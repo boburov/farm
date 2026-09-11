@@ -6824,7 +6824,7 @@ var BEATS=[
    var order=["barn-54","barn-76","barn-98","barn-120","feedmill","processing","packaging","cold","warehouse","logistics","admin","lab"];
    order.forEach(function(k,i){
      var o=FAC[k]; if(!o) return;
-     var b=beat(p,.08+i*.055,.42+i*.055);
+     var b=beat(p,.08+i*.05,.42+i*.05);   /* the 12th building completes at p=.97: the held final frame is fully built */
      o.userData.setBuild(b);
    });
    FAC.slaughter.userData.setBuild(1);
@@ -7108,10 +7108,12 @@ var BEATS=[
    The building scene runs 4× faster (6 s → 1.5 s).
    "Mahsulot va odamlar" ends with the product-ring animation (beat 8): the scenes that followed it
    (9 Qiymat qo‘shiladi, 10 Ish o‘rinlari, 12 Odamlar uchun foyda, 4 cuts) were removed on request
-   and stay defined but unused. */
+   and stay defined but unused.
+   "Klaster" ends with the aerial cluster scene (beat 6): the scenes that followed it
+   (13 Kelajakni quramiz, 7 Yagona zanjir) were removed on request and stay defined but unused. */
 var CH=[
   {t:"O‘z tizimimizga", beats:[3], times:[1.5]},
-  {t:"Klaster", beats:[6,13,7], times:[5,4,6]},
+  {t:"Klaster", beats:[6], times:[5]},
   {t:"Mahsulot va odamlar", beats:[8], times:[3]},
   {t:"Iqtisod va yakun", beats:[11,14,15], times:[4,5,5]}
 ];

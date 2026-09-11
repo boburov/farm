@@ -162,7 +162,8 @@ async function boot(page, tag) {
   const d0 = await page.evaluate(() => EX.wantDist); await page.mouse.wheel(0, -400); await wait(page, 300);
   ok('explore-wheel', await page.evaluate(() => EX.wantDist) !== d0);
   await page.locator('#explore-chips button').nth(3).click(); await wait(page, 900);
-  ok('explore-chip', (await page.evaluate(() => document.getElementById('explore-name').textContent)) === 'Qayta ishlash');
+  const chipWant = await page.evaluate(() => EX_STOPS[3][1]), chipGot = await page.evaluate(() => document.getElementById('explore-name').textContent);
+  ok('explore-chip', chipGot === chipWant, { want: chipWant, got: chipGot });
   await shot(page, 'd9-explore');
   await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
   ok('explore-off-keeps-chapter', !s.ex && s.cur === before.cur && s.curBeat === before.curBeat, { cur: s.cur, was: before.cur });
@@ -199,12 +200,23 @@ async function boot(page, tag) {
   } else console.log('skip still-12/still-10 checks: beats 12 and 10 are not in the presentation');
   // the product-ring chapter (beat 8) is a single animated scene: it completes, holds, and nothing follows in manual mode
   const ringChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(8)));
+  await page.keyboard.press('Home'); await wait(page, 1900); // leave chapter 3 (and the pause) so the rail click starts a fresh run
   await page.locator('#rail button').nth(ringChapter).click(); await wait(page, 1900 + 3200); s = await S(page);
   const ringSingle = await page.evaluate(() => CH[cur].beats.length === 1);
   ok('product-ring-single-scene', s.cur === ringChapter && s.curBeat === 8 && ringSingle && s.complete && !s.playing && !s.tr, { cur: s.cur, curBeat: s.curBeat, single: ringSingle, complete: s.complete, playing: s.playing });
   await wait(page, 4500); s = await S(page);
   ok('product-ring-holds', s.cur === ringChapter && s.curBeat === 8 && s.complete, { cur: s.cur, curBeat: s.curBeat });
   await shot(page, 'd13-product-ring-hold');
+  // the cluster chapter (beat 6) is a single animated scene: the aerial rise completes with every building built, then holds
+  const clusterChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(6)));
+  await page.locator('#rail button').nth(clusterChapter).click(); await wait(page, 1900 + 5200); s = await S(page);
+  const clusterState = await page.evaluate(() => ({ single: CH[cur].beats.length === 1, built: ['barn-54', 'barn-76', 'barn-98', 'barn-120', 'feedmill', 'processing', 'packaging', 'cold', 'warehouse', 'logistics', 'admin', 'lab'].every(k => { const o = FAC[k], st = o.userData.stages; return st ? st.detail.visible && st.detail.scale.x > .999 : o.visible && o.scale.y > .999; }), nav: document.getElementById('beat-index').textContent.trim(), chain: Array.from(document.querySelectorAll('[data-chain]')).map(e => e.classList.contains('is-active') ? 'A' : e.classList.contains('is-done') ? 'D' : '-').join('') }));
+  ok('cluster-single-scene', s.cur === clusterChapter && s.curBeat === 6 && clusterState.single && s.complete && !s.playing && !s.tr, { cur: s.cur, curBeat: s.curBeat, ...clusterState, complete: s.complete });
+  ok('cluster-hold-fully-built', clusterState.built, clusterState);
+  ok('cluster-chain-complete', clusterState.chain === 'DDDDDDA', clusterState.chain);
+  await wait(page, 4500); s = await S(page);
+  ok('cluster-holds', s.cur === clusterChapter && s.curBeat === 6 && s.complete, { cur: s.cur, curBeat: s.curBeat });
+  await shot(page, 'd13b-cluster-hold');
   // number formatting consistency
   const nums = await page.evaluate(() => Array.from(document.querySelectorAll('.metric-value')).map(e => e.textContent));
   ok('numbers-uz-format', nums.every(n => !/\d\.\d{3}/.test(n) && !/\d{4,}/.test(n)), nums);

@@ -300,7 +300,8 @@
   }
   function updateChain(p){
     if(curBeat!==7&&curBeat!==6)return;
-    var active=curBeat===7?Math.min(6,Math.floor(beat(p,.05,.75)*7)):curBeat===6?Math.min(4,Math.floor(p*5)):-1;
+    /* the cluster chapter is the single beat 6: its chain walks all seven steps (Yem … Bozor) while the buildings go up */
+    var active=curBeat===7?Math.min(6,Math.floor(beat(p,.05,.75)*7)):curBeat===6?Math.min(6,Math.floor(beat(p,.06,.94)*7)):-1;
     dataCopy.querySelectorAll('[data-chain]').forEach(function(el,i){el.classList.toggle('is-active',i===active);el.classList.toggle('is-done',i<active);el.setAttribute('aria-current',i===active?'step':'false');});
   }
   P.frame=function(now){

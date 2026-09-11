@@ -53,6 +53,7 @@ svg.icon{width:18px;height:18px;stroke:currentColor;stroke-width:1.7;fill:none;s
 #scene-layer{position:absolute;left:var(--gutter);bottom:46px;width:var(--copy);z-index:5;transition:opacity .45s var(--ease-out),transform .65s var(--ease-out)}
 #data-layer{position:absolute;right:var(--gutter);bottom:50px;width:var(--data);z-index:5;transition:opacity .45s var(--ease-out),transform .65s var(--ease-out);transition-delay:.06s}
 #scene-layer::before,#data-layer::before{content:"";position:absolute;inset:-36px -48px -30px -40px;z-index:-1;pointer-events:none;border-radius:40%;background:rgba(244,242,236,.78);filter:blur(28px)}
+#data-layer::before{inset:-48px -60px -40px -52px;background:rgba(244,242,236,.95);filter:blur(24px)}
 .is-leaving{opacity:0;transform:translateY(-10px);pointer-events:none}.is-entering{opacity:0;transform:translateY(18px)}
 .slide-category{display:flex;align-items:center;gap:12px;margin-bottom:16px}.slide-category::before{content:"";width:26px;height:1px;background:var(--gold)}
 #slide-title{font:700 clamp(36px,3.5vw,58px)/1.02 var(--display);letter-spacing:-.035em;text-wrap:balance;max-width:16ch}

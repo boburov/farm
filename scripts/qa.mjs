@@ -16,7 +16,7 @@ const out = process.env.QA_OUT || 'qa/current';
 await mkdir(out, { recursive: true });
 
 const SIZES = (opt('--sizes', quick ? '1440x900,390x844' : '1440x900,1920x1080,390x844,430x932,844x390')).split(',').map(s => s.split('x').map(Number));
-let BEATS = opt('--beats', quick ? '3,8,15' : '3,6,7,8,11,13,14,15').split(',').map(Number); // beats outside CH are skipped after boot
+let BEATS = opt('--beats', quick ? '3,8,15' : '3,6,8,11,14,15').split(',').map(Number); // beats outside CH are skipped after boot
 const BUDGET = { 0: 900000, 1: 900000, 2: 900000, 3: 900000, 4: 300000, 6: 600000, 7: 600000, 8: 300000, 10: 600000, 11: 600000, 12: 600000, 14: 600000, 15: 600000 };
 const MAX_FRAME_MS = 120, MAX_CALLS = Number(process.env.QA_MAX_CALLS || 1500); // draw-call reduction is Pass 5 work
 
@@ -150,13 +150,15 @@ if (!flag('--no-interact') && !flag('--no-interactions')) {
   await page.keyboard.press('Escape'); await page.waitForTimeout(600);
   I.exploreOff = await page.evaluate(() => !EX.on);
   if (!I.exploreOff) fail('Escape did not leave explore mode');
-  // part tooltips at beat 4 (exploded cuts)
-  await seek(page, 4, .8); await page.waitForTimeout(1500);
-  const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera); return { x: (v.x * .5 + .5) * innerWidth, y: (-v.y * .5 + .5) * innerHeight }; });
-  await page.mouse.move(pt.x, pt.y, { steps: 4 }); await page.waitForTimeout(400);
-  I.tooltip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 120) }));
-  if (!I.tooltip.on) fail('part tooltip did not appear over the breast fillet');
-  await page.screenshot({ path: `${out}/tooltip.png` });
+  // part tooltips at beat 4 (exploded cuts) — only while a chapter still shows beat 4
+  if (await page.evaluate(() => CH.some(c => c.beats.includes(4)))) {
+    await seek(page, 4, .8); await page.waitForTimeout(1500);
+    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera); return { x: (v.x * .5 + .5) * innerWidth, y: (-v.y * .5 + .5) * innerHeight }; });
+    await page.mouse.move(pt.x, pt.y, { steps: 4 }); await page.waitForTimeout(400);
+    I.tooltip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 120) }));
+    if (!I.tooltip.on) fail('part tooltip did not appear over the breast fillet');
+    await page.screenshot({ path: `${out}/tooltip.png` });
+  } else { I.tooltip = 'skipped: beat 4 is not in the presentation'; console.log('SKIP tooltip: beat 4 is not in the presentation'); }
   // figures editor
   await page.click('#edit-open'); await page.waitForTimeout(400);
   I.editorOpen = await page.evaluate(() => document.getElementById('editor').classList.contains('open'));
@@ -169,12 +171,14 @@ if (!flag('--no-interact') && !flag('--no-interactions')) {
   if (stillOpen) { await page.evaluate(() => document.getElementById('edit-reset').scrollIntoView()); await page.click('#edit-reset', { force: true, timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300); await page.keyboard.press('Escape'); await page.waitForTimeout(300); }
   I.editorClosed = await page.evaluate(() => !document.getElementById('editor').classList.contains('open'));
   if (!I.editorClosed) fail('editor did not close');
-  // resize sweep at beat 4: subject must stay inside the viewport
-  await seek(page, 4, .8);
+  // resize sweep: at beat 4 the cut spread must stay inside the viewport; without beat 4 in the show,
+  // sweep the product-ring scene (beat 8) and only check for horizontal overflow
+  const hasCuts = await page.evaluate(() => CH.some(c => c.beats.includes(4)));
+  await seek(page, hasCuts ? 4 : 8, .8);
   I.resize = [];
   for (const [w, h] of [[1920, 1080], [390, 844], [844, 390], [1440, 900]]) {
     await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(700);
-    I.resize.push(await page.evaluate(([w, h]) => { const parts = Object.values(G.birdDressed.userData.parts); const pts = parts.map(m => m.getWorldPosition(new THREE.Vector3()).project(camera)); const out = pts.filter(p => Math.abs(p.x) > .98 || Math.abs(p.y) > .98).length; return { w, h, inside: out === 0, outside: out, aspect: +camera.aspect.toFixed(3), overflow: document.documentElement.scrollWidth > innerWidth }; }, [w, h]));
+    I.resize.push(await page.evaluate(([w, h]) => { const parts = G.birdDressed.visible ? Object.values(G.birdDressed.userData.parts) : []; const pts = parts.map(m => m.getWorldPosition(new THREE.Vector3()).project(camera)); const out = pts.filter(p => Math.abs(p.x) > .98 || Math.abs(p.y) > .98).length; return { w, h, inside: out === 0, outside: out, aspect: +camera.aspect.toFixed(3), overflow: document.documentElement.scrollWidth > innerWidth }; }, [w, h]));
   }
   for (const r of I.resize) { if (!r.inside) fail(`cut spread leaves the viewport at ${r.w}x${r.h}`); if (r.overflow) fail(`overflow after resize to ${r.w}x${r.h}`); }
 }
