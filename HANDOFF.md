@@ -39,6 +39,14 @@ User request: replace scrolling with a premium white, six-chapter click-controll
 - Port note: another project's Vite dev server took :5173 during this session; `PORT=5188 HOST=127.0.0.1 node scripts/serve.mjs` and `QA_URL=http://127.0.0.1:5188` were used.
 - Known limitations: film grain and crew/flock poses are frozen on stills (like reduced motion); the interior HDRI crossfades in if beat 10 is dot-clicked before its prefetch finished; pre-existing REDUCED-toggle blend quirk on beat 7 untouched.
 
+## Header removed + data card (session 2, latest)
+- User request: no top bar; the right-hand information block needs its own background because it blended into the hazy page.
+- `#hud-top` is now `hidden` (brand, chapter meta, status stay in the DOM for the JS that updates them). `#play` (round) moved into `.slide-actions` next to Oldingi; `#explore-btn`, `#edit-open`, `#details-open` (now a text link "Batafsil ↗") live in `#data-links`, a small link row directly under the data card (bottom-right). `#data-links` is a sibling of `#data-layer` on purpose: the card is made `inert` during transitions/Explore, the links must stay clickable.
+- `#data-layer` keeps the soft "cloud" scrim (user preferred it over a card), now denser: a wide faint halo (`::before`, rgba(244,242,236,.97), blur 34 px) plus a tighter core (`::after`, blur 16 px); the left copy block's cloud is slightly stronger too (.84).
+- Explore: desktop keeps the link row at the bottom-right ("Taqdimotga qaytish" highlighted); mobile pins `#data-links` as a fixed pill at the top-right with only the return link visible.
+- `--header` is now 28 px desktop / 16 px mobile (only used for the composition rectangle and `#credit`).
+- QA: qa-click PASS (72 checks), qa quick DONE clean (`qa/click-noheader/`, `qa/noheader-std/`); screenshots `qa/noheader/`.
+
 ## Concurrent edit noticed (14:53 local)
 While session 2 was running QA, a separate Claude Code session (`eb27a724`, see `.claude/WORKLOG.md`, asked by the user to switch the site to bold Archivo) edited `assets/presentation.css`, `assets/cinematic.css`, `assets/fonts.css`, `index.html` in the same second and added `assets/fonts/Archivo-700-normal-latin.woff2`: the display font was switched from Instrument Serif to Archivo and all text weights to 700/800 (`--display`, `body`, `h1,h2`, eyebrows, buttons, SVG chart labels). Session 2 kept it (it was the user's request); the original serif/400 design remains in git history (`git diff assets/fonts.css assets/presentation.css`).
 
