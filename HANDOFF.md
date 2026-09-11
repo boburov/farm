@@ -1,14 +1,39 @@
-# Click presentation pass — in progress (2026-09-11)
+# Click presentation pass — implemented (2026-09-11, continued by Claude Fable 5.1 session 2)
 
-User request: replace scrolling with a premium white, six-chapter interactive presentation. Preserve all Uzbek content, figures/calculations/editor, Three.js scene, models, raycasting, Explore and all 16 internal beats. No Kage source or assets.
+User request: replace scrolling with a premium white, six-chapter click-controlled presentation. Preserve all Uzbek content, figures/calculations/editor, Three.js scene, models, raycasting, Explore and all 16 internal beats. No Kage source or assets.
 
-- Backups: `backups/click-presentation/` (index, cinematic CSS/JS, environment JS, previous handoff).
-- Read the full authored runtime (index and assets JS/CSS). Baseline browser QA passed on Apple M4 / ANGLE Metal: `qa/click-baseline/`.
-- Existing development server already occupies http://127.0.0.1:5173 and serves this workspace.
-- Scroll systems identified: 2400vh track, goTo scrollTo, syncScroll, global scroll listener / scrollTarget smoothing, wheel/touch autoplay cancellation, progress scrubbing, resize and Explore return scroll restoration.
-- Plan: keep world assembly and all BEATS definitions; restore omitted beats 5,9,13. Chapter controller in `assets/presentation.js`; white layout in `assets/presentation.css`; adapt core entry/render/editor/Explore hooks in index; retain cinematic bird idle/pinch with new viewport-aware framing.
-- Timing: finite 8–15 second chapter sequences, hold at end; autoplay adds a readable hold and countdown. Navigation queues latest request during 1.4s transition; modal/visibility/Explore suspend clocks.
-- New QA will exercise actual chapter/keyboard/swipe/autoplay/editor/Explore interactions and all sixteen beats at desktop/mobile/reduced motion.
+## State
+- Backups: `backups/click-presentation/` (index, cinematic CSS/JS, environment JS, previous handoff) — the pre-pass scroll version.
+- Dev server: `npm run dev` → http://127.0.0.1:5173 (a server was already running on this port during both sessions).
+- Scroll systems removed: the 2400vh track, `window.scrollY` timeline, `syncScroll`, scroll listener/smoothing, wheel/touch autoplay cancellation, progress scrubbing (`#progress` is now a read-only progressbar), resize/Explore scroll restoration, `enhanceSceneUI` panel toggles. `html,body{overflow:hidden}`; document height equals the viewport (QA asserts this). Wheel is used only for Explore zoom inside the canvas.
+- Controller: `assets/presentation.js` (`window.FarmPresentation`, state object `presentation` = {currentChapter, currentBeat, isTransitioning, isPlaying, isPaused, remainingTime, sequenceElapsed, sequenceComplete, holdElapsed, panel, queuedChapter, completed, transition, opening}). index.html keeps `goTo/setPlaying/updateHUD/setExplore/openEditor/closeEditor` as thin shims to it.
+- Chapters `CH` (index.html ≈7103): **4 chapters** since the user removed 01 Boshlanish and 02 Ferma va bozor (beats 0–2 stay defined, unused). Beats 3,5 / 6,13,7 / 8,9,10,12,4 / 11,14,15; the intro beat 3 of the first chapter was sped up 4× (6 s → 1.5 s) on request → chapter durations 5.5 / 15 / 15 / 14 s, `hold` 4 s for autoplay. Chapter counts (`/ 04`, categories, details table on the last chapter) are derived from `CH.length`. `beatAt(ci,p)` maps chapter progress to a beat + local progress; `poseAt()` drives the authored `camFn`/curves.
+- Transition (`P.goTo` → `transitionTick`): veil over the 3D frame 0–0.32 s, commit (camera/env/content) at 0.32 s, veil clears by ~1.04 s, unlock at 1.45 s; navigation during a transition queues the latest target. `commit()` blends the camera (`blend`, 1.08 s) unless the environment/location changes (then a cut behind the veil). Reduced motion: instant commit, sequences are static at their final pose.
+- Opening countdown (`P.start` → `openingTick`): 3 → 2 → 1 over 3 s while chapter 1 is posed and rendered behind it; `started` becomes true at 0, the ECON stage is initialised and chapter 1's sequence begins. Replay (`#replay` / play button on the finished last chapter) reruns it.
+- Autoplay (`P.setPlaying`): `remainingTime` = sequence remainder + hold; `#auto-countdown` shows `Keyingi bo‘lim: mm:ss` and a bar; hidden in manual mode; reset on chapter change; frozen while a panel is open, the tab is hidden or Explore is on; stopped on the last chapter (play button becomes `Qayta ko‘rish`).
+- Completed rail marks: a chapter is marked ✓ when its sequence completes or when the user leaves it.
+- Camera framing (`assets/cinematic.js` `camera.lookAt` wrapper): `setViewOffset` projects the scene into `#scene-frame`; vertical FOV is derived so the horizontal field of view matches the authored 16:10 composition (studio: the 1.24 desktop frame), capped at 62°/72°. `viewAspect()` (index.html) replaces `W/H` for the exploded-cuts camera back-off.
+- Info panel (`P.renderSummary`): category → title → one sentence → 2–4 metrics (`uzNumber`, tabular, unit, context/delta) → optional comparison bars / value path / cluster chain → sticky `.slide-foot` with the conclusion, `Batafsil` (details dialog with the chapter's original beat DOM + the stage table on chapter 6) and replay. Mobile: collapsed by default (`#info-toggle` expands).
+- Explore: `P.explore` saves/restores chapter + progress + timers; `Taqdimotga qaytish` button, Escape.
+- QA: `node scripts/qa-click.mjs` (full click flow: countdown, every chapter, keys, rapid clicks, beat nav, autoplay/editor/hidden-tab pauses, details, Explore, tooltip, number format, replay, idle render stop, 1100×700, 844×390, reduced motion, iPhone swipe/rail/info/autoplay/Explore) and `npm run qa:quick` (`scripts/qa.mjs`, updated to click navigation). Both pass with 0 errors / 0 missing after the 4-chapter change (`qa/click-4ch/`, `qa/click-std/`).
+
+## Full-bleed layout pass (session 2, later) — 3D as the background, MDX-style composition
+- User request: the boxed scene frame looked fragmented; the 3D models must be the full-screen background with text/figures composed over them, in the style of a light studio landing (big title bottom-left with a dark pill CTA, paragraph + figures + chips bottom-right, minimal top bar).
+- `#gl` is full-viewport again (no clip-path). `#scene-frame` is now an invisible composition rectangle (top ≈ header, bottom 24% desktop / 52% mobile); `camera.lookAt` still centres the subject inside it via `setViewOffset`, so subjects sit in the upper-middle, clear of the text bands.
+- `#grade` = soft fades to the page colour (bottom 56 %, top 20 %, thin side fades); `#scene-layer::before` / `#data-layer::before` add blurred local scrims so text stays readable over buildings.
+- DOM (index.html overlay): top bar = brand · round play/pause · `01 — title · 01 / 04` · status · `Klasterni kezish ↗` · `Raqamlar ↗` · `≡` (opens Batafsil). Bottom-left `#scene-layer` = eyebrow, title, one sentence, `#next` dark pill (`Keyingi bo‘lim` → `Qayta ko‘rish` on the last chapter, replays the countdown) + `#prev` text. Bottom-right `#data-layer` = `.data-lead` (bold conclusion + muted lead sentence), 2×2 metrics, cluster chain (chapter 2), `#rail` chapter chips (active = dark, ✓ = visited). Bottom centre = beat index/title/dots; autoplay countdown above it; 2 px progress line at the very bottom.
+- Comparison bars / value path / secondary figures moved into the Batafsil dialog (`visualsHTML` at the top of `renderDetails`).
+- Mobile (≤ 900 px): `#overlay` is a flex column anchored to the bottom (caption → title/CTA → lead/metrics/chips); intro, lead, metrics 3–4 and contexts collapse behind `#info-toggle`; `#explore-btn` is a pill fixed under the header; chips scroll horizontally.
+- QA: `scripts/qa-click.mjs` updated (`next-becomes-replay-at-end`); `qa/fullbleed-qa/` and `qa/fullbleed-std/` pass with 0 errors. Screenshots of every chapter/mode: `qa/fullbleed/`.
+- Previous boxed-frame stylesheet kept at `build/presentation.before-fullbleed.css` (not shipped).
+
+## Concurrent edit noticed (14:53 local)
+While session 2 was running QA, a separate Claude Code session (`eb27a724`, see `.claude/WORKLOG.md`, asked by the user to switch the site to bold Archivo) edited `assets/presentation.css`, `assets/cinematic.css`, `assets/fonts.css`, `index.html` in the same second and added `assets/fonts/Archivo-700-normal-latin.woff2`: the display font was switched from Instrument Serif to Archivo and all text weights to 700/800 (`--display`, `body`, `h1,h2`, eyebrows, buttons, SVG chart labels). Session 2 kept it (it was the user's request); the original serif/400 design remains in git history (`git diff assets/fonts.css assets/presentation.css`).
+
+## Remaining limitations
+- Short desktop windows (≤ 720 px tall) still scroll the info panel for chapters 2–6; the sticky conclusion keeps the key message visible.
+- Beat 4 anchors (cut labels) can overlap pieces on desktop; the tooltip covers the details.
+- Mobile swipe uses horizontal pointer gestures on the canvas; vertical drags are ignored.
 
 The historical handoff below is preserved for asset provenance and previous work.
 

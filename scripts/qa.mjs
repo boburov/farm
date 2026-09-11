@@ -16,7 +16,7 @@ const out = process.env.QA_OUT || 'qa/current';
 await mkdir(out, { recursive: true });
 
 const SIZES = (opt('--sizes', quick ? '1440x900,390x844' : '1440x900,1920x1080,390x844,430x932,844x390')).split(',').map(s => s.split('x').map(Number));
-const BEATS = opt('--beats', quick ? '1,4,8,10' : '0,1,2,3,4,6,7,8,10,11,12,14,15').split(',').map(Number);
+const BEATS = opt('--beats', quick ? '3,4,8,10' : '3,4,5,6,7,8,9,10,11,12,13,14,15').split(',').map(Number);
 const BUDGET = { 0: 900000, 1: 900000, 2: 900000, 3: 900000, 4: 300000, 6: 600000, 7: 600000, 8: 300000, 10: 600000, 11: 600000, 12: 600000, 14: 600000, 15: 600000 };
 const MAX_FRAME_MS = 120, MAX_CALLS = Number(process.env.QA_MAX_CALLS || 1500); // draw-call reduction is Pass 5 work
 
@@ -47,10 +47,12 @@ async function boot(page) {
   await page.waitForSelector('#start.ready:not(.error)', { timeout: 180000 });
   const readyMs = Date.now() - start;
   await page.click('#start');
+  await page.waitForFunction(() => started, null, { timeout: 15000 }); // 3-2-1 opening countdown
   await page.evaluate(() => { setPlaying(false); window.__qa = { gap: 0, last: performance.now() }; (function loop(n) { window.__qa.gap = Math.max(window.__qa.gap, n - window.__qa.last); window.__qa.last = n; requestAnimationFrame(loop); })(performance.now()); });
   return readyMs;
 }
-const seek = (page, id, at = .62) => page.evaluate(([id, at]) => { const ci = CH.findIndex(c => c.beats.includes(id)), c = CH[ci], n = c.beats.indexOf(id), before = c.beats.slice(0, n).reduce((a, b) => a + BEATS[b].dur, 0); goTo(ci, { force: true, at: (before + BEATS[id].dur * at) / c.dur, hard: true }); setPlaying(false); window.__qa.gap = 0; window.__qa.last = performance.now(); }, [id, at]);
+const innerHeightOf = () => 900;
+const seek = (page, id, at = .62) => page.evaluate(([id, at]) => { const ci = CH.findIndex(c => c.beats.includes(id)), c = CH[ci], n = c.beats.indexOf(id), before = c.beats.slice(0, n).reduce((a, b) => a + BEATS[b].dur, 0); goTo(ci, { force: true, at: (before + BEATS[id].dur * at) / c.dur, instant: true }); setPlaying(false); window.__qa.gap = 0; window.__qa.last = performance.now(); }, [id, at]);
 const state = (page) => page.evaluate(() => ({ beat: curBeat, progress: +prog.toFixed(4), playing, overflow: document.documentElement.scrollWidth > innerWidth, geometry: renderer.info.memory.geometries, textures: renderer.info.memory.textures, cam: camera.position.toArray().map(v => +v.toFixed(2)), fov: +camera.fov.toFixed(1), modelLoaded: !!PoultryAssets.ready, failures: PoultryAssets.failures, env: (window.ENV && ENV.status) ? ENV.status() : null, stats: window.CINEMA_STATS ? Object.assign({}, CINEMA_STATS) : null, maxGapMs: +window.__qa.gap.toFixed(1) }));
 
 // ---------- main sweep ----------
@@ -101,23 +103,20 @@ if (!flag('--no-interact') && !flag('--no-interactions')) {
   await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(400); // interactions assume the desktop layout
   const I = report.interactions;
   // render-on-demand: paused scene must stop rendering
-  await seek(page, 1); await page.waitForTimeout(2200);
+  await seek(page, 3); await page.waitForTimeout(2200);
   I.idleFrames = await page.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return CINEMA_STATS.frames - a; });
   if (I.idleFrames > 3) fail(`render loop still running while paused: ${I.idleFrames} frames in 1.5 s`);
-  // scroll takes over autoplay
-  I.scroll = await page.evaluate(async () => { setPlaying(true); await new Promise(r => setTimeout(r, 300)); const y = Math.round(trackLen() * .4); window.scrollTo(0, y); await new Promise(r => setTimeout(r, 1500)); return { playing, globalProg: +globalProg().toFixed(3) }; });
-  if (I.scroll.playing) fail('manual scroll did not pause autoplay');
-  if (Math.abs(I.scroll.globalProg - .4) > .03) fail(`scroll seek landed at ${I.scroll.globalProg}, expected ~0.4`);
-  // progress bar seek (single seek)
-  const bar = await page.locator('#progress').boundingBox();
-  await page.mouse.move(bar.x + bar.width * .5, bar.y + bar.height / 2); await page.mouse.down(); await page.mouse.up(); await page.waitForTimeout(600);
-  I.progressSeek = await page.evaluate(() => +globalProg().toFixed(3));
-  if (Math.abs(I.progressSeek - .5) > .03) fail(`progress seek landed at ${I.progressSeek}, expected ~0.5`);
+  // chapter navigation replaces the scroll timeline; the document itself never scrolls
+  I.nav = await page.evaluate(async () => { setPlaying(true); await new Promise(r => setTimeout(r, 300)); goTo(2); await new Promise(r => setTimeout(r, 1900)); return { cur, playing, docH: document.documentElement.scrollHeight, scrollY: window.scrollY, remaining: +presentation.remainingTime.toFixed(1) }; });
+  if (I.nav.cur !== 2) fail(`goTo(2) landed on chapter ${I.nav.cur}`);
+  if (I.nav.docH > innerHeightOf(page) + 1 || I.nav.scrollY) fail(`document still scrolls (height ${I.nav.docH})`);
+  if (!I.nav.playing || I.nav.remaining <= 0) fail('autoplay countdown not running after chapter change');
+  await page.evaluate(() => setPlaying(false));
   // chapter rail + keyboard
-  await page.locator('#rail button').nth(2).click(); await page.waitForTimeout(700);
+  await page.locator('#rail button').nth(2).click(); await page.waitForTimeout(1900);
   I.rail = await page.evaluate(() => cur);
   if (I.rail !== 2) fail(`rail button 3 went to chapter ${I.rail}`);
-  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(700);
+  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(1900);
   I.arrowRight = await page.evaluate(() => cur);
   if (I.arrowRight !== 3) fail(`ArrowRight went to chapter ${I.arrowRight}`);
   // explore mode

@@ -130,12 +130,12 @@
     Object.keys(manifest.states).forEach(function(name){
       var s=manifest.states[name], e=ENVS[name]; if(!e) return;
       if(s.hasSun){ e.sun=s.sunDir.slice(); e.sunI=s.sunI; if(s.sunColor) e.sunC=parseInt(s.sunColor.slice(1),16); }
-      e.hemiI=Math.min(e.hemiI,.18); e.exp=1.0;
+      e.hemiI=name==='studio'?.30:Math.min(e.hemiI,.24); e.hemiG=0x777064; e.exp=1.02;
       var f=s.horizon.map(function(v){ return Math.min(.9,v*.85); });
       e.fog=(Math.round(f[0]*255)<<16)|(Math.round(f[1]*255)<<8)|Math.round(f[2]*255);
       e.glow=s.hasSun?e.glow:0;
     });
-    ambient.intensity=0; fill.intensity=.10;
+    ambient.intensity=.025; fill.intensity=.12;
     ENV.ready=true;
   };
   ENV.prefetchFor=function(beatIdx){

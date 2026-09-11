@@ -20,25 +20,29 @@
   <div id="grade"></div>
   <div id="flash"></div>
 
-  <div id="scene-frame" aria-hidden="true">
-    <div class="scene-topline"><span id="scene-kicker">BOSHLANG‘ICH HOLAT</span><span class="scene-live"><i></i> 3D SAHNA</span></div>
-    <div id="scene-veil"><span id="transition-number">01</span></div>
-  </div>
+  <div id="scene-frame" aria-hidden="true"><div id="scene-veil"><span id="transition-number">01</span></div></div>
   <div id="overlay" inert>
     <header id="hud-top">
-      <div id="mark"><b>Bir tovuqdan<span>.</span></b><span>Integratsiyalashgan<br>parranda klasteri</span></div>
-      <div id="chapter-meta"><span class="num" id="ch-num">01</span><span class="meta-divider"></span><span id="ch-title">Boshlanish</span></div>
-      <div class="header-actions"><span id="presentation-status"><i></i> Sizning sur’atingizda</span><button id="edit-open" class="text-button">Raqamlar <span aria-hidden="true">↗</span></button></div>
+      <div id="mark"><b>Bir tovuqdan<span>.</span></b><span class="header-divider"></span><button id="play" class="round" aria-pressed="false"></button></div>
+      <div id="chapter-meta"><span class="num" id="ch-num">01</span><span class="meta-divider"></span><span id="ch-title">O‘z tizimimizga</span><span id="chapter-count">01 <span>/ 04</span></span></div>
+      <div class="header-actions">
+        <span id="presentation-status"><i></i> Sizning sur’atingizda</span>
+        <button id="explore-btn" class="text-button" aria-pressed="false">Klasterni kezish <span aria-hidden="true">↗</span></button>
+        <button id="edit-open" class="text-button">Raqamlar <span aria-hidden="true">↗</span></button>
+        <span class="header-divider"></span>
+        <button id="details-open" class="lines" aria-label="Batafsil ma’lumot"><i></i><i></i></button>
+      </div>
     </header>
-    <nav id="rail" aria-label="Taqdimot bo‘limlari"></nav>
-    <div id="rail-foot"><span class="rail-note">Bir g‘oyadan —<br>butun bir tizimgacha.</span><button id="explore-btn" class="text-button" aria-pressed="false">Klasterni kezish <span aria-hidden="true">↗</span></button></div>
-    <main id="scene-layer" aria-labelledby="slide-title"></main>
+    <main id="scene-layer" aria-labelledby="slide-title">
+      <button id="info-toggle" aria-expanded="false" aria-label="Barcha asosiy raqamlarni ko‘rsatish" hidden></button>
+      <div id="slide-copy"></div>
+      <div class="slide-actions"><button id="next" class="pill"></button><button id="prev" class="text-button" aria-label="Oldingi bo‘lim"></button></div>
+    </main>
+    <aside id="data-layer" aria-label="Bo‘lim ko‘rsatkichlari"><div id="data-copy"></div><nav id="rail" aria-label="Taqdimot bo‘limlari"></nav></aside>
     <div id="scene-caption"><div class="scene-description"><span id="beat-index">01</span><span id="beat-title">Boshlanish</span></div><nav id="beat-nav" aria-label="Bo‘lim ichidagi sahnalar"></nav></div>
     <footer id="hud-bottom">
-      <div class="ctrl"><button id="prev" aria-label="Oldingi bo‘lim"></button><button id="play" aria-pressed="false"></button><button id="next" aria-label="Keyingi bo‘lim"></button></div>
-      <div id="journey"><span id="chapter-count">01 <span>/ 06</span></span><div id="progress" role="progressbar" aria-label="Taqdimot bo‘limlari" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1"><div class="done"></div></div></div>
+      <div id="progress" role="progressbar" aria-label="Taqdimot bo‘limlari" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1"><div class="done"></div></div>
       <div id="auto-countdown" hidden><span id="clock">Keyingi bo‘lim: 00:12</span><div class="timer-track"><i id="timer-fill"></i></div></div>
-      <span id="manual-hint">← <span>Bo‘limni tanlang</span> →</span>
     </footer>
   </div>
   <div id="chapter-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -78,7 +82,7 @@
     <div class="bar"><i id="load-fill"></i></div>
     <div class="st" id="load-state">Dunyo quriladi</div>
     <button id="start" disabled>Taqdimotni boshlash <span aria-hidden="true">→</span></button>
-    <p class="loader-note">6 bo‘lim · sizning sur’atingizda</p>
+    <p class="loader-note">4 bo‘lim · sizning sur’atingizda</p>
     <div class="credit">3D tovuq modeli — pooiloui2 (Sketchfab, CC BY 4.0) · Osmon va teksturalar — Poly Haven (CC0)</div>
   </div>
   <div id="opening-countdown" hidden role="status" aria-live="assertive"><span class="eyebrow">Taqdimot boshlanmoqda</span><b id="opening-number">3</b><p>Kichik g‘oyadan katta qiymatgacha.</p></div>
@@ -5537,11 +5541,12 @@ scene.fog=new T.FogExp2(0xbcd0d8,0.00055);
 
 /* studio backdrop */
 var backdrop=new T.Mesh(new T.SphereGeometry(210,24,16),
-  new T.MeshBasicMaterial({color:0x18251f,side:T.BackSide,fog:false}));
+  new T.MeshBasicMaterial({color:0xf0eee6,side:T.BackSide,fog:false}));
+backdrop.material.color.convertSRGBToLinear();
 backdrop.visible=false; scene.add(backdrop);
 /* stays inside the backdrop so its rim never catches the key light */
 var studioFloor=new T.Mesh(new T.CircleGeometry(120,64),
-  stdMat({color:0x18241d,roughness:.91,metalness:0,envMapIntensity:.20}));
+  stdMat({color:0xe7e3d8,roughness:.91,metalness:0,envMapIntensity:.20}));
 studioFloor.rotation.x=-Math.PI/2; studioFloor.receiveShadow=true; studioFloor.visible=false;
 scene.add(studioFloor);
 
@@ -5962,7 +5967,7 @@ function f(k){ return FIGS[k]!==undefined&&FIGS[k]!=="" ? FIGS[k] : FIG_DEFAULT[
 function isPh(k){ return /X/.test(String(f(k))); }
 function num(k,fb){ var v=parseFloat(String(f(k)).replace(/[\s\u00a0\u202f]/g,"").replace(",",".").replace(/[^0-9.\-]/g,"")); return Number.isFinite(v)?v:fb; }
 var UZ_FORMATS={};
-function uzNumber(v,digits){ digits=digits===undefined?0:digits; var fmt=UZ_FORMATS[digits]||(UZ_FORMATS[digits]=new Intl.NumberFormat("uz-UZ",{maximumFractionDigits:digits})); return fmt.format(v).replace(/[\u00a0\u202f]/g," ").replace(/\./g,","); }
+function uzNumber(v,digits){ digits=digits===undefined?0:digits; var fmt=UZ_FORMATS[digits]||(UZ_FORMATS[digits]=new Intl.NumberFormat("uz-UZ",{maximumFractionDigits:digits})); return fmt.formatToParts(v).map(function(p){return p.type==="group"?" ":p.type==="decimal"?",":p.value;}).join(""); }
 function ratio(a,b,fbA,fbB){
   if(isPh(a)||isPh(b)) return [fbA,fbB];
   var x=num(a,fbA), y=num(b,fbB), m=Math.max(x,y,0.0001);
@@ -6218,7 +6223,7 @@ var BUILD_STEPS=[
     if(window.invalidateScene) invalidateScene();
   };
   if(PoultryAssets.heroPromise) PoultryAssets.heroPromise.then(G.installHeroHen).catch(function(){});
-  var pl=new T.Mesh(cylG(2.4,2.43,.4,64),stdMat({color:0x343d35,roughness:.86,metalness:0,envMapIntensity:.25}));
+  var pl=new T.Mesh(cylG(2.4,2.43,.4,64),stdMat({color:0xc3c1b5,roughness:.86,metalness:0,envMapIntensity:.25}));
   pl.position.y=.2; pl.receiveShadow=true; G.studio.add(pl); G.plinth=pl;
 
   G.ring=new T.Group(); G.studio.add(G.ring);
@@ -6305,7 +6310,7 @@ var BUILD_STEPS=[
   CREW.group.visible=false;
 }],
 ["Transport yo’lga chiqmoqda",function(){
-  G.bars=impactBars(["Ishlab chiqarish","Aylanma","Qo’shilgan qiymat","Bandlik","Soliq"]);
+  G.bars=impactBars(["Sotuv","Tushum","Foyda","Bandlik","Soliq"]);
   G.bars.position.set(150,0,210); G.bars.scale.setScalar(1.6); G.bars.visible=false; scene.add(G.bars);
 
   /* ---------------------------------------------------------- traffic --
@@ -6447,17 +6452,14 @@ var _v=new T.Vector3();
 var econBottomPx=0;
 function measureAnchorBand(){ var e=document.getElementById("econ"); econBottomPx=(e&&e.offsetParent)?e.getBoundingClientRect().bottom:0; }
 function updateAnchors(show){
-  var topLimit=1-2*((econBottomPx+14)/H), landscape=H<500&&W>H, xLimit=landscape?.80:.92, yLow=landscape?-.62:-.76;
+  var r=window.FarmPresentation&&FarmPresentation.view||{left:0,top:0,right:W,bottom:H}, placed=[];
   for(var i=0;i<ANCH.length;i++){
-    var a=ANCH[i];
-    a.obj.getWorldPosition(_v); _v.add(a.off);
-    _v.project(camera);
-    var vis=show && _v.z<1 && _v.z>-1 && Math.abs(_v.x)<xLimit && _v.y>yLow && _v.y<Math.min(.76,topLimit);
-    a.el.classList.toggle("in",!!vis);
-    if(vis){
-      a.el.style.left=((_v.x*.5+.5)*100)+"%";
-      a.el.style.top=((-_v.y*.5+.5)*100)+"%";
-    }
+    var a=ANCH[i];a.obj.getWorldPosition(_v);_v.add(a.off);_v.project(camera);
+    var x=(_v.x*.5+.5)*W,y=(-_v.y*.5+.5)*H;
+    var vis=show&&_v.z<1&&_v.z>-1&&x>r.left+48&&x<r.right-48&&y>r.top+58&&y<r.bottom-28;
+    if(vis&&placed.some(function(q){return Math.abs(q.x-x)<90&&Math.abs(q.y-y)<38;}))vis=false;
+    a.el.classList.toggle('in',!!vis);
+    if(vis){a.el.style.left=x+'px';a.el.style.top=y+'px';placed.push({x:x,y:y});}
   }
 }
 
@@ -6631,35 +6633,21 @@ function econWaterfall(){
     if(prevTop!==null)
       s+='<line x1="'+(x-gap)+'" y1="'+prevTop+'" x2="'+x+'" y2="'+prevTop+
          '" stroke="rgba(216,178,106,.45)" stroke-dasharray="2 3" stroke-width="1"/>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(top-5)+'" fill="#EEF1EA" font-size="9" font-family="Archivo,Arial" text-anchor="middle">'+
+    s+='<text x="'+(x+bw/2)+'" y="'+(top-5)+'" fill="#101512" font-size="9" font-family="Archivo,Arial" font-weight="700" text-anchor="middle">'+
        ECON.text("prof",v)+'</text>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(h+15)+'" fill="#93A79A" font-size="6.6" letter-spacing=".6" font-family="Archivo,Arial" text-anchor="middle">'+
+    s+='<text x="'+(x+bw/2)+'" y="'+(h+15)+'" fill="#687066" font-size="6.6" letter-spacing=".6" font-family="Archivo,Arial" font-weight="700" text-anchor="middle">'+
        a[0].toUpperCase()+'</text>';
     prevTop=top;
   });
   return s+'</svg>';
 }
 
-/* sharshara diagramma: nisbatlar shartli, raqamlar tahrirlanadi */
+/* Values are proportional to the editable, per-bird calculation. */
 function waterfallHTML(){
-  var steps=[["Xomashyo",.30,f("cutCost")],["Qayta ishlash",.46,"+"],["Qadoqlash",.58,"+"],
-             ["Brend",.72,"+"],["Yuqori qiymat",.90,f("cutPrice")]];
-  var w=300,h=150,bw=42,gap=(w-steps.length*bw)/(steps.length+1);
-  var s='<svg viewBox="0 0 '+w+' '+(h+42)+'" width="100%" role="img" aria-label="Qiymat qo’shilish bosqichlari">';
-  s+='<line x1="0" y1="'+h+'" x2="'+w+'" y2="'+h+'" stroke="rgba(238,241,234,.18)" stroke-width="1"/>';
-  var prev=null;
-  steps.forEach(function(st,i){
-    var x=gap+i*(bw+gap), bh=st[1]*h, y=h-bh;
-    var base=prev===null?h:h-prev*h;
-    var top=y;
-    s+='<rect x="'+x+'" y="'+top+'" width="'+bw+'" height="'+(base-top)+'" fill="'+(i===steps.length-1?"#D8B26A":"#2f6a49")+'" opacity="'+(i===steps.length-1?1:.85)+'"/>';
-    if(prev!==null) s+='<line x1="'+(x-gap)+'" y1="'+base+'" x2="'+x+'" y2="'+base+'" stroke="rgba(216,178,106,.5)" stroke-dasharray="2 3" stroke-width="1"/>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(top-6)+'" fill="#EEF1EA" font-size="9" font-family="Archivo,Arial" text-anchor="middle">'+st[2]+'</text>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(h+16)+'" fill="#93A79A" font-size="7" letter-spacing="1" font-family="Archivo,Arial" text-anchor="middle">'+st[0].toUpperCase()+'</text>';
-    prev=st[1];
-  });
-  s+='</svg>';
-  return s;
+  var d=calcData(),max=Math.max(d.cost,d.price,1);
+  return '<div class="comparison">'+[{label:'Tannarx',value:d.cost},{label:'Sotish narxi',value:d.price}].map(function(a){
+    return '<div class="compare-row"><span>'+a.label+'</span><span class="compare-track"><i style="width:'+Math.max(0,a.value/max*100)+'%"></i></span><b>'+soum(a.value)+' so‘m</b></div>';
+  }).join('')+'</div><p class="note">Bir tovuq hisobida. Xomashyo → qayta ishlash → qadoqlash → brend → yuqori qiymat.</p>';
 }
 
 /* ------------------------------------------------------------ parchalar -
@@ -6773,7 +6761,7 @@ var BEATS=[
    addAnchor(P.rest,"Boshqa qismlar",f("shRest"),V3(0,.10,-.12));
  },
  camFn:function(p,t){
-   var e=easeInOut(p), a=.28+e*.30, rad=lerp(10.8,10.0,e)*(W/H<.85?1.32:1);
+   var e=easeInOut(p), a=.28+e*.30, rad=lerp(10.8,10.0,e)*(viewAspect()<.85?1.32:viewAspect()<1.05?1.12:1);
    camera.position.set(SX+Math.sin(a)*rad,SY+lerp(6.0,4.4,e),SZ+Math.cos(a)*rad);
    return V3(SX,SY+1.8,SZ);
  },
@@ -6813,14 +6801,14 @@ var BEATS=[
    G.rowAfter.position.y=lerp(1.9,1.6,s);
  },
  dom:function(){
-   var rt=ratio("costBefore","costAfter",1,.68);
+   var av=ECON.read(0).cost,ho=ECON.read(1).cost,mx=Math.max(av,ho,1),rt=[av/mx,ho/mx];
    return '<div class="mod z-title" data-at="0.06">'+
    ey("Avval va hozir")+
    '<h2>Qisqaroq va<br>mustahkam zanjir</h2></div>'+
-   '<div class="mod z-right" data-at="0.24"><div class="panel"><h3>Javonga yetib borish xarajati</h3>'+
-   barsHTML([{lbl:"Avval",val:f("costBefore"),pct:Math.round(rt[0]*100)},
-             {lbl:"Hozir",val:f("costAfter"),pct:Math.round(rt[1]*100),cls:"after"}],.3)+
-   '<dl class="kv" data-at="0.62"><dt>Xarajat kamaydi</dt><dd class="ph">'+f("costCut")+'</dd></dl>'+
+   '<div class="mod z-right" data-at="0.24"><div class="panel"><h3>Bir kilogramm mahsulot tannarxi</h3>'+
+   barsHTML([{lbl:"Avval",val:SV(1,"cost")+" so‘m/kg",pct:Math.round(rt[0]*100)},
+             {lbl:"Hozir",val:SV(2,"cost")+" so‘m/kg",pct:Math.round(rt[1]*100),cls:"after"}],.3)+
+   '<dl class="kv" data-at="0.62"><dt>Xarajat kamaydi</dt><dd class="ph">'+SD(1,2,"cost")+'</dd></dl>'+
    '<p class="note">Nisbatlar shartli &middot; raqamlar tahrirlanadi</p></div></div>'+
    '<div class="mod z-strip" data-at="0.12"><div style="display:grid;gap:10px">'+
    '<div class="eyebrow">Avval</div>'+
@@ -6990,7 +6978,8 @@ var BEATS=[
    return V3(150,lerp(18,14,e),210);
  },
  up:function(p){
-   G.bars.userData.set(beat(p,.12,.9),[1,.92,.84,.74,.64]);
+   var a=ECON.read(0),b=ECON.read(3),ratios=["sales","rev","prof","jobs","tax"].map(function(k){return a[k]>0?Math.max(0,b[k]/a[k]):0;}),max=Math.max.apply(null,ratios.concat([1]));
+   G.bars.userData.set(beat(p,.12,.9),ratios.map(function(v){return v/max;}));
  },
  dom:function(){
    return '<div class="mod z-title" data-at="0.06">'+
@@ -7098,11 +7087,7 @@ var BEATS=[
    return V3(110,10,20);
  },
  up:function(p){
-   var fade=0;
-   if(p<.10) fade=easeInOut(p/.10)*.94;
-   else if(p<.70) fade=.94;
-   else if(p<.82) fade=.94*(1-easeInOut((p-.70)/.12));
-   compMat.uniforms.fade.value=fade;
+   compMat.uniforms.fade.value=0;
  },
  exit:function(){ compMat.uniforms.fade.value=0; },
  dom:function(){return '<div class="mod z-center" data-at="0.08"><div class="lines">'+
@@ -7119,10 +7104,10 @@ var BEATS=[
 
 /* Six presentation chapters, all sixteen authored beats. Durations are seconds.
    Each sequence completes once; manual mode holds the final scene. */
+/* Chapters 01–02 (Boshlanish, Ferma va bozor) were removed on request; beats 0–2 stay defined but unused.
+   The first beat of "O‘z tizimimizga" (intro) runs 4× faster (6 s → 1.5 s). */
 var CH=[
-  {t:"Boshlanish", beats:[0], times:[8]},
-  {t:"Ferma va bozor", beats:[1,2], times:[4.5,7.5]},
-  {t:"O‘z tizimimizga", beats:[3,5], times:[6,4]},
+  {t:"O‘z tizimimizga", beats:[3,5], times:[1.5,4]},
   {t:"Klaster", beats:[6,13,7], times:[5,4,6]},
   {t:"Mahsulot va odamlar", beats:[8,9,10,12,4], times:[3,2.5,3.5,3,3]},
   {t:"Iqtisod va yakun", beats:[11,14,15], times:[4,5,5]}
@@ -7285,7 +7270,7 @@ function enterBeat(idx,hard){
   if(sc.enter) sc.enter();
   timed=[];
   document.body.dataset.beat=String(idx);
-  if(window.Presentation) Presentation.onBeat(idx);
+  if(window.FarmPresentation) FarmPresentation.onBeat(idx);
   if(sc.cut||hard){
     envSnap(sc.env); blend.on=false;
     if(sc.cut&&prev&&!hard&&performance.now()-lastDip>900){ flashCut(.7); lastDip=performance.now(); }
@@ -7293,10 +7278,12 @@ function enterBeat(idx,hard){
     blend.on=true; blend.t=0; blend.pos.copy(wasPos); blend.look.copy(wasLook);
   }
 }
-function goTo(i,opts){ return window.Presentation&&Presentation.goTo(i,opts); }
-function updateHUD(){ if(window.Presentation) Presentation.updateHUD(); }
-function updateProgressUI(){ if(window.Presentation) Presentation.updateProgress(); }
-function setPlaying(v){ if(window.Presentation) Presentation.setPlaying(v); }
+function goTo(i,opts){ return window.FarmPresentation&&FarmPresentation.goTo(i,opts); }
+function updateHUD(){ if(window.FarmPresentation) FarmPresentation.updateHUD(); }
+function updateProgressUI(){ if(window.FarmPresentation) FarmPresentation.updateProgress(); }
+function setPlaying(v){ if(window.FarmPresentation) FarmPresentation.setPlaying(v); }
+/* Aspect of the 3D viewport frame (falls back to the window before the layout exists). */
+function viewAspect(){ var v=window.FarmPresentation&&FarmPresentation.view; return v?v.width/v.height:W/H; }
 /* Compatibility for tools that inspect normalized chapter progress; no DOM scroll timeline. */
 function globalProg(){ return cur<0?0:(cur+prog)/CH.length; }
 var rail=document.getElementById("rail"),railBtns=[],
@@ -7344,13 +7331,13 @@ function exGoTo(i){
   EX.wantDist=Math.max(46,(o.userData.w||40)*1.7);
   EX.wantPitch=.34;
 }
-function setExplore(v){ return window.Presentation&&Presentation.explore(v); }
+function setExplore(v){ return window.FarmPresentation&&FarmPresentation.explore(v); }
 exBtn.addEventListener("click",function(){ setExplore(!EX.on); });
 canvas.addEventListener("pointerdown",function(e){
   if(!EX.on||presentation.isTransitioning||presentation.panel) return;
   EX.drag={x:e.clientX,y:e.clientY}; EX.moved=0;
   document.body.classList.add("dragging");
-  canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId);
+  try{ canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId); }catch(err){}
 });
 canvas.addEventListener("pointermove",function(e){
   if(!EX.on||!EX.drag) return;
@@ -7412,12 +7399,13 @@ function partTip(e){
     tipEl.innerHTML='<div class="t">'+r.name+'</div>'+
       '<dl><dt>Vazn</dt><dd>'+kg(r.kg)+' kg</dd></dl>'+
       '<dl><dt>Ulush</dt><dd>'+Math.round(r.share)+'%</dd></dl>'+
-      '<dl><dt>Tannarx</dt><dd>'+soum(r.cost)+'</dd></dl>'+
-      '<dl><dt>Sotish narxi</dt><dd>'+soum(r.val)+'</dd></dl>'+
-      '<dl><dt>Yalpi foyda</dt><dd>'+soum(r.val-r.cost)+'</dd></dl>';
+      '<dl><dt>Tannarx</dt><dd>'+soum(r.cost)+' so‘m</dd></dl>'+
+      '<dl><dt>Sotish narxi</dt><dd>'+soum(r.val)+' so‘m</dd></dl>'+
+      '<dl><dt>Yalpi foyda</dt><dd>'+soum(r.val-r.cost)+' so‘m</dd></dl>';
   }
-  tipEl.style.left=clamp(e.clientX,112,W-112)+"px";
-  tipEl.style.top=Math.max(210,e.clientY)+"px";
+  var view=FarmPresentation.view,half=Math.min(tipEl.offsetWidth/2+8,view.width/2);
+  tipEl.style.left=clamp(e.clientX,view.left+half,view.right-half)+"px";
+  tipEl.style.top=clamp(e.clientY,view.top+tipEl.offsetHeight*1.08+8,view.bottom-8)+"px";
   tipEl.classList.add("on"); tipEl.setAttribute("aria-hidden","false");
 }
 window.addEventListener("pointermove",partTip,{passive:true});
@@ -7443,8 +7431,8 @@ function readEditor(){
     if(el) FIGS[fd[0]]=el.value.trim()||fd[2];
   });});
 }
-function openEditor(){ if(window.Presentation) Presentation.openPanel("editor"); }
-function closeEditor(){ if(window.Presentation) Presentation.closePanel(); }
+function openEditor(){ if(window.FarmPresentation) FarmPresentation.openPanel("editor"); }
+function closeEditor(){ if(window.FarmPresentation) FarmPresentation.closePanel(); }
 document.getElementById("edit-open").addEventListener("click",openEditor);
 document.getElementById("edit-close").addEventListener("click",closeEditor);
 document.getElementById("edit-reset").addEventListener("click",function(){
@@ -7455,7 +7443,7 @@ document.getElementById("edit-save").addEventListener("click",function(){
 });
 function refreshFigures(){
   ECON.refresh(); hideTip();
-  if(window.Presentation) Presentation.refreshFigures();
+  if(window.FarmPresentation) FarmPresentation.refreshFigures();
   invalidateScene();
 }
 function persist(){
@@ -7496,7 +7484,7 @@ function invalidateScene(ms){
   dirtyUntil=Math.max(dirtyUntil,performance.now()+(ms===undefined?1400:ms));
   if(!frameHandle&&!document.hidden)frameHandle=requestAnimationFrame(frame);
 }
-function frame(now){ frameHandle=0; if(window.Presentation) Presentation.frame(now); }
+function frame(now){ frameHandle=0; if(window.FarmPresentation) FarmPresentation.frame(now); }
 
 /* ------------------------------------------------------------- resize -- */
 window.addEventListener("resize",function(){
@@ -7507,7 +7495,7 @@ window.addEventListener("resize",function(){
   camera.aspect=W/H; camera.updateProjectionMatrix();
   renderer.setSize(W,H);
   makeTargets();invalidateScene(); if(typeof measureAnchorBand==="function") measureAnchorBand();
-  if(window.Presentation) Presentation.layout();
+  if(window.FarmPresentation) FarmPresentation.layout();
 });
 
 /* --------------------------------------------------------------- boot -- */
@@ -7539,7 +7527,7 @@ async function buildNext(){
 }
 startBtn.addEventListener("click",function(){
   if(step<BUILD_STEPS.length||startBtn.classList.contains("error"))return;
-  Presentation.start();
+  FarmPresentation.start();
 });
 loadFigures();
 invalidateScene();
@@ -7550,7 +7538,7 @@ function showLoadError(err){
 document.addEventListener("visibilitychange",function(){
   if(document.hidden){if(frameHandle)cancelAnimationFrame(frameHandle);frameHandle=0;lastNow=performance.now();}
   else{lastNow=performance.now();invalidateScene();}
-  if(window.Presentation) Presentation.updateStatus();
+  if(window.FarmPresentation) FarmPresentation.updateStatus();
 });
 ["pointerdown","pointermove","pointerup","wheel","keydown","input"].forEach(function(type){window.addEventListener(type,function(e){if(EX.on&&(type!=="pointermove"||EX.drag))invalidateScene();},{passive:true});});
 window.addEventListener("DOMContentLoaded",function(){
