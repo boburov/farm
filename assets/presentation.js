@@ -41,7 +41,7 @@
       {category:'Integratsiyalashgan klaster',title:'Butun zanjir. Bitta tizim.',lead:'Yem, ferma, qayta ishlash, sovuq zanjir va bozor — bitta tizimda.',
        intro:'Don ichkariga kiradi, tayyor mahsulot tashqariga chiqadi. Har bir bosqich keyingisiga bog‘lanadi.',
        metrics:[metric('sales','Klaster sotuv hajmi',c.sales,'kg',delta(a.sales,c.sales)),metric('cost','Klaster tannarxi',c.cost,costUnit,delta(a.cost,c.cost,true),{featured:true}),metric('prof','Foyda',c.prof,moneyUnit,'3-bosqich · klaster',{digits:2}),metric('jobs','Bandlik',c.jobs,'ish o‘rni','3-bosqich · klaster')],
-       chain:true,conclusion:'Yemdan bozorgacha — yagona qiymat zanjiri.'},
+       conclusion:'Yemdan bozorgacha — yagona qiymat zanjiri.'},
       {category:'Mahsulot va odamlar',title:'Bir tovuq. Ko‘proq qiymat.',lead:'Har bir bo‘lak alohida mahsulot, har bir bosqich yangi ish o‘rni.',
        intro:'Har bir bo‘lak alohida mahsulotga aylanadi. Ishlab chiqarish kengaygani sari yangi kasblar va ish o‘rinlari paydo bo‘ladi.',
        metrics:[metric('bird-price','Bir tovuq sotish narxi',cut.price,'so‘m/tovuq','Bir tovuq hisobida'),metric('jobs','Bandlik',d.jobs,'ish o‘rni',(d.jobs>=a.jobs?'+':'')+uzNumber(d.jobs-a.jobs)+' yangi ish o‘rni',{featured:true}),metric('added','Qo‘shilgan qiymat',num('cutValue',26),'%','Kiritilgan ko‘rsatkich',{digits:1,prefix:'+',featured:true,inlineUnit:true}),metric('bird-cost','Bir tovuq tannarxi',cut.cost,'so‘m/tovuq','Bir tovuq hisobida')],
@@ -76,7 +76,6 @@
     var c=content(cur); metricTweens=[];
     slideCopy.innerHTML='<div class="slide-category eyebrow">'+c.category+'</div><h1 id="slide-title">'+c.title+'</h1><p class="slide-intro">'+c.intro+'</p>';
     var h='<p class="data-lead"><b>'+c.conclusion+'</b> <span>'+c.lead+'</span></p><div class="metrics">'+c.metrics.map(metricHTML).join('')+'</div>';
-    if(c.chain)h+='<ol class="cluster-chain" aria-label="Klaster bosqichlari">'+['Yem','Ferma','Qayta ishlash','Qadoqlash','Sovuq saqlash','Logistika','Bozor'].map(function(x,i){return '<li data-chain="'+i+'"><span>'+pad2(i+1)+'</span>'+x+'</li>';}).join('')+'</ol>';
     dataCopy.innerHTML=h;
     layers.forEach(function(l){l.scrollTop=0;l.classList.toggle('expanded',infoExpanded);});
   };
@@ -104,12 +103,6 @@
     if(cur<0)return;
     state.currentChapter=cur;elNum.textContent=pad2(cur+1);elTitle.textContent=CH[cur].t;
     document.getElementById('chapter-count').innerHTML=pad2(cur+1)+' <span>/ '+pad2(CH.length)+'</span>';
-    railBtns.forEach(function(b,i){
-      var done=state.completed.has(i),active=i===cur;
-      b.setAttribute('aria-current',String(active));b.classList.toggle('completed',done);
-      b.querySelector('.chapter-state').textContent=done&&!active?'✓':'';
-      b.setAttribute('aria-label',pad2(i+1)+'-bo‘lim: '+CH[i].t+(active?' · joriy bo‘lim':done?' · ko‘rib chiqildi':''));
-    });
     var last=cur===CH.length-1, nextBtn=document.getElementById('next');
     document.getElementById('prev').disabled=cur===0||EX.on;
     nextBtn.disabled=EX.on;nextBtn.classList.toggle('replay',last);
@@ -298,12 +291,6 @@
   function tickMetrics(dt){
     metricTweens=metricTweens.filter(function(a){a.t=Math.min(1,a.t+dt/1.1);var el=document.getElementById('metric-'+a.id);if(el)el.textContent=valueText(a.m,lerp(a.from,a.to,easeOut(a.t)));return a.t<1;});
   }
-  function updateChain(p){
-    if(curBeat!==7&&curBeat!==6)return;
-    /* the cluster chapter is the single beat 6: its chain walks all seven steps (Yem … Bozor) while the buildings go up */
-    var active=curBeat===7?Math.min(6,Math.floor(beat(p,.05,.75)*7)):curBeat===6?Math.min(6,Math.floor(beat(p,.06,.94)*7)):-1;
-    dataCopy.querySelectorAll('[data-chain]').forEach(function(el,i){el.classList.toggle('is-active',i===active);el.classList.toggle('is-done',i<active);el.setAttribute('aria-current',i===active?'step':'false');});
-  }
   P.frame=function(now){
     if(document.hidden)return;
     now=now||performance.now();var wallDt=Math.max(0,(now-lastNow)/1000),dt=Math.min(wallDt,.05);lastNow=now;
@@ -346,14 +333,10 @@
         stillPrime=false;camera.updateMatrixWorld();worldTick(elapsed,1/60,camera);
       }else{if(window.ENV)ENV.tick();}
       if(curBeat===4)updateAnchors(!state.isTransitioning&&!state.panel&&pose.upP>.42);else updateAnchors(false);
-      if(!suspended)tickMetrics(dt);updateChain(pose.beat.local);P.updateProgress();renderFrame(elapsed);
+      if(!suspended)tickMetrics(dt);P.updateProgress();renderFrame(elapsed);
     }
     if(!frameHandle)frameHandle=requestAnimationFrame(frame);
   };
-  CH.forEach(function(c,i){
-    var b=document.createElement('button');b.innerHTML='<span class="n">'+pad2(i+1)+'</span><span class="chapter-name">'+c.t+'</span><span class="chapter-state" aria-hidden="true"></span>';
-    b.addEventListener('click',function(){P.goTo(i);});rail.appendChild(b);railBtns.push(b);
-  });
   document.getElementById('prev').innerHTML=icon('left')+'<span class="button-label">Oldingi</span>';
   function navIndex(){return state.queuedChapter?state.queuedChapter.i:state.transition?state.transition.i:cur;}
   document.getElementById('next').addEventListener('click',function(){if(navIndex()===CH.length-1)P.start(true);else P.goTo(navIndex()+1);});

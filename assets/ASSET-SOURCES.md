@@ -83,3 +83,19 @@ three.js r128 (MIT, `assets/vendor/THREE-LICENSE.txt`) with its GLTFLoader, RGBE
 ## 3D model — studio hen
 
 "Chicken" by **pooiloui2** — https://sketchfab.com/3d-models/chicken-98830a78e8c54354a7fbe5ca8346fbf9 — **CC BY 4.0** (attribution required; shown on the page in the loader and next to the studio scene). Prepared for the web in the sibling `chicken2` project (`scripts/build-chicken.mjs`: spec/gloss → metal/rough, albedo-derived normal map, quantized, WebP textures) and copied here as `assets/models/hen-photoreal.glb` (1.4 MB, 57,027 triangles, no skeleton). Used for the studio hero hen only; the flock, chicks, cuts and workers remain project-generated.
+
+## 3D model — whole raw chicken
+
+`assets/models/raw-chicken.glb` is prepared by `scripts/prep-raw-chicken.mjs` from
+`~/Downloads/whole-raw-chicken-3d-model/source/raw chicken 3d model.glb` (Tripo AI-generated GLB, `THREE.GLTFExporter r182`,
+1.37 M triangles, three 4K JPEG maps: colour, ORM, normal; the `source/` + `textures/gltf_embedded_*` layout is Sketchfab's
+download format). Prepared file: 61,513 triangles, 1.15 MB, WebP maps (colour 2K, ORM/normal 1K), KHR_mesh_quantization.
+
+**Author and licence are not recorded**: the downloaded folder contains no licence file and carries no download-origin metadata.
+Confirm the licence on the source page before publishing; if it is CC BY, add the attribution to the loader credit and `#credit`
+in index.html next to the studio hen. Used for the “Butun tovuq” pack in the studio product ring (chapter 3) and the raw station
+of the unused beat 10; the procedural carcass stays in the scene as the fallback if the GLB fails to load.
+
+`assets/models/raw-chicken-cuts.glb` is derived from the same model by `scripts/split-raw-chicken.mjs` (plane-region split
+into breastL/R, thighL/R, drumL/R, wingL/R, rest with exact planar caps and an inner flesh shell on `rest`; output in the
+site frame at length 1.0). Same author/licence caveat as above. Used for the disassembly scene of chapter 3.

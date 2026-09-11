@@ -16,7 +16,7 @@ const out = process.env.QA_OUT || 'qa/current';
 await mkdir(out, { recursive: true });
 
 const SIZES = (opt('--sizes', quick ? '1440x900,390x844' : '1440x900,1920x1080,390x844,430x932,844x390')).split(',').map(s => s.split('x').map(Number));
-let BEATS = opt('--beats', quick ? '3,8,15' : '3,6,8,11,14,15').split(',').map(Number); // beats outside CH are skipped after boot
+let BEATS = opt('--beats', quick ? '3,8,15' : '3,6,8,4,11,14,15').split(',').map(Number); // beats outside CH are skipped after boot
 const BUDGET = { 0: 900000, 1: 900000, 2: 900000, 3: 900000, 4: 300000, 6: 600000, 7: 600000, 8: 300000, 10: 600000, 11: 600000, 12: 600000, 14: 600000, 15: 600000 };
 const MAX_FRAME_MS = 120, MAX_CALLS = Number(process.env.QA_MAX_CALLS || 1500); // draw-call reduction is Pass 5 work
 
@@ -126,15 +126,12 @@ if (!flag('--no-interact') && !flag('--no-interactions')) {
   if (I.nav.docH > innerHeightOf(page) + 1 || I.nav.scrollY) fail(`document still scrolls (height ${I.nav.docH})`);
   if (!I.nav.playing || I.nav.remaining <= 0) fail('autoplay countdown not running after chapter change');
   await page.evaluate(() => setPlaying(false));
-  // chapter rail + keyboard
-  await page.locator('#rail button').nth(2).click(); await page.waitForTimeout(1900);
-  I.rail = await page.evaluate(() => cur);
-  if (I.rail !== 2) fail(`rail button 3 went to chapter ${I.rail}`);
+  // keyboard (the chapter rail was removed; goTo(2) above already covers programmatic navigation)
   await page.keyboard.press('ArrowRight'); await page.waitForTimeout(1900);
   I.arrowRight = await page.evaluate(() => cur);
   if (I.arrowRight !== 3) fail(`ArrowRight went to chapter ${I.arrowRight}`);
   // explore mode
-  await page.click('#explore-btn'); await page.waitForTimeout(900);
+  await page.evaluate(() => setExplore(true)); await page.waitForTimeout(900);
   I.exploreOn = await page.evaluate(() => EX.on && document.body.classList.contains('exploring'));
   if (!I.exploreOn) fail('explore mode did not open');
   await page.locator('#explore-chips button').nth(3).click(); await page.waitForTimeout(600);
@@ -153,14 +150,16 @@ if (!flag('--no-interact') && !flag('--no-interactions')) {
   // part tooltips at beat 4 (exploded cuts) — only while a chapter still shows beat 4
   if (await page.evaluate(() => CH.some(c => c.beats.includes(4)))) {
     await seek(page, 4, .8); await page.waitForTimeout(1500);
-    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera); return { x: (v.x * .5 + .5) * innerWidth, y: (-v.y * .5 + .5) * innerHeight }; });
+    // hover a point that actually lies on the breast piece: probe a small grid around its projected centre with the page's own raycaster
+    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera), cx = (v.x * .5 + .5) * innerWidth, cy = (-v.y * .5 + .5) * innerHeight, r = new THREE.Raycaster();
+      for (const d of [0, 6, 12, 18, 24]) for (let i = 0; i < (d ? 8 : 1); i++) { const a = i * Math.PI / 4, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d; r.setFromCamera(new THREE.Vector2((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1), camera); let o = r.intersectObject(G.birdDressed, true)[0]?.object; while (o && o !== m) o = o.parent; if (o) return { x, y, d }; } return { x: cx, y: cy, d: -1 }; });
     await page.mouse.move(pt.x, pt.y, { steps: 4 }); await page.waitForTimeout(400);
     I.tooltip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 120) }));
     if (!I.tooltip.on) fail('part tooltip did not appear over the breast fillet');
     await page.screenshot({ path: `${out}/tooltip.png` });
   } else { I.tooltip = 'skipped: beat 4 is not in the presentation'; console.log('SKIP tooltip: beat 4 is not in the presentation'); }
   // figures editor
-  await page.click('#edit-open'); await page.waitForTimeout(400);
+  await page.evaluate(() => openEditor()); await page.waitForTimeout(400);
   I.editorOpen = await page.evaluate(() => document.getElementById('editor').classList.contains('open'));
   if (!I.editorOpen) fail('editor did not open');
   const firstInput = page.locator('#editor input').first(); const original = await firstInput.inputValue();
@@ -180,7 +179,8 @@ if (!flag('--no-interact') && !flag('--no-interactions')) {
     await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(700);
     I.resize.push(await page.evaluate(([w, h]) => { const parts = G.birdDressed.visible ? Object.values(G.birdDressed.userData.parts) : []; const pts = parts.map(m => m.getWorldPosition(new THREE.Vector3()).project(camera)); const out = pts.filter(p => Math.abs(p.x) > .98 || Math.abs(p.y) > .98).length; return { w, h, inside: out === 0, outside: out, aspect: +camera.aspect.toFixed(3), overflow: document.documentElement.scrollWidth > innerWidth }; }, [w, h]));
   }
-  for (const r of I.resize) { if (!r.inside) fail(`cut spread leaves the viewport at ${r.w}x${r.h}`); if (r.overflow) fail(`overflow after resize to ${r.w}x${r.h}`); }
+  // the cuts now rest on the ring bases (radius 4.9): on phone-width viewports the side bases sit at the frame edge by design
+  for (const r of I.resize) { if (!r.inside && r.w >= 500) fail(`cut spread leaves the viewport at ${r.w}x${r.h}`); if (r.overflow) fail(`overflow after resize to ${r.w}x${r.h}`); }
 }
 await context.close();
 
@@ -199,7 +199,7 @@ if (!quick || flag('--contexts')) {
   const mob = await browser.newContext({ ...devices['iPhone 13'], viewport: { width: 390, height: 844 } });
   const p3 = await mob.newPage(); wire(p3, 'iphone');
   await boot(p3); await seek(p3, 4, .8); await p3.waitForTimeout(1500);
-  report.interactions.mobile = await p3.evaluate(() => ({ dpr: CINEMA_STATS.dpr, small: SMALL, overflow: document.documentElement.scrollWidth > innerWidth, tapTargets: Array.from(document.querySelectorAll('.ctrl button,#rail button')).filter(b => b.offsetParent).every(b => { const r = b.getBoundingClientRect(); return r.height >= 40 && r.width >= 40; }) }));
+  report.interactions.mobile = await p3.evaluate(() => ({ dpr: CINEMA_STATS.dpr, small: SMALL, overflow: document.documentElement.scrollWidth > innerWidth, tapTargets: Array.from(document.querySelectorAll('.ctrl button')).filter(b => b.offsetParent).every(b => { const r = b.getBoundingClientRect(); return r.height >= 40 && r.width >= 40; }) }));
   if (!report.interactions.mobile.tapTargets) fail('mobile controls smaller than 40 px');
   if (report.interactions.mobile.overflow) fail('mobile overflow');
   await p3.screenshot({ path: `${out}/iphone-beat-4.png` }); await mob.close();

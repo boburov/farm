@@ -80,6 +80,78 @@
     var s=height/size.y;wrap.scale.setScalar(s);wrap.userData.s=s;wrap.userData.size=size.multiplyScalar(s);wrap.name='hero-hen-photoreal';
     return wrap;
   };
+  // Photoreal whole raw chicken: Tripo-generated GLB from the user's downloads, prepared by scripts/prep-raw-chicken.mjs
+  // (61k triangles, WebP maps, KHR_mesh_quantization). No skeleton; the procedural carcass stays the fallback.
+  A.loadRaw=function(){return A.rawPromise||(A.rawPromise=new Promise(function(resolve,reject){
+    loader.load('assets/models/raw-chicken.glb',function(gltf){A.rawModel=gltf.scene;resolve(gltf.scene);},undefined,function(e){A.failures.push('raw-chicken');reject(new Error('raw-chicken: '+(e.message||'asset load failed')));});
+  }));};
+  /* Rotation that turns the file's axes into the site's dressed-bird frame (breast up, length along Z, neck at -Z):
+     the file is Y-up with the neck at +Z and the trussed drumsticks at -Z, so a half turn about Y. */
+  A.rawPose={rx:0,ry:Math.PI,rz:0};
+  /* Normalised clone: rests on y=0, centred on x/z, scaled so its length along Z equals `length` (site metres). */
+  A.raw=function(length,ownMaterials){
+    var o=A.rawModel.clone(true),inner=new T.Group(),wrap=new T.Group(),mats=[];
+    o.traverse(function(n){if(!n.isMesh)return;n.castShadow=n.receiveShadow=true;if(ownMaterials)n.material=n.material.clone();var m=n.material;
+      if(m&&m.isMeshStandardMaterial){m.metalness=0;m.envMapIntensity=.85;m.side=T.FrontSide;mats.push(m);}});
+    wrap.userData.mats=mats;
+    inner.add(o);inner.rotation.set(A.rawPose.rx,A.rawPose.ry,A.rawPose.rz);wrap.add(inner);wrap.updateMatrixWorld(true);
+    var box=new T.Box3().setFromObject(wrap),size=box.getSize(new T.Vector3()),c=box.getCenter(new T.Vector3());
+    inner.position.set(-c.x,-box.min.y,-c.z);
+    var s=length/size.z;wrap.scale.setScalar(s);wrap.userData.s=s;wrap.userData.size=size.multiplyScalar(s);wrap.name='whole-raw-chicken-photoreal';
+    return wrap;
+  };
+  /* Feather / skin dissolve without transparency sorting: a tileable value-noise alphaMap in [.55,1] with alphaTest .5,
+     so animating `opacity` 1 → .48 erodes the surface in a noise pattern (and .48 → 1 grows it back). One compile per material. */
+  A.dissolveTexture=function(){
+    if(A._noise) return A._noise;
+    var N=256,d=new Uint8Array(N*N*4),lat=[8,16,32,64],amp=[.5,.25,.15,.10];
+    function rnd(x,y,s){ var v=Math.sin(x*127.1+y*311.7+s*74.7)*43758.5453; return v-Math.floor(v); }
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+      var v=0,tot=0;
+      for(var o=0;o<lat.length;o++){ var L=lat[o],fx=x/N*L,fy=y/N*L,ix=Math.floor(fx),iy=Math.floor(fy),tx=fx-ix,ty=fy-iy; tx=tx*tx*(3-2*tx); ty=ty*ty*(3-2*ty);
+        var a=rnd(ix,iy,o),b=rnd((ix+1)%L,iy,o),c=rnd(ix,(iy+1)%L,o),e=rnd((ix+1)%L,(iy+1)%L,o);
+        v+=amp[o]*((a*(1-tx)+b*tx)*(1-ty)+(c*(1-tx)+e*tx)*ty); tot+=amp[o]; }
+      v/=tot; var byte=Math.round((.55+.45*v)*255),i=(y*N+x)*4; d[i]=d[i+1]=d[i+2]=byte; d[i+3]=255;
+    }
+    var t=new T.DataTexture(d,N,N,T.RGBAFormat); t.wrapS=t.wrapT=T.RepeatWrapping; t.needsUpdate=true; A._noise=t; return t;
+  };
+  A.prepareDissolve=function(obj){
+    var mats=[];
+    obj.traverse(function(o){ if(!o.isMesh||!o.material||!o.material.isMeshStandardMaterial) return; var m=o.material;
+      if(!m.alphaMap){ m.alphaMap=A.dissolveTexture(); m.alphaTest=.5; m.transparent=false; m.opacity=1; m.needsUpdate=true; }
+      if(mats.indexOf(m)<0) mats.push(m); });
+    return mats;
+  };
+  // Photoreal retail cuts: scripts/split-raw-chicken.mjs slices the same GLB by plane regions (exact caps, inner flesh
+  // shell on the remainder) and writes it already in the site frame at length 1.0, so A.rawCuts(L) overlays A.raw(L).
+  A.loadRawCuts=function(){return A.rawCutsPromise||(A.rawCutsPromise=new Promise(function(resolve,reject){
+    loader.load('assets/models/raw-chicken-cuts.glb',function(gltf){
+      /* three r128 raycasts against raw attribute values, so the quantized int16 positions must become floats
+         (same normalised range, the node keeps its quantization scale) for the part tooltip to hit the pieces */
+      gltf.scene.traverse(function(o){ if(!o.isMesh) return; var g=o.geometry,at=g.attributes.position; if(!at||!at.normalized) return;
+        var arr=at.array,k=arr instanceof Int16Array?1/32767:arr instanceof Int8Array?1/127:1,n=at.count,f=new Float32Array(n*3);
+        for(var i=0;i<n;i++){ f[i*3]=at.getX(i)*k; f[i*3+1]=at.getY(i)*k; f[i*3+2]=at.getZ(i)*k; }   /* getX/Y/Z: works for interleaved buffers too */
+        g.setAttribute('position',new T.BufferAttribute(f,3)); g.computeBoundingBox(); g.computeBoundingSphere(); });
+      A.rawCutsModel=gltf.scene;resolve(gltf.scene);},undefined,function(e){A.failures.push('raw-chicken-cuts');reject(new Error('raw-chicken-cuts: '+(e.message||'asset load failed')));});
+  }));};
+  /* Same interface as A.cuts(): root.userData.parts (breastL … rest), each a Group pivoted on its bbox centre with
+     userData.home / homeQuaternion; the piece node keeps its own (quantization) transform inside an offset group. */
+  A.rawCuts=function(length){
+    var root=new T.Group(),parts={},o=A.rawCutsModel.clone(true),holder=o.getObjectByName('raw-chicken-cuts')||o;
+    root.name='photoreal-poultry-cuts'; root.scale.setScalar(length); root.userData.s=length;
+    holder.children.slice().forEach(function(n){
+      var m=new T.Group(),off=new T.Group(),c=n.userData.center||[0,0,0]; m.name=n.name;
+      holder.remove(n); off.position.set(-c[0],-c[1],-c[2]); off.add(n); m.add(off); m.position.set(c[0],c[1],c[2]);
+      n.traverse(function(x){ if(!x.isMesh) return; x.castShadow=x.receiveShadow=true; x.userData.part=m.name; var mat=x.material;
+        if(mat&&mat.isMeshStandardMaterial){ mat.metalness=0; mat.envMapIntensity=/cut|inner/.test(mat.name||'')?.5:.85; } });
+      m.userData.home=m.position.clone(); m.userData.homeQuaternion=m.quaternion.clone();
+      m.userData.size=new T.Vector3().fromArray(n.userData.max||[0,0,0]).sub(new T.Vector3().fromArray(n.userData.min||[0,0,0])).multiplyScalar(length);
+      parts[m.name]=m; root.add(m);
+    });
+    root.userData.parts=parts;
+    root.userData.explode=function(progress){ /* legacy interface: no-op, the flight is driven by index.html */ root.userData.explosion=progress; };
+    return root;
+  };
   A.loadFood=function(){return A.foodPromise||(A.foodPromise=load('poultry-cuts').then(function(nodes){A.food=nodes;if(window.MAT)A.foodMaterials();}));};
   var TINTS=[0xffffff,0xb87c48,0x97928a,0x49423c];
   function merge(nodes,variant,groups){

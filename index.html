@@ -32,8 +32,8 @@
       <div id="slide-copy"></div>
       <div class="slide-actions"><button id="next" class="pill"></button><button id="prev" class="text-button" aria-label="Oldingi bo‘lim"></button><button id="play" class="round" aria-pressed="false"></button></div>
     </main>
-    <aside id="data-layer" aria-label="Bo‘lim ko‘rsatkichlari"><div id="data-copy"></div><nav id="rail" aria-label="Taqdimot bo‘limlari"></nav></aside>
-    <div id="data-links">
+    <aside id="data-layer" aria-label="Bo‘lim ko‘rsatkichlari"><div id="data-copy"></div></aside>
+    <div id="data-links" hidden>
       <button id="explore-btn" class="text-button" aria-pressed="false">Klasterni kezish <span aria-hidden="true">↗</span></button>
       <button id="edit-open" class="text-button">Raqamlar <span aria-hidden="true">↗</span></button>
       <button id="details-open" class="text-button">Batafsil <span aria-hidden="true">↗</span></button>
@@ -1532,6 +1532,63 @@ function heroBird(mode){
   return PoultryAssets.cuts();
 }
 function wholeRawBird(){ return PoultryAssets.whole(); }
+/* tirik tovuq -> xom tovuq: f 0..1 (0 = faqat tirik tovuq, 1 = faqat xom tovuq), oraliqda eritib o'tkaziladi */
+/* Feathers dissolve: the photoreal hen erodes in a noise pattern (alphaMap + alphaTest, see PoultryAssets.prepareDissolve)
+   while the raw bird grows in the same place — no transparency, no ghosting. f 0 = hen only, 1 = raw bird only. */
+function swapHenRaw(f){
+  if(!G.birdRaw) return;
+  var e=f<=0?0:f>=1?1:f*f*(3-2*f), photo=G.heroHenPhoto;
+  if(photo){
+    if(!photo.userData.mats) photo.userData.mats=PoultryAssets.prepareDissolve(photo);
+    photo.userData.mats.forEach(function(m){ m.opacity=1-.52*e; });
+    G.birdLive.visible=e<1;
+  }else G.birdLive.visible=e<.5;   /* the procedural rig shares its materials with the flock: no dissolve, a cut */
+  G.birdRaw.visible=e>0;
+  G.birdRaw.userData.mats.forEach(function(m){ m.opacity=.48+.52*e; });
+}
+/* Cuts fly from the bird to the ring bases: name, holder index (0 = +Z, counter-clockwise by 45°), final local Euler
+   (rotations about x/z lay a piece flat — the cuts root only turns about y, so "up" is preserved). */
+var PART_SCALE=1.35;   /* pieces grow while they float to their bases so each reads clearly on its base */
+var FLIGHT=[["breastL",5,[0,.35,0]],["breastR",3,[0,-.35,0]],["thighL",6,[0,.40,0]],["thighR",2,[0,-.40,0]],
+            ["drumL",7,[.61,.50,0]],["drumR",1,[.61,-.50,0]],["wingL",4,[0,.20,-Math.PI/2]],["wingR",0,[0,-.20,Math.PI/2]]];   /* wings: whole shells, laid on their broad side */
+/* per piece: the landing spot on its base (root-local), the landing orientation and the arc height */
+function prepareFlight(root){
+  var parts=root.userData.parts; if(!parts||!G.ring) return;
+  G.studio.updateMatrixWorld(true);
+  var hw=new T.Vector3(),tmp=new T.Vector3(),pos=new T.Vector3();
+  FLIGHT.forEach(function(fd,i){
+    var m=parts[fd[0]],holder=G.ring.children[fd[1]]; if(!m||!holder) return;
+    var q=new T.Quaternion().setFromEuler(new T.Euler(fd[2][0],fd[2][1],fd[2][2]));
+    /* lowest vertex of the piece in its landing orientation, so it rests on the base instead of floating */
+    m.quaternion.copy(q); m.position.set(0,0,0); m.scale.setScalar(PART_SCALE); root.updateMatrixWorld(true);
+    var minY=Infinity;
+    m.traverse(function(o){ if(!o.isMesh) return; var at=o.geometry.attributes.position,arr=at.array,k=at.normalized?(arr instanceof Int16Array?1/32767:arr instanceof Int8Array?1/127:1):1;
+      for(var v=0;v<at.count;v++){ pos.set(at.getX(v)*k,at.getY(v)*k,at.getZ(v)*k).applyMatrix4(o.matrixWorld); if(pos.y<minY) minY=pos.y; } });
+    m.getWorldPosition(tmp); var bottom=tmp.y-minY;
+    holder.getWorldPosition(hw); hw.y+=bottom+.006;          /* the base top is the holder's origin */
+    m.userData.target=root.worldToLocal(hw.clone()); m.userData.targetQuaternion=q;
+    m.userData.lift=(1.5+i*.06)/root.scale.y; m.userData.order=i;
+    m.position.copy(m.userData.home); m.quaternion.copy(m.userData.homeQuaternion); m.scale.setScalar(1);
+  });
+  root.updateMatrixWorld(true); root.userData.flightReady=true;
+}
+/* p 0 = assembled bird, 1 = every piece resting on its base; each piece lifts, arcs outward and settles, staggered */
+function flyParts(root,p){
+  var parts=root.userData.parts; if(!parts) return;
+  if(!root.userData.flightReady) prepareFlight(root);
+  FLIGHT.forEach(function(fd,i){ var m=parts[fd[0]]; if(!m||!m.userData.target) return;
+    var t=easeInOut(beat(p,i*.055,.62+i*.055)),h=m.userData.home,g=m.userData.target,u=1-t;
+    var mx=(h.x+g.x)/2,my=Math.max(h.y,g.y)+m.userData.lift,mz=(h.z+g.z)/2;
+    m.position.set(u*u*h.x+2*u*t*mx+t*t*g.x,u*u*h.y+2*u*t*my+t*t*g.y,u*u*h.z+2*u*t*mz+t*t*g.z);
+    m.quaternion.copy(m.userData.homeQuaternion).slerp(m.userData.targetQuaternion,t);
+    m.scale.setScalar(1+(PART_SCALE-1)*t);
+  });
+  Object.keys(parts).forEach(function(k){ var m=parts[k],owner=parts[m.userData.attachTo]; if(!owner) return;   /* procedural bones follow their cut */
+    m.position.copy(m.userData.home).sub(owner.userData.home).applyQuaternion(owner.quaternion).add(owner.position); m.quaternion.copy(owner.quaternion); });
+  root.userData.flight=p;
+}
+/* chapter 3 shows the cuts on the ring bases: the packaged products stay hidden there */
+function showRingBases(){ G.ring.visible=true; G.ring.rotation.y=0; G.ring.children.forEach(function(h){ h.children.forEach(function(c){ c.visible=c===h.userData.base; }); }); }
 
 /* ------------------------------------------------------------ products -- */
 function labelPlate(key,title,sub){
@@ -1609,7 +1666,7 @@ function pack(kind){
     tray(MAT.trayWhite,.09); label=labelPlate("whole","Butun tovuq","SOVUTILGAN - OLIY NAV");
     var wb=wholeRawBird();
     wb.scale.setScalar(.62); wb.position.set(0,.11,0); wb.rotation.y=-.35;
-    G.add(wb);
+    G.add(wb); G.userData.whole=wb; G.userData.tray={w:w,d:d};
     topY=.34;
   }
   /* label lies flat on the pack, slightly proud of the film */
@@ -1617,7 +1674,7 @@ function pack(kind){
     stdMat({map:label,roughness:.72,metalness:.02}));
   lp.rotation.x=-Math.PI/2; lp.position.set(0,topY,0);
   G.add(lp);
-  G.userData.label=label;
+  G.userData.label=label; G.userData.labelMesh=lp;
   return G;
 }
 var PRODUCTS=["fillet","sausage","nugget","cutlet","marinated","smoked","ready","whole"];
@@ -6200,8 +6257,13 @@ var BUILD_STEPS=[
   rim.position.set(SX-9,SY+8,SZ-10); rim.target.position.set(SX,SY+1.4,SZ);
   fillS.position.set(SX-5,SY+4,SZ+8);
 
+  var RAW_LEN=2.3;   /* photoreal raw bird length on the plinth (studio units) ≈ the procedural carcass at scale 2.3 */
   G.birdDressed=heroBird("dressed"); G.birdDressed.scale.setScalar(2.3);
-  G.birdDressed.position.set(0,.4,0); G.studio.add(G.birdDressed);
+  G.birdDressed.position.set(0,.16,0); G.birdDressed.rotation.y=-.30; G.studio.add(G.birdDressed);   /* assembled carcass rests on the plinth top (y .4) */
+  /* the anatomical cuts are procedural (the photoreal GLB is one shell and cannot be split): their skin and meat are
+     tinted towards the photoreal bird so the spread reads as the same chicken */
+  (function(){ var seen={}; G.birdDressed.traverse(function(o){ if(!o.isMesh||!o.material) return; var m=o.material, c=seen[m.uuid];
+    if(!c){ c=m.clone(); c.color.multiply(new T.Color(1,.80,.66)); c.roughness=Math.min(c.roughness||.7,.6); c.envMapIntensity=.85; seen[m.uuid]=c; } o.material=c; }); })();
   /* markazdagi tirik tovuq - fermadagi bilan bitta model, kattalashtirilgan */
   var heroMat=stdMat({vertexColors:true,map:TEX.feather(),bumpMap:TEX.featherBump(),
     bumpScale:.012,roughness:.72,metalness:.02});
@@ -6217,6 +6279,7 @@ var BUILD_STEPS=[
     if(G.heroHenPhoto||!PoultryAssets.heroModel) return;
     var box=new T.Box3().setFromObject(heroHen), h=box.max.y-box.min.y;
     var photo=PoultryAssets.hero(h*.96); photo.position.y=0;
+    photo.userData.mats=PoultryAssets.prepareDissolve(photo);
     heroHen.visible=false; G.birdLive.add(photo); G.heroHenPhoto=photo;
     if(window.invalidateScene) invalidateScene();
   };
@@ -6230,7 +6293,7 @@ var BUILD_STEPS=[
     var holder=new T.Group();
     var pk=pack(kind); pk.scale.setScalar(1.9); holder.add(pk);
     var base=new T.Mesh(cylG(.9,1,.14,24),stdMat({color:0x293b2e,roughness:.82,metalness:0,envMapIntensity:.25}));
-    base.position.y=-.07; base.receiveShadow=true; holder.add(base);
+    base.position.y=-.07; base.receiveShadow=true; base.name="holder-base"; holder.add(base); holder.userData.base=base;
     holder.position.set(Math.sin(a)*4.9,0.14,Math.cos(a)*4.9);
     holder.rotation.y=a; holder.userData.a=a;
     G.ring.add(holder);
@@ -6253,6 +6316,45 @@ var BUILD_STEPS=[
     base.position.set(-9+i*6,1,0); base.receiveShadow=true; G.line.add(base);
   });
   G.lineStations=stations;
+  /* fotorealistik xom tovuq (Tripo GLB, scripts/prep-raw-chicken.mjs): yuklangach halqadagi "Butun tovuq" mahsuloti va
+     xomashyo bosqichidagi protsedural tushkaning o'rnini egallaydi; javonlardagi 72 qadoq protsedural qoladi (uchburchak byudjeti) */
+  G.installRawChicken=function(){
+    if(G.rawChickenPhoto||!PoultryAssets.rawModel||!PoultryAssets.rawGeometry) return;
+    var g=PoultryAssets.rawGeometry.whole; g.computeBoundingBox();
+    var procLen=g.boundingBox.max.z-g.boundingBox.min.z, targets=[];
+    [G.ring,G.line].forEach(function(grp){ grp.traverse(function(o){ if(o.name==="whole-dressed-chicken") targets.push(o); }); });
+    G.rawChickenPhoto=targets.map(function(proc){
+      var pk=proc.parent, tray=pk.userData.tray, photo;
+      if(tray){ /* halqadagi "Butun tovuq": kichik qadoq o'rniga katta oq patnisdagi ochiq tushka (plyonka va yorliqsiz, kameraga
+                   qiyalab) - kadrda aniq ko'rinishi uchun. Protsedural qadoq yashirin qoladi. */
+        var holder=pk.parent, yaw=-holder.rotation.y-.5, tw=1.4, td=.95, th=.12;
+        pk.visible=false;
+        var big=new T.Mesh(boxG(tw,th,td),MAT.trayWhite); big.position.y=th/2; big.rotation.y=yaw; big.castShadow=big.receiveShadow=true; big.name="whole-tray"; holder.add(big);
+        photo=PoultryAssets.raw(1.2); photo.position.y=th; photo.rotation.y=yaw; pk=holder;
+      }else{ /* xomashyo bosqichi: protsedural tushka bilan bir xil o'lcham va yo'nalish */
+        photo=PoultryAssets.raw(procLen*proc.scale.z*1.06); photo.position.copy(proc.position); photo.rotation.copy(proc.rotation);
+      }
+      proc.visible=false; pk.add(photo); return photo;
+    });
+    /* the same bird on the plinth, where the live hen stands: takes the hen's place 2.6 s into the product scene */
+    if(!G.birdRaw){
+      var raw=PoultryAssets.raw(RAW_LEN,true); raw.position.set(0,.4,0); raw.rotation.y=-.30; raw.visible=false; raw.name="raw-on-plinth";
+      raw.userData.mats=PoultryAssets.prepareDissolve(raw);
+      G.studio.add(raw); G.birdRaw=raw;
+    }
+    if(window.invalidateScene) invalidateScene();
+  };
+  if(PoultryAssets.rawPromise) PoultryAssets.rawPromise.then(G.installRawChicken).catch(function(){});
+  /* the same bird split into its own pieces (scripts/split-raw-chicken.mjs): identical size and pose to G.birdRaw, so the
+     hand-over is invisible. The procedural cuts stay as the fallback (G.birdDressedProc) if the GLB is missing. */
+  G.installRawCuts=function(){
+    if(G.birdRawCuts||!PoultryAssets.rawCutsModel) return;
+    var cuts=PoultryAssets.rawCuts(RAW_LEN); cuts.position.set(0,.4,0); cuts.rotation.y=-.30; cuts.visible=false; G.studio.add(cuts);
+    G.birdRawCuts=cuts; G.birdDressedProc=G.birdDressed; G.birdDressedProc.visible=false; G.birdDressed=cuts;
+    prepareFlight(cuts);
+    if(window.invalidateScene) invalidateScene();
+  };
+  if(PoultryAssets.rawCutsPromise) PoultryAssets.rawCutsPromise.then(G.installRawCuts).catch(function(){});
 
   function nodeRow(labels,y,col){
     var R=new T.Group();
@@ -6428,36 +6530,55 @@ function stage(on){
     var insideC=on.indexOf("interiorC")>=0;
     FAC.cold.userData.stages.shell.visible=!insideC;
   }
-  G.birdDressed.visible=false; G.birdLive.visible=false;
+  G.birdDressed.visible=false; G.birdLive.visible=false; if(G.birdRaw) G.birdRaw.visible=false;
   G.ring.visible=false; G.line.visible=false; G.plinth.visible=false;
   G.rowBefore.visible=false; G.rowAfter.visible=false;
 }
 
 /* -------------------------------------------------------------- anchors - */
 var anchorHost=document.getElementById("anchors");
-var ANCH=[];
-function clearAnchors(){ anchorHost.innerHTML=""; ANCH=[]; }
-function addAnchor(obj,title,value,off){
+var ANCH=[], SVGNS="http://www.w3.org/2000/svg";
+var anchorSvg=document.createElementNS(SVGNS,"svg"); anchorSvg.id="anchor-lines"; anchorSvg.setAttribute("aria-hidden","true");
+function clearAnchors(){ anchorHost.innerHTML=""; anchorSvg.innerHTML=""; anchorHost.appendChild(anchorSvg); ANCH=[]; }
+/* lead = {x,y} screen offset (px at 1440 wide): the label sits there and a leader line joins it to the piece */
+function addAnchor(obj,title,value,off,lead){
   var el=document.createElement("div");
   el.className="anchor";
   el.innerHTML='<div class="dot"></div><div class="t">'+title+'</div>'+
     (value?'<div class="v">'+value+'</div>':"");
   anchorHost.appendChild(el);
-  ANCH.push({el:el,obj:obj,off:off||V3(0,0,0)});
+  var a={el:el,obj:obj,off:off||V3(0,0,0),lead:lead||null};
+  if(lead){
+    a.line=document.createElementNS(SVGNS,"line"); a.dot=document.createElementNS(SVGNS,"circle"); a.dot.setAttribute("r","3.2");
+    anchorSvg.appendChild(a.line); anchorSvg.appendChild(a.dot);
+  }
+  ANCH.push(a);
   return el;
 }
 var _v=new T.Vector3();
 var econBottomPx=0;
 function measureAnchorBand(){ var e=document.getElementById("econ"); econBottomPx=(e&&e.offsetParent)?e.getBoundingClientRect().bottom:0; }
 function updateAnchors(show){
-  var r=window.FarmPresentation&&FarmPresentation.view||{left:0,top:0,right:W,bottom:H}, placed=[];
+  var r=window.FarmPresentation&&FarmPresentation.view||{left:0,top:0,right:W,bottom:H}, placed=[], k=clamp(W/1440,.55,1), cx=W/2, cy=H/2;
+  if(ANCH.length) anchorSvg.setAttribute("viewBox","0 0 "+W+" "+H);
+  if(ANCH.some(function(a){return a.lead&&a.lead.out;})&&G.plinth){ G.plinth.getWorldPosition(_v); _v.project(camera); cx=(_v.x*.5+.5)*W; cy=(-_v.y*.5+.5)*H; }
   for(var i=0;i<ANCH.length;i++){
     var a=ANCH[i];a.obj.getWorldPosition(_v);_v.add(a.off);_v.project(camera);
-    var x=(_v.x*.5+.5)*W,y=(-_v.y*.5+.5)*H;
-    var vis=show&&_v.z<1&&_v.z>-1&&x>r.left+48&&x<r.right-48&&y>r.top+58&&y<r.bottom-28;
+    var px=(_v.x*.5+.5)*W,py=(-_v.y*.5+.5)*H;                          /* the piece */
+    var lx=0,ly=0;
+    if(a.lead&&a.lead.out){ var dx=px-cx,dy=py-cy,dl=Math.hypot(dx,dy); if(dl<1){dx=0;dy=1;dl=1;}
+      if(W<600){ lx=-Math.sign(dx)*a.lead.out*.35; ly=-a.lead.out*.9; }            /* phones: above the piece, leaning inward */
+      else{ lx=dx/dl*a.lead.out; ly=dy/dl*a.lead.out-a.lead.out*.25; } }
+    else if(a.lead){ lx=a.lead.x; ly=a.lead.y; }
+    var x=px+lx*k,y=py+ly*k;                                            /* the label */
+    var vis=show&&_v.z<1&&_v.z>-1&&x>r.left+48&&x<r.right-48&&y>r.top+58&&y<r.bottom-28&&px>r.left+8&&px<r.right-8&&py>r.top+8&&py<r.bottom-8;
     if(vis&&placed.some(function(q){return Math.abs(q.x-x)<90&&Math.abs(q.y-y)<38;}))vis=false;
     a.el.classList.toggle('in',!!vis);
     if(vis){a.el.style.left=x+'px';a.el.style.top=y+'px';placed.push({x:x,y:y});}
+    if(a.line){
+      a.line.classList.toggle('in',!!vis); a.dot.classList.toggle('in',!!vis);
+      if(vis){a.line.setAttribute("x1",px.toFixed(1));a.line.setAttribute("y1",py.toFixed(1));a.line.setAttribute("x2",x.toFixed(1));a.line.setAttribute("y2",y.toFixed(1));a.dot.setAttribute("cx",px.toFixed(1));a.dot.setAttribute("cy",py.toFixed(1));}
+    }
   }
 }
 
@@ -6747,28 +6868,32 @@ var BEATS=[
    '<dl class="kv" data-at="0.78"><dt>Natija</dt><dd class="ph">'+SD(1,2,"cost")+' tannarx, '+SD(1,2,"prof")+' foyda</dd></dl>'+
    '<p class="note">Vositachi yo’q &middot; gigienik so’yish &middot; to’g’ridan-to’g’ri savdo</p></div></div>';}},
 /* 05 ------------------------------------------------------------------- */
-{t:"Bir tovuq — bir necha qiymat",dur:REDUCED?16:23,env:"studio",r:40,cut:true,st:["studio"],
+{t:"Bir tovuq — bir necha qiymat",dur:REDUCED?16:23,env:"studio",r:40,cut:false,st:["studio"],
  enter:function(){
-   G.birdDressed.visible=true; G.plinth.visible=true;
+   /* the raw bird is handed over to its own pieces (same geometry, same pose); the bases rise, the pieces fly to them */
+   G.plinth.visible=true; showRingBases(); G.birdLive.visible=false; if(G.birdRaw) G.birdRaw.visible=false;
+   G.ring.children.forEach(function(h){ h.scale.setScalar(.0001); h.visible=false; h.position.y=.14; });
+   G.birdDressed.visible=true; G.birdDressed.rotation.y=-.30; flyParts(G.birdDressed,0);
    var P=G.birdDressed.userData.parts;
    clearAnchors();
-   addAnchor(P.breastL,"To’sh",f("shBreast"),V3(0,.22,0));
-   addAnchor(P.thighR,"Son",f("shThigh"),V3(-.14,.19,0));
-   addAnchor(P.drumL,"Boldir",f("shDrum"),V3(.14,-.12,0));
-   addAnchor(P.wingR,"Qanot",f("shWing"),V3(-.14,.16,0));
-   addAnchor(P.rest,"Boshqa qismlar",f("shRest"),V3(0,.10,-.12));
+   addAnchor(P.breastL,"To’sh",f("shBreast"),V3(0,.08,0),{out:96});
+   addAnchor(P.thighR,"Son",f("shThigh"),V3(0,.08,0),{out:96});
+   addAnchor(P.drumL,"Boldir",f("shDrum"),V3(0,.06,0),{out:96});
+   addAnchor(P.rest,"Boshqa qismlar",f("shRest"),V3(0,.02,0),{x:0,y:92});
  },
  camFn:function(p,t){
-   var e=easeInOut(p), a=.28+e*.30, rad=lerp(10.8,10.0,e)*(viewAspect()<.85?1.32:viewAspect()<1.05?1.12:1);
-   camera.position.set(SX+Math.sin(a)*rad,SY+lerp(6.0,4.4,e),SZ+Math.cos(a)*rad);
-   return V3(SX,SY+1.8,SZ);
+   /* continues from the end of the previous scene (a .83, r 10, y 3.8) and rises a little to read the ring and its labels */
+   var e=easeInOut(p), a=.83-e*.13, rad=lerp(10.0,10.6,e)*(viewAspect()<.85?1.32:viewAspect()<1.05?1.12:1);
+   camera.position.set(SX+Math.sin(a)*rad,SY+lerp(3.8,5.2,e),SZ+Math.cos(a)*rad);
+   return V3(SX,SY+1.4,SZ);
  },
  up:function(p,t){
-   G.birdDressed.rotation.y=-.28+p*.30;
-   G.birdDressed.userData.explode(beat(p,.3,.78));
-   updateAnchors(p>.42);
+   /* 7 s slot: bases rise 0.15-1.6 s; pieces lift, arc outward and settle on them 0.55-4.35 s (staggered); labels from 4.3 s; then holds */
+   G.ring.children.forEach(function(h,i){ var b=easeOut(beat(p,.02+i*.028,.22+i*.028)); h.scale.setScalar(b*1.0001); h.visible=b>.01; });
+   flyParts(G.birdDressed,beat(p,.08,.62));
+   updateAnchors(p>.62);
  },
- exit:function(){ clearAnchors(); G.birdDressed.userData.explode(0); },
+ exit:function(){ clearAnchors(); flyParts(G.birdDressed,0); },
  dom:function(){return '<div class="mod z-title" data-at="0.08">'+
    ey("Qiymat tarkibi")+
    '<h2>Bir tovuq,<br>bir necha qiymat</h2>'+
@@ -6860,23 +6985,19 @@ var BEATS=[
      {from:.2,step:.055})+'</div>';}},
 /* 09 ------------------------------------------------------------------- */
 {t:"Bir tovuq, ko’p mahsulot",dur:REDUCED?15:22,env:"studio",r:40,cut:true,st:["studio"],
- enter:function(){ G.birdLive.visible=true; G.plinth.visible=true; G.ring.visible=true; },
+ enter:function(){ G.birdLive.visible=true; G.plinth.visible=true; showRingBases(); G.ring.children.forEach(function(h){ h.scale.setScalar(.0001); h.visible=false; }); swapHenRaw(0); },
  camFn:function(p,t){
    var e=easeInOut(p), a=.65+e*.18, rad=lerp(10.6,10.0,e);
    camera.position.set(SX+Math.sin(a)*rad,SY+lerp(6.2,3.8,e),SZ+Math.cos(a)*rad);
    return V3(SX,SY+1.9,SZ);
  },
  up:function(p,t){
-   G.birdLive.rotation.y=-.50+p*.20;
+   /* 3 s slot: the hen stands on the platform; 0.45-2.55 s its feathers dissolve and the same place is taken by the raw bird */
+   G.birdLive.rotation.y=-.34+p*.04;
    G.birdLive.position.y=.4;
-   G.ring.rotation.y=p*.12;
-   G.ring.children.forEach(function(h,i){
-     var b=easeOut(beat(p,.22+i*.055,.5+i*.055));
-     h.scale.setScalar(b*1.0001);
-     h.position.y=.14;
-     h.visible=b>.01;
-   });
+   swapHenRaw(beat(p,.15,.85));
  },
+ exit:function(){ swapHenRaw(0); },
  dom:function(){return '<div class="mod z-center" data-at="0.62">'+
    '<h2>Bir tovuq.<br>Ko’p mahsulot.<br>Ko’proq qiymat.</h2></div>'+
    '<div class="mod z-title" data-at="0.06">'+ey("Mahsulot qatori")+'</div>'+
@@ -7114,7 +7235,7 @@ var BEATS=[
 var CH=[
   {t:"O‘z tizimimizga", beats:[3], times:[1.5]},
   {t:"Klaster", beats:[6], times:[5]},
-  {t:"Mahsulot va odamlar", beats:[8], times:[3]},
+  {t:"Mahsulot va odamlar", beats:[8,4], times:[3,7]},
   {t:"Iqtisod va yakun", beats:[11,14,15], times:[4,5,5]}
 ];
 CH.forEach(function(c){
@@ -7128,7 +7249,6 @@ CH.forEach(function(c){
    the beat's own enter with this = the BEATS entry. Stills are always cuts and
    the ambient world does not tick while one is shown.                        */
 var STILL={
-  4:{cam:1,up:1},
   5:{cam:1,up:1},
   9:{cam:.5,up:1,dist:16,camFn:function(p,t){
       /* centred pull-back so all four stations (x = -9 … +9) share the frame: never closer than
@@ -7334,8 +7454,7 @@ function setPlaying(v){ if(window.FarmPresentation) FarmPresentation.setPlaying(
 function viewAspect(){ var v=window.FarmPresentation&&FarmPresentation.view; return v?v.width/v.height:W/H; }
 /* Compatibility for tools that inspect normalized chapter progress; no DOM scroll timeline. */
 function globalProg(){ return cur<0?0:(cur+prog)/CH.length; }
-var rail=document.getElementById("rail"),railBtns=[],
-  elNum=document.getElementById("ch-num"),elTitle=document.getElementById("ch-title"),
+var elNum=document.getElementById("ch-num"),elTitle=document.getElementById("ch-title"),
   elDone=document.querySelector("#progress .done"),elClock=document.getElementById("clock"),
   elPlay=document.getElementById("play"),progEl=document.getElementById("progress");
 /* Wheel input is reserved for Explore zoom, inside the canvas only. */
@@ -7439,7 +7558,7 @@ function partTip(e){
   var hits=_pray.intersectObject(G.birdDressed,true);
   if(!hits.length){ hideTip(); return; }
   var obj=hits[0].object, P=G.birdDressed.userData.parts, key=null;
-  for(var k in P) if(P[k]===obj) key=k;
+  while(obj&&key===null){ for(var k in P) if(P[k]===obj) key=k; obj=obj.parent; }
   if(key===null||PART_MAP[key]===undefined){ hideTip(); return; }
   var pi=PART_MAP[key], d=calcData(), r=d.rows[pi];
   if(_phit!==pi){
@@ -7560,7 +7679,7 @@ var step=0;
 async function buildNext(){
   if(step===9){ try{ await PoultryAssets.loadFood(); }catch(e){showLoadError(e);return;} }
   if(step<BUILD_STEPS.length&&BUILD_STEPS[step][0]==="Shaderlar tayyorlanmoqda"){ loadState.textContent="Osmon va yer yuklanmoqda"; if(window.ENV&&ENV.first) await ENV.first; if(window.TERRAIN&&TERRAIN.ready) await TERRAIN.ready; if(window.ENV) envSnap(BEATS[0].env);
-    try{ await Promise.all([PoultryAssets.heroPromise, TERRAIN.assetsReady, WORLD.detailReady, document.fonts.ready, Promise.all(Object.keys(ENVS).map(function(n){return ENV.load(n,true);}))]); }catch(err){showLoadError(err);return;}
+    try{ await Promise.all([PoultryAssets.heroPromise, PoultryAssets.rawPromise&&PoultryAssets.rawPromise.catch(function(){}), PoultryAssets.rawCutsPromise&&PoultryAssets.rawCutsPromise.catch(function(){}), TERRAIN.assetsReady, WORLD.detailReady, document.fonts.ready, Promise.all(Object.keys(ENVS).map(function(n){return ENV.load(n,true);}))]); }catch(err){showLoadError(err);return;}
   }
   if(step<BUILD_STEPS.length){
     loadState.textContent=BUILD_STEPS[step][0];
@@ -7596,6 +7715,8 @@ document.addEventListener("visibilitychange",function(){
 ["pointerdown","pointermove","pointerup","wheel","keydown","input"].forEach(function(type){window.addEventListener(type,function(e){if(EX.on&&(type!=="pointermove"||EX.drag))invalidateScene();},{passive:true});});
 window.addEventListener("DOMContentLoaded",function(){
   PoultryAssets.loadHero().catch(function(e){console.warn(e.message);});
+  PoultryAssets.loadRaw().catch(function(e){console.warn(e.message);});
+  PoultryAssets.loadRawCuts().catch(function(e){console.warn(e.message);});
   PoultryAssets.loadLiving().then(function(){PoultryAssets.loadFood().catch(function(){});setTimeout(buildNext,12);}).catch(showLoadError);
 });
 

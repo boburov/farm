@@ -87,12 +87,12 @@ async function boot(page, tag) {
   await page.keyboard.press('End'); await wait(page, 1900); s = await S(page); ok('key-end', s.cur === N - 1, s.cur);
   await page.keyboard.press('ArrowLeft'); await wait(page, 1900); s = await S(page); ok('key-left', s.cur === N - 2, s.cur);
   await page.keyboard.press('ArrowRight'); await wait(page, 1900); s = await S(page); ok('key-right', s.cur === N - 1, s.cur);
-  // rail click + completed markers
-  await page.locator('#rail button').nth(1).click(); await wait(page, 1900); s = await S(page);
-  ok('rail-click', s.cur === 1, s.cur);
-  const rail = await page.evaluate(() => Array.from(document.querySelectorAll('#rail button')).map(b => ({ cur: b.getAttribute('aria-current'), done: b.classList.contains('completed'), mark: b.querySelector('.chapter-state').textContent })));
-  ok('rail-active-obvious', rail[1].cur === 'true' && rail.filter(r => r.cur === 'true').length === 1, rail);
-  ok('rail-completed-marks', rail[0].done && rail[N - 1].done && rail[0].mark === '✓', rail);
+  // programmatic chapter change (the chapter rail, the cluster chain chips and the #data-links row were removed from the data card) + completed markers
+  await page.evaluate(() => goTo(1)); await wait(page, 1900); s = await S(page);
+  ok('goto-chapter', s.cur === 1, s.cur);
+  const marks = await page.evaluate(() => ({ first: presentation.completed.has(0), last: presentation.completed.has(CH.length - 1), rail: !!document.getElementById('rail'), chain: document.querySelectorAll('.cluster-chain,[data-chain]').length, links: (function(l){ return l.hidden && !l.offsetParent; })(document.getElementById('data-links')) }));
+  ok('completed-marks', marks.first && marks.last, marks);
+  ok('card-extras-removed', !marks.rail && marks.chain === 0 && marks.links, marks);
   // rapid clicks: queue the latest request
   await page.keyboard.press('Home'); await wait(page, 1900);
   await page.click('#next'); await wait(page, 80); await page.click('#next'); await wait(page, 80); await page.click('#next');
@@ -117,7 +117,7 @@ async function boot(page, tag) {
   ok('autoplay-counts-down', r2 < r1 - 1 && r2 > r1 - 2.2, { r1, r2 });
   await shot(page, 'd6-autoplay');
   // editor pauses the timer
-  await page.click('#edit-open'); await wait(page, 500); s = await S(page);
+  await page.evaluate(() => openEditor()); await wait(page, 500); s = await S(page);
   ok('editor-opens', s.panel === 'editor' && /pauza/i.test(s.status), { panel: s.panel, status: s.status });
   const r3 = s.remaining; await wait(page, 1500); s = await S(page);
   ok('editor-pauses-timer', Math.abs(s.remaining - r3) < .2, { r3, now: s.remaining });
@@ -126,7 +126,7 @@ async function boot(page, tag) {
   const firstInput = page.locator('#editor input').first(); const original = await firstInput.inputValue();
   await firstInput.fill(String(Number(original) + 1)); await page.click('#edit-save'); await wait(page, 600); s = await S(page);
   ok('editor-save-closes', s.panel === null && !!localStorage_ok(await page.evaluate(() => localStorage.getItem('chicken-figs'))), s.panel);
-  await page.click('#edit-open'); await wait(page, 300); await page.click('#edit-reset'); await wait(page, 300); await page.keyboard.press('Escape'); await wait(page, 400); s = await S(page);
+  await page.evaluate(() => openEditor()); await wait(page, 300); await page.click('#edit-reset'); await wait(page, 300); await page.keyboard.press('Escape'); await wait(page, 400); s = await S(page);
   ok('escape-closes-editor', s.panel === null && s.playing, { panel: s.panel, playing: s.playing });
   // hidden tab pauses
   const r4 = (await S(page)).remaining;
@@ -139,13 +139,13 @@ async function boot(page, tag) {
   const remaining = (await S(page)).remaining; await wait(page, remaining * 1000 + 2500); s = await S(page);
   ok('autoplay-advances', s.cur === 1 && s.playing, { cur: s.cur, playing: s.playing });
   // selecting another chapter resets the countdown
-  await page.locator('#rail button').nth(2).click(); await wait(page, 1900); s = await S(page);
+  await page.evaluate(() => goTo(2)); await wait(page, 1900); s = await S(page);
   const ch2Total = await page.evaluate(() => CH[2].dur + CH[2].hold);
   ok('chapter-change-resets-timer', s.cur === 2 && s.remaining > ch2Total - 3, { remaining: s.remaining, total: ch2Total, playing: s.playing });
   await page.click('#play'); await wait(page, 300); s = await S(page);
   ok('pause-hides-countdown', !s.playing && s.autoHidden, { playing: s.playing, autoHidden: s.autoHidden });
   // details panel
-  await page.click('#details-open'); await wait(page, 700); s = await S(page);
+  await page.evaluate(() => FarmPresentation.openPanel('details')); await wait(page, 700); s = await S(page);
   ok('details-opens', s.panel === 'details', s.panel);
   const detailCount = await page.evaluate(() => document.querySelectorAll('#details-body .archive-beat').length);
   const beatCount = await page.evaluate(() => CH[cur].beats.length);
@@ -154,7 +154,7 @@ async function boot(page, tag) {
   await page.keyboard.press('Escape'); await wait(page, 400); s = await S(page); ok('escape-closes-details', s.panel === null);
   // explore mode keeps the chapter
   const before = await S(page);
-  await page.click('#explore-btn'); await wait(page, 1000); s = await S(page);
+  await page.evaluate(() => setExplore(true)); await wait(page, 1000); s = await S(page);
   ok('explore-on', s.ex && await page.evaluate(() => document.body.classList.contains('exploring')));
   const yaw0 = await page.evaluate(() => EX.wantYaw);
   await page.mouse.move(600, 450); await page.mouse.down(); await page.mouse.move(760, 470, { steps: 8 }); await page.mouse.up(); await wait(page, 300);
@@ -170,9 +170,11 @@ async function boot(page, tag) {
   // tooltip on the exploded cuts (only while a chapter still shows beat 4)
   const cutsChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(4)));
   if (cutsChapter >= 0) {
-    await page.locator('#rail button').nth(cutsChapter).click(); await wait(page, 1900);
+    await page.evaluate((i) => goTo(i), cutsChapter); await wait(page, 1900);
     await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(4))).click(); await wait(page, 1900 + 2600);
-    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera); return { x: (v.x * .5 + .5) * innerWidth, y: (-v.y * .5 + .5) * innerHeight }; });
+    // hover a point that actually lies on the breast piece: probe a small grid around its projected centre with the page's own raycaster
+    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera), cx = (v.x * .5 + .5) * innerWidth, cy = (-v.y * .5 + .5) * innerHeight, r = new THREE.Raycaster();
+      for (const d of [0, 6, 12, 18, 24]) for (let i = 0; i < (d ? 8 : 1); i++) { const a = i * Math.PI / 4, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d; r.setFromCamera(new THREE.Vector2((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1), camera); let o = r.intersectObject(G.birdDressed, true)[0]?.object; while (o && o !== m) o = o.parent; if (o) return { x, y, d }; } return { x: cx, y: cy, d: -1 }; });
     await page.mouse.move(pt.x, pt.y, { steps: 4 }); await wait(page, 400);
     const tip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 80) }));
     ok('part-tooltip', tip.on, tip);
@@ -181,11 +183,11 @@ async function boot(page, tag) {
   // still beats 12 (parked lorry) and 10 (pre-staged hall interior), only while a chapter shows both
   const stillChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(12) && c.beats.includes(10)));
   if (stillChapter >= 0) {
-    await page.locator('#rail button').nth(stillChapter).click(); await wait(page, 1900);
+    await page.evaluate((i) => goTo(i), stillChapter); await wait(page, 1900);
     await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(12))).click(); await wait(page, 1900); s = await S(page);
     ok('truck-still-parked', s.curBeat === 12 && s.manual && s.speed === 0 && !s.paused, { curBeat: s.curBeat, manual: s.manual, speed: s.speed });
     await shot(page, 'd13-truck-still');
-    await page.click('#explore-btn'); await wait(page, 800); s = await S(page);
+    await page.evaluate(() => setExplore(true)); await wait(page, 800); s = await S(page);
     ok('explore-unparks-truck', s.ex && !s.manual, { ex: s.ex, manual: s.manual });
     await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
     ok('explore-back-reparks', !s.ex && s.curBeat === 12 && s.manual, { ex: s.ex, curBeat: s.curBeat, manual: s.manual });
@@ -198,22 +200,33 @@ async function boot(page, tag) {
     ok('interior-still-no-mid-beat-flash', flashes.every(f => f === 0), flashes);
     await shot(page, 'd14-interior-still');
   } else console.log('skip still-12/still-10 checks: beats 12 and 10 are not in the presentation');
-  // the product-ring chapter (beat 8) is a single animated scene: it completes, holds, and nothing follows in manual mode
+  // the product chapter: scene 1 (beat 8, 3 s) — the hen's feathers dissolve into the photoreal raw bird in the same place
+  // (0.45-2.55 s); scene 2 (beat 4, 7 s) — the ring bases rise, the bird's own pieces fly out and settle on them, four
+  // leader-line labels appear; the sequence completes and holds
   const ringChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(8)));
-  await page.keyboard.press('Home'); await wait(page, 1900); // leave chapter 3 (and the pause) so the rail click starts a fresh run
-  await page.locator('#rail button').nth(ringChapter).click(); await wait(page, 1900 + 3200); s = await S(page);
-  const ringSingle = await page.evaluate(() => CH[cur].beats.length === 1);
-  ok('product-ring-single-scene', s.cur === ringChapter && s.curBeat === 8 && ringSingle && s.complete && !s.playing && !s.tr, { cur: s.cur, curBeat: s.curBeat, single: ringSingle, complete: s.complete, playing: s.playing });
-  await wait(page, 4500); s = await S(page);
-  ok('product-ring-holds', s.cur === ringChapter && s.curBeat === 8 && s.complete, { cur: s.cur, curBeat: s.curBeat });
+  await page.keyboard.press('Home'); await wait(page, 1900); // leave chapter 3 (and the pause) so the chapter change starts a fresh run
+  await page.evaluate((i) => goTo(i), ringChapter); await wait(page, 1900); s = await S(page);
+  ok('product-ring-opens-on-scene-1', s.cur === ringChapter && s.curBeat === 8 && !s.complete && !s.tr, { cur: s.cur, curBeat: s.curBeat, complete: s.complete });
+  const seekTo = (frac) => page.evaluate((frac) => { goTo(cur, { force: true, at: frac, instant: true }); setPlaying(false); }, frac);
+  await seekTo(.02); await wait(page, 500); // 0.2 s into scene 1: the hen stands, intact
+  const early = await page.evaluate(() => ({ beat: curBeat, henVisible: G.birdLive.visible, henOpacity: G.heroHenPhoto ? +G.heroHenPhoto.userData.mats[0].opacity.toFixed(2) : null, rawVisible: !!G.birdRaw && G.birdRaw.visible }));
+  ok('product-hen-stands-first', early.beat === 8 && early.henVisible && (early.henOpacity === null || early.henOpacity >= .99) && !early.rawVisible, early);
+  await seekTo(.29); await wait(page, 500); // 2.9 s: the feathers have dissolved into the raw bird, same place
+  const swap = await page.evaluate(() => ({ beat: curBeat, raw: !!G.birdRaw, rawVisible: !!G.birdRaw && G.birdRaw.visible, henVisible: G.birdLive.visible, opacity: G.birdRaw ? +G.birdRaw.userData.mats[0].opacity.toFixed(2) : null, transparent: G.birdRaw ? G.birdRaw.userData.mats[0].transparent : null }));
+  ok('product-hen-becomes-raw', swap.beat === 8 && (!swap.raw || (swap.rawVisible && !swap.henVisible && swap.opacity === 1 && swap.transparent === false)), swap);
+  await shot(page, 'd13a-product-raw-on-plinth');
+  await page.evaluate(() => FarmPresentation.selectBeat(1)); // the 02 dot, as a viewer would: scene 2 plays through (7 s) and the chapter completes
+  await wait(page, 1900 + 7000 + 800); s = await S(page);
+  const cuts = await page.evaluate(() => { const parts = G.birdDressed.userData.parts, base = (k) => { const m = parts[k]; if (!m || !m.userData.target) return null; return +m.position.distanceTo(m.userData.target).toFixed(3); }; return { beat: curBeat, flight: G.birdDressed.userData.flight, photoCuts: G.birdDressed === G.birdRawCuts, cutsVisible: G.birdDressed.visible, rawVisible: !!G.birdRaw && G.birdRaw.visible, landed: ['breastL', 'thighR', 'drumL', 'wingR'].map(base), basesUp: G.ring.children.every(h => h.visible && h.scale.x > .999), packsHidden: G.ring.children.every(h => h.children.every(c => c === h.userData.base || !c.visible)), anchors: document.querySelectorAll('.anchor.in').length, lines: document.querySelectorAll('#anchor-lines line.in').length }; });
+  ok('product-cuts-land-on-bases-with-labels', s.curBeat === 4 && cuts.cutsVisible && !cuts.rawVisible && cuts.flight === 1 && cuts.landed.every(d => d !== null && d < 1e-3) && cuts.basesUp && cuts.packsHidden && cuts.anchors === 4 && cuts.lines === 4, cuts);
+  ok('product-ring-holds', s.cur === ringChapter && s.curBeat === 4 && s.complete && !s.playing, { cur: s.cur, curBeat: s.curBeat, complete: s.complete, playing: s.playing });
   await shot(page, 'd13-product-ring-hold');
   // the cluster chapter (beat 6) is a single animated scene: the aerial rise completes with every building built, then holds
   const clusterChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(6)));
-  await page.locator('#rail button').nth(clusterChapter).click(); await wait(page, 1900 + 5200); s = await S(page);
-  const clusterState = await page.evaluate(() => ({ single: CH[cur].beats.length === 1, built: ['barn-54', 'barn-76', 'barn-98', 'barn-120', 'feedmill', 'processing', 'packaging', 'cold', 'warehouse', 'logistics', 'admin', 'lab'].every(k => { const o = FAC[k], st = o.userData.stages; return st ? st.detail.visible && st.detail.scale.x > .999 : o.visible && o.scale.y > .999; }), nav: document.getElementById('beat-index').textContent.trim(), chain: Array.from(document.querySelectorAll('[data-chain]')).map(e => e.classList.contains('is-active') ? 'A' : e.classList.contains('is-done') ? 'D' : '-').join('') }));
+  await page.evaluate((i) => goTo(i), clusterChapter); await wait(page, 1900 + 5200); s = await S(page);
+  const clusterState = await page.evaluate(() => ({ single: CH[cur].beats.length === 1, built: ['barn-54', 'barn-76', 'barn-98', 'barn-120', 'feedmill', 'processing', 'packaging', 'cold', 'warehouse', 'logistics', 'admin', 'lab'].every(k => { const o = FAC[k], st = o.userData.stages; return st ? st.detail.visible && st.detail.scale.x > .999 : o.visible && o.scale.y > .999; }), nav: document.getElementById('beat-index').textContent.trim() }));
   ok('cluster-single-scene', s.cur === clusterChapter && s.curBeat === 6 && clusterState.single && s.complete && !s.playing && !s.tr, { cur: s.cur, curBeat: s.curBeat, ...clusterState, complete: s.complete });
   ok('cluster-hold-fully-built', clusterState.built, clusterState);
-  ok('cluster-chain-complete', clusterState.chain === 'DDDDDDA', clusterState.chain);
   await wait(page, 4500); s = await S(page);
   ok('cluster-holds', s.cur === clusterChapter && s.curBeat === 6 && s.complete, { cur: s.cur, curBeat: s.curBeat });
   await shot(page, 'd13b-cluster-hold');
@@ -263,7 +276,7 @@ if (!args.includes('--no-mobile')) {
   let s = await S(page);
   ok('mobile-start', s.started && s.cur === 0, s);
   await wait(page, 1500); await shot(page, 'm1-ch1');
-  const targets = await page.evaluate(() => Array.from(document.querySelectorAll('#rail button,.ctrl button,#beat-nav button,#info-toggle,#explore-btn,#edit-open')).filter(b => b.offsetParent).map(b => { const r = b.getBoundingClientRect(); return [b.id || b.className || b.textContent.trim(), Math.round(r.width), Math.round(r.height)]; }));
+  const targets = await page.evaluate(() => Array.from(document.querySelectorAll('.ctrl button,#beat-nav button,#info-toggle')).filter(b => b.offsetParent).map(b => { const r = b.getBoundingClientRect(); return [b.id || b.className || b.textContent.trim(), Math.round(r.width), Math.round(r.height)]; }));
   ok('mobile-touch-targets', targets.every(t => t[1] >= 44 && t[2] >= 44), targets.filter(t => t[1] < 44 || t[2] < 44));
   // swipe left on the canvas → next chapter
   const frame = await page.locator('#scene-frame').boundingBox();
@@ -275,8 +288,8 @@ if (!args.includes('--no-mobile')) {
   await page.evaluate(([x, y]) => { const c = document.getElementById('gl'); const o = { pointerId: 10, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: x, clientY: y }; c.dispatchEvent(new PointerEvent('pointerdown', o)); c.dispatchEvent(new PointerEvent('pointerup', { ...o, clientX: x + 140 })); }, [cx, cy]);
   await wait(page, 2000); s = await S(page);
   ok('mobile-swipe-prev', s.cur === 0, s.cur);
-  await page.locator('#rail button').nth(1).click(); await wait(page, 2200); s = await S(page);
-  ok('mobile-rail', s.cur === 1, s.cur);
+  await page.click('#next'); await wait(page, 2200); s = await S(page);
+  ok('mobile-next-pill', s.cur === 1, s.cur);
   await shot(page, 'm2-ch4');
   await page.click('#info-toggle'); await wait(page, 500);
   ok('mobile-info-expands', await page.evaluate(() => document.getElementById('scene-layer').classList.contains('expanded')));
@@ -286,12 +299,12 @@ if (!args.includes('--no-mobile')) {
   ok('mobile-autoplay', s.playing && !s.autoHidden, { clock: s.clock });
   await shot(page, 'm4-autoplay');
   await page.click('#play'); await wait(page, 300);
-  await page.click('#explore-btn'); await wait(page, 1200); s = await S(page);
+  await page.evaluate(() => setExplore(true)); await wait(page, 1200); s = await S(page);
   ok('mobile-explore', s.ex);
   await shot(page, 'm5-explore');
-  await page.click('#explore-btn'); await wait(page, 900); s = await S(page);
+  await page.evaluate(() => setExplore(false)); await wait(page, 900); s = await S(page);
   ok('mobile-explore-back', !s.ex && s.cur === 1, { cur: s.cur });
-  await page.locator('#rail button').nth(await page.evaluate(() => CH.findIndex(c => c.beats.includes(8)))).click(); await wait(page, 2200 + 3200);
+  await page.evaluate(() => goTo(CH.findIndex(c => c.beats.includes(8)))); await wait(page, 2200 + 3200);
   await shot(page, 'm6-ch3-product-ring');
   ok('mobile-no-overflow', !(await S(page)).overflow);
   await ctx.close();
