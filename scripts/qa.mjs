@@ -16,7 +16,7 @@ const out = process.env.QA_OUT || 'qa/current';
 await mkdir(out, { recursive: true });
 
 const SIZES = (opt('--sizes', quick ? '1440x900,390x844' : '1440x900,1920x1080,390x844,430x932,844x390')).split(',').map(s => s.split('x').map(Number));
-const BEATS = opt('--beats', quick ? '3,4,8,10' : '3,4,6,7,8,9,10,11,12,13,14,15').split(',').map(Number);
+let BEATS = opt('--beats', quick ? '3,8,15' : '3,6,7,8,11,13,14,15').split(',').map(Number); // beats outside CH are skipped after boot
 const BUDGET = { 0: 900000, 1: 900000, 2: 900000, 3: 900000, 4: 300000, 6: 600000, 7: 600000, 8: 300000, 10: 600000, 11: 600000, 12: 600000, 14: 600000, 15: 600000 };
 const MAX_FRAME_MS = 120, MAX_CALLS = Number(process.env.QA_MAX_CALLS || 1500); // draw-call reduction is Pass 5 work
 
@@ -47,7 +47,7 @@ async function boot(page) {
   await page.waitForSelector('#start.ready:not(.error)', { timeout: 180000 });
   const readyMs = Date.now() - start;
   await page.click('#start');
-  await page.waitForFunction(() => started, null, { timeout: 15000 }); // 3-2-1 opening countdown
+  await page.waitForFunction(() => started, null, { timeout: 15000 });
   await page.evaluate(() => { setPlaying(false); window.__qa = { gap: 0, last: performance.now() }; (function loop(n) { window.__qa.gap = Math.max(window.__qa.gap, n - window.__qa.last); window.__qa.last = n; requestAnimationFrame(loop); })(performance.now()); });
   return readyMs;
 }
@@ -59,6 +59,9 @@ const state = (page) => page.evaluate(() => ({ beat: curBeat, progress: +prog.to
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const page = await context.newPage(); wire(page, 'main');
 report.readyMs = await boot(page); console.log('READY', report.readyMs);
+{ const shown = await page.evaluate(() => CH.flatMap(c => c.beats)), skipped = BEATS.filter(id => !shown.includes(id));
+  if (skipped.length) console.log('SKIP beats not in the presentation:', skipped.join(','));
+  BEATS = BEATS.filter(id => shown.includes(id)); }
 report.gpu = await page.evaluate(() => { const gl = renderer.getContext(), d = gl.getExtension('WEBGL_debug_renderer_info'); return d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : 'unknown'; });
 console.log('GPU', report.gpu);
 const softwareGpu = /SwiftShader|llvmpipe|Software/i.test(report.gpu);

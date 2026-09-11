@@ -66,7 +66,7 @@ async function convert(gltfPath, family) {
   for (const m of json.materials || []) { if (/cards/.test(m.name || '')) { m.alphaMode = 'MASK'; m.alphaCutoff = .5; m.doubleSided = true; } const pbr = m.pbrMetallicRoughness || {}; if (pbr.metallicRoughnessTexture) m.occlusionTexture = { index: pbr.metallicRoughnessTexture.index, strength: .45 }; if (m.extensions) { for (const k of Object.keys(m.extensions)) if (!ALLOWED_EXT.has(k)) delete m.extensions[k]; if (!Object.keys(m.extensions).length) delete m.extensions; } }
   json.extensionsUsed = (json.extensionsUsed || []).filter(e => ALLOWED_EXT.has(e)); if (!json.extensionsUsed.length) delete json.extensionsUsed; delete json.extensionsRequired;
   json.samplers = [{ magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497 }]; for (const t of json.textures || []) t.sampler = 0;
-  json.asset.generator = 'Bir tovuqdan Blender pipeline (scripts/blender) + scripts/build-assets.mjs'; json.asset.copyright = 'Original project assets';
+  json.asset.generator = 'Sokin Savdo Blender pipeline (scripts/blender) + scripts/build-assets.mjs'; json.asset.copyright = 'Original project assets';
   // the exporter's default scene may include the armature root; keep as is (GLTFLoader builds bones from it)
   const glb = buildGlb(json, doc.bins[0]); const out = `build/blender/out/${name}.glb`; await writeFile(out, glb);
   // previews rendered from build/blender/out resolve ../textures relative to it

@@ -202,7 +202,7 @@ function humanSurfaces(){
 
 // Binary glTF writer: standard float attributes, packed ORM textures and named nodes.
 async function glb(name,meshes){
- const doc={asset:{version:'2.0',generator:'Bir tovuqdan anatomical loft generator 1.0',copyright:'Original assets authored for this project'},scene:0,scenes:[{nodes:[]}],nodes:[],meshes:[],buffers:[{byteLength:0}],bufferViews:[],accessors:[],materials:[],textures:[],images:[],samplers:[{magFilter:9729,minFilter:9987,wrapS:10497,wrapT:10497}]};
+ const doc={asset:{version:'2.0',generator:'Sokin Savdo anatomical loft generator 1.0',copyright:'Original assets authored for this project'},scene:0,scenes:[{nodes:[]}],nodes:[],meshes:[],buffers:[{byteLength:0}],bufferViews:[],accessors:[],materials:[],textures:[],images:[],samplers:[{magFilter:9729,minFilter:9987,wrapS:10497,wrapT:10497}]};
  const blocks=[];let offset=0;
  function accessor(attr){const ar=attr.array,b=Buffer.from(ar.buffer,ar.byteOffset,ar.byteLength),pad=(4-b.length%4)%4;const vi=doc.bufferViews.length;doc.bufferViews.push({buffer:0,byteOffset:offset,byteLength:b.length});blocks.push(b,Buffer.alloc(pad));offset+=b.length+pad;const a={bufferView:vi,componentType:ar instanceof Uint16Array?5123:ar instanceof Uint32Array?5125:5126,count:attr.count,type:({1:'SCALAR',2:'VEC2',3:'VEC3',4:'VEC4'})[attr.itemSize]};
  if(attr.itemSize===3){a.min=[Infinity,Infinity,Infinity];a.max=[-Infinity,-Infinity,-Infinity];for(let i=0;i<attr.count;i++)for(let k=0;k<3;k++){a.min[k]=Math.min(a.min[k],ar[i*3+k]);a.max[k]=Math.max(a.max[k],ar[i*3+k]);}}

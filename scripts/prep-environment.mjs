@@ -64,7 +64,7 @@ function decodeHDR(buf) {
 function frexp(v) { if (v === 0) return [0, 0]; let e = Math.ceil(Math.log2(v)); let m = v / Math.pow(2, e); if (m >= 1) { m /= 2; e++; } if (m < .5) { m *= 2; e--; } return [m, e]; }
 function encodeHDR({ w, h, rgb }) {
   const out = [];
-  const header = `#?RADIANCE\nFORMAT=32-bit_rle_rgbe\n# prepared by scripts/prep-environment.mjs (Bir tovuqdan)\n\n-Y ${h} +X ${w}\n`;
+  const header = `#?RADIANCE\nFORMAT=32-bit_rle_rgbe\n# prepared by scripts/prep-environment.mjs (Sokin Savdo)\n\n-Y ${h} +X ${w}\n`;
   out.push(Buffer.from(header, 'latin1'));
   const scan = new Uint8Array(w * 4);
   for (let y = 0; y < h; y++) {

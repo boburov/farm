@@ -14,7 +14,7 @@ def export(objects, path, armature=None, extras=None):
               export_skins=armature is not None, export_all_influences=False, export_influence_nb=4, export_def_bones=True,
               export_rest_position_armature=True, export_armature_object_remove=False,
               export_animations=False, export_morph=False, export_lights=False, export_cameras=False,
-              export_extras=True, export_copyright='Bir tovuqdan — original procedural assets (CC0 textures by Poly Haven where used)')
+              export_extras=True, export_copyright='Sokin Savdo — original procedural assets (CC0 textures by Poly Haven where used)')
     allowed = bpy.ops.export_scene.gltf.get_rna_type().properties.keys()
     dropped = [k for k in kw if k not in allowed]
     if dropped: log('export: dropped unsupported options', dropped)

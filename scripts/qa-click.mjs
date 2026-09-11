@@ -1,4 +1,4 @@
-/** Click-presentation QA: boots the page, runs the opening countdown, walks every chapter with
+/** Click-presentation QA: boots the page, starts the presentation, walks every chapter with
  *  buttons/keys/swipes, exercises autoplay, panels, Explore, editor and reduced motion.
  *  Usage: node scripts/qa-click.mjs [--out=qa/click-current] [--no-mobile]
  */
@@ -28,7 +28,7 @@ function wire(page, tag) {
   page.on('response', r => { if (r.status() >= 400 && !/favicon/.test(r.url())) { R.missing.push(r.url()); console.log('MISSING', r.status(), r.url()); } });
   page.on('requestfailed', r => { if (!/favicon/.test(r.url())) { R.missing.push(r.url()); console.log('REQFAIL', r.url()); } });
 }
-const S = (page) => page.evaluate(() => ({ cur, curBeat, prog: +prog.toFixed(3), started, playing, still: !!(window.STILL && STILL[curBeat]), manual: !!(TRUCKS[0] && TRUCKS[0].veh.manual), speed: TRUCKS[0] ? +TRUCKS[0].veh.speed.toFixed(3) : null, paused: presentation.isPaused, elapsedT: elapsed, cam: camera.position.toArray().map(v => +v.toFixed(3)), near: camera.near, shell: FAC.processing.userData.stages.shell.visible, flashAnims: document.getElementById('flash').getAnimations().length, tr: presentation.isTransitioning, panel: presentation.panel, ex: EX.on, remaining: +presentation.remainingTime.toFixed(1), complete: presentation.sequenceComplete, opening: !!presentation.opening, clock: document.getElementById('clock').textContent, autoHidden: document.getElementById('auto-countdown').hidden, status: document.getElementById('presentation-status').textContent.trim(), play: document.getElementById('play').textContent.trim(), title: document.getElementById('slide-title')?.textContent, count: document.getElementById('chapter-count').textContent.replace(/\s+/g, ' '), scrollY: window.scrollY, docH: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth, frames: CINEMA_STATS.frames }));
+const S = (page) => page.evaluate(() => ({ cur, curBeat, prog: +prog.toFixed(3), started, playing, still: !!(window.STILL && STILL[curBeat]), manual: !!(TRUCKS[0] && TRUCKS[0].veh.manual), speed: TRUCKS[0] ? +TRUCKS[0].veh.speed.toFixed(3) : null, paused: presentation.isPaused, elapsedT: elapsed, cam: camera.position.toArray().map(v => +v.toFixed(3)), near: camera.near, shell: FAC.processing.userData.stages.shell.visible, flashAnims: document.getElementById('flash').getAnimations().length, tr: presentation.isTransitioning, panel: presentation.panel, ex: EX.on, remaining: +presentation.remainingTime.toFixed(1), complete: presentation.sequenceComplete, clock: document.getElementById('clock').textContent, autoHidden: document.getElementById('auto-countdown').hidden, status: document.getElementById('presentation-status').textContent.trim(), play: document.getElementById('play').textContent.trim(), title: document.getElementById('slide-title')?.textContent, count: document.getElementById('chapter-count').textContent.replace(/\s+/g, ' '), scrollY: window.scrollY, docH: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth, frames: CINEMA_STATS.frames }));
 const shot = (page, name) => page.screenshot({ path: `${out}/${name}.png` });
 const wait = (page, ms) => page.waitForTimeout(ms);
 
@@ -50,15 +50,12 @@ async function boot(page, tag) {
   ok('no-scroll-track', s.docH <= 900 + 1 && s.scrollY === 0, { docH: s.docH });
   await page.click('#start'); await wait(page, 350);
   s = await S(page);
-  ok('opening-countdown-runs', s.opening && !s.started, s.opening);
-  const n1 = await page.evaluate(() => document.getElementById('opening-number').textContent);
-  await shot(page, 'd1-countdown');
-  await wait(page, 1200);
-  const n2 = await page.evaluate(() => document.getElementById('opening-number').textContent);
-  ok('countdown-decrements', n1 === '3' && n2 === '2', { n1, n2 });
-  await wait(page, 2200);
+  ok('start-lands-chapter-1-immediately', s.started && s.cur === 0 && s.curBeat === (await page.evaluate(() => CH[0].beats[0])), s);
+  ok('no-countdown-overlay', await page.evaluate(() => !document.getElementById('opening-countdown') && document.getElementById('loader').classList.contains('gone')), true);
+  await shot(page, 'd1-start');
+  await wait(page, 700);
+  ok('loader-hidden-after-fade', await page.evaluate(() => document.getElementById('loader').hidden), true);
   s = await S(page);
-  ok('countdown-finishes', s.started && !s.opening && s.cur === 0 && s.curBeat === (await page.evaluate(() => CH[0].beats[0])), s);
   ok('chapter-1-not-autoplay', !s.playing && s.autoHidden, { playing: s.playing, autoHidden: s.autoHidden });
   await wait(page, 1500);
   s = await S(page);
@@ -143,7 +140,8 @@ async function boot(page, tag) {
   ok('autoplay-advances', s.cur === 1 && s.playing, { cur: s.cur, playing: s.playing });
   // selecting another chapter resets the countdown
   await page.locator('#rail button').nth(2).click(); await wait(page, 1900); s = await S(page);
-  ok('chapter-change-resets-timer', s.cur === 2 && s.remaining > 13, { remaining: s.remaining, playing: s.playing });
+  const ch2Total = await page.evaluate(() => CH[2].dur + CH[2].hold);
+  ok('chapter-change-resets-timer', s.cur === 2 && s.remaining > ch2Total - 3, { remaining: s.remaining, total: ch2Total, playing: s.playing });
   await page.click('#play'); await wait(page, 300); s = await S(page);
   ok('pause-hides-countdown', !s.playing && s.autoHidden, { playing: s.playing, autoHidden: s.autoHidden });
   // details panel
@@ -168,31 +166,45 @@ async function boot(page, tag) {
   await shot(page, 'd9-explore');
   await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
   ok('explore-off-keeps-chapter', !s.ex && s.cur === before.cur && s.curBeat === before.curBeat, { cur: s.cur, was: before.cur });
-  // tooltip on the exploded cuts (the chapter that ends with beat 4)
+  // tooltip on the exploded cuts (only while a chapter still shows beat 4)
   const cutsChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(4)));
-  await page.locator('#rail button').nth(cutsChapter).click(); await wait(page, 1900);
-  await page.locator('#beat-nav button').nth(4).click(); await wait(page, 1900 + 2600);
-  const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera); return { x: (v.x * .5 + .5) * innerWidth, y: (-v.y * .5 + .5) * innerHeight }; });
-  await page.mouse.move(pt.x, pt.y, { steps: 4 }); await wait(page, 400);
-  const tip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 80) }));
-  ok('part-tooltip', tip.on, tip);
-  await shot(page, 'd10-cuts-tooltip');
-  // still beats 12 (parked lorry) and 10 (pre-staged hall interior) in the same chapter
-  await page.locator('#beat-nav button').nth(3).click(); await wait(page, 1900); s = await S(page);
-  ok('truck-still-parked', s.curBeat === 12 && s.manual && s.speed === 0 && !s.paused, { curBeat: s.curBeat, manual: s.manual, speed: s.speed });
-  await shot(page, 'd13-truck-still');
-  await page.click('#explore-btn'); await wait(page, 800); s = await S(page);
-  ok('explore-unparks-truck', s.ex && !s.manual, { ex: s.ex, manual: s.manual });
-  await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
-  ok('explore-back-reparks', !s.ex && s.curBeat === 12 && s.manual, { ex: s.ex, curBeat: s.curBeat, manual: s.manual });
-  await page.locator('#beat-nav button').nth(2).click(); await wait(page, 300);
-  const flashes = [];
-  for (const t of [300, 900, 1200]) { await wait(page, t); flashes.push((await S(page)).flashAnims); }
-  s = await S(page);
-  ok('interior-still-staged', s.curBeat === 10 && s.near === 0.06 && s.shell === false, { curBeat: s.curBeat, near: s.near, shell: s.shell });
-  ok('truck-unparked-on-exit', !s.manual, { manual: s.manual });
-  ok('interior-still-no-mid-beat-flash', flashes.every(f => f === 0), flashes);
-  await shot(page, 'd14-interior-still');
+  if (cutsChapter >= 0) {
+    await page.locator('#rail button').nth(cutsChapter).click(); await wait(page, 1900);
+    await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(4))).click(); await wait(page, 1900 + 2600);
+    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera); return { x: (v.x * .5 + .5) * innerWidth, y: (-v.y * .5 + .5) * innerHeight }; });
+    await page.mouse.move(pt.x, pt.y, { steps: 4 }); await wait(page, 400);
+    const tip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 80) }));
+    ok('part-tooltip', tip.on, tip);
+    await shot(page, 'd10-cuts-tooltip');
+  } else console.log('skip part-tooltip: beat 4 is not in the presentation');
+  // still beats 12 (parked lorry) and 10 (pre-staged hall interior), only while a chapter shows both
+  const stillChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(12) && c.beats.includes(10)));
+  if (stillChapter >= 0) {
+    await page.locator('#rail button').nth(stillChapter).click(); await wait(page, 1900);
+    await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(12))).click(); await wait(page, 1900); s = await S(page);
+    ok('truck-still-parked', s.curBeat === 12 && s.manual && s.speed === 0 && !s.paused, { curBeat: s.curBeat, manual: s.manual, speed: s.speed });
+    await shot(page, 'd13-truck-still');
+    await page.click('#explore-btn'); await wait(page, 800); s = await S(page);
+    ok('explore-unparks-truck', s.ex && !s.manual, { ex: s.ex, manual: s.manual });
+    await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
+    ok('explore-back-reparks', !s.ex && s.curBeat === 12 && s.manual, { ex: s.ex, curBeat: s.curBeat, manual: s.manual });
+    await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(10))).click(); await wait(page, 300);
+    const flashes = [];
+    for (const t of [300, 900, 1200]) { await wait(page, t); flashes.push((await S(page)).flashAnims); }
+    s = await S(page);
+    ok('interior-still-staged', s.curBeat === 10 && s.near === 0.06 && s.shell === false, { curBeat: s.curBeat, near: s.near, shell: s.shell });
+    ok('truck-unparked-on-exit', !s.manual, { manual: s.manual });
+    ok('interior-still-no-mid-beat-flash', flashes.every(f => f === 0), flashes);
+    await shot(page, 'd14-interior-still');
+  } else console.log('skip still-12/still-10 checks: beats 12 and 10 are not in the presentation');
+  // the product-ring chapter (beat 8) is a single animated scene: it completes, holds, and nothing follows in manual mode
+  const ringChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(8)));
+  await page.locator('#rail button').nth(ringChapter).click(); await wait(page, 1900 + 3200); s = await S(page);
+  const ringSingle = await page.evaluate(() => CH[cur].beats.length === 1);
+  ok('product-ring-single-scene', s.cur === ringChapter && s.curBeat === 8 && ringSingle && s.complete && !s.playing && !s.tr, { cur: s.cur, curBeat: s.curBeat, single: ringSingle, complete: s.complete, playing: s.playing });
+  await wait(page, 4500); s = await S(page);
+  ok('product-ring-holds', s.cur === ringChapter && s.curBeat === 8 && s.complete, { cur: s.cur, curBeat: s.curBeat });
+  await shot(page, 'd13-product-ring-hold');
   // number formatting consistency
   const nums = await page.evaluate(() => Array.from(document.querySelectorAll('.metric-value')).map(e => e.textContent));
   ok('numbers-uz-format', nums.every(n => !/\d\.\d{3}/.test(n) && !/\d{4,}/.test(n)), nums);
@@ -200,9 +212,7 @@ async function boot(page, tag) {
   await page.keyboard.press('End'); await wait(page, 1900 + 14500); s = await S(page);
   ok('final-replay-button', /Qayta/.test(s.play), s.play);
   await page.click('#next'); await wait(page, 500); s = await S(page);
-  ok('replay-restarts-countdown', s.opening && !s.started, s.opening);
-  await wait(page, 3300); s = await S(page);
-  ok('replay-lands-chapter-1', s.started && s.cur === 0, s.cur);
+  ok('replay-lands-chapter-1', s.started && s.cur === 0 && s.curBeat === (await page.evaluate(() => CH[0].beats[0])), s.cur);
   // idle: render loop must stop after the sequence finishes
   await wait(page, 9500);
   const f0 = (await S(page)).frames; await wait(page, 1500); const f1 = (await S(page)).frames;
@@ -269,8 +279,8 @@ if (!args.includes('--no-mobile')) {
   await shot(page, 'm5-explore');
   await page.click('#explore-btn'); await wait(page, 900); s = await S(page);
   ok('mobile-explore-back', !s.ex && s.cur === 1, { cur: s.cur });
-  await page.locator('#rail button').nth(await page.evaluate(() => CH.findIndex(c => c.beats.includes(4)))).click(); await wait(page, 2200); await page.locator('#beat-nav button').nth(4).click(); await wait(page, 4500);
-  await shot(page, 'm6-ch5-cuts');
+  await page.locator('#rail button').nth(await page.evaluate(() => CH.findIndex(c => c.beats.includes(8)))).click(); await wait(page, 2200 + 3200);
+  await shot(page, 'm6-ch3-product-ring');
   ok('mobile-no-overflow', !(await S(page)).overflow);
   await ctx.close();
 }

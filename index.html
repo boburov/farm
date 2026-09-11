@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f4f2ec">
-<meta name="description" content="Bir tovuqdan — parranda klasteri va qiymat zanjiri haqida interaktiv kinematik hikoya.">
-<title>Bir tovuqdan</title>
+<meta name="description" content="Sokin Savdo — parranda klasteri va qiymat zanjiri haqida interaktiv kinematik hikoya.">
+<title>Sokin Savdo</title>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/presentation.css">
 <link rel="icon" href="data:,">
@@ -23,7 +23,7 @@
   <div id="scene-frame" aria-hidden="true"><div id="scene-veil"><span id="transition-number">01</span></div></div>
   <div id="overlay" inert>
     <header id="hud-top" hidden>
-      <div id="mark"><b>Bir tovuqdan<span>.</span></b></div>
+      <div id="mark"><b>Sokin Savdo<span>.</span></b></div>
       <div id="chapter-meta"><span class="num" id="ch-num">01</span><span class="meta-divider"></span><span id="ch-title">O‘z tizimimizga</span><span id="chapter-count">01 <span>/ 04</span></span></div>
       <span id="presentation-status"><i></i> Sizning sur’atingizda</span>
     </header>
@@ -75,7 +75,7 @@
   </aside>
 
   <div id="loader">
-    <div class="loader-brand">Bir tovuqdan<span>.</span></div>
+    <div class="loader-brand">Sokin Savdo<span>.</span></div>
     <div class="eyebrow">Qiymat zanjiri haqida kinematik taqdimot</div>
     <h2>Kichik fermadan<br>zamonaviy parranda klasterigacha</h2>
     <div class="bar"><i id="load-fill"></i></div>
@@ -84,7 +84,6 @@
     <p class="loader-note">4 bo‘lim · sizning sur’atingizda</p>
     <div class="credit">3D tovuq modeli — pooiloui2 (Sketchfab, CC BY 4.0) · Osmon va teksturalar — Poly Haven (CC0)</div>
   </div>
-  <div id="opening-countdown" hidden role="status" aria-live="assertive"><span class="eyebrow">Taqdimot boshlanmoqda</span><b id="opening-number">3</b><p>Kichik g‘oyadan katta qiymatgacha.</p></div>
   <div id="credit">3D tovuq: <a href="https://sketchfab.com/3d-models/chicken-98830a78e8c54354a7fbe5ca8346fbf9" target="_blank" rel="noopener">pooiloui2</a> · CC BY 4.0</div>
 </div>
 
@@ -6085,7 +6084,7 @@ var BUILD_STEPS=[
 }],
 ["So’yish sexi o’rnatilmoqda",function(){
   G.slaughter=new T.Group(); scene.add(G.slaughter);
-  FAC.slaughter=facility({w:46,d:38,h:13,roof:"flat",docks:3,tanks:3,label:"So’yish sexi",wall:MAT.wall});
+  FAC.slaughter=facility({w:46,d:38,h:13,roof:"flat",docks:3,tanks:3,wall:MAT.wall}); /* peshtaxta yozuvisiz */
   FAC.slaughter.position.set(70,0,-20);
   G.slaughter.add(FAC.slaughter);
   var can=new T.Group();
@@ -7079,7 +7078,7 @@ var BEATS=[
    ey("Bugungi klaster")+
    '<h2>Boshidan oxirigacha<br>yagona tizim</h2></div>';}},
 /* 16 ------------------------------------------------------------------- */
-{t:"Bir tovuqdan",cut:true,dur:REDUCED?20:30,env:"golden",r:520,
+{t:"Sokin Savdo",cut:true,dur:REDUCED?20:30,env:"golden",r:520,
  st:["farm","slaughter","cluster","expansion","flows","roads","roads2","trucks","dust","crew","sky"],
  camFn:function(p,t){
    var a=.4+p*.9;
@@ -7099,18 +7098,21 @@ var BEATS=[
    '<p data-at="0.55">Eng muhimi — xalq uchun qulayroq narx.</p>'+
    '</div></div>'+
    '<div class="mod z-center" data-at="0.63"><h1 class="gold" style="margin-top:24vh">Tannarxni kamaytirishdan —<br>qiymat yaratishgacha.</h1>'+
-   '<p class="sub" style="margin-top:18px">Bir tovuqdan boshlangan jarayon — butun iqtisodiy qiymat zanjiriga aylandi.</p></div>';}}
+   '<p class="sub" style="margin-top:18px">Sokin Savdo boshlangan jarayon — butun iqtisodiy qiymat zanjiriga aylandi.</p></div>';}}
 ];
 
 /* Four presentation chapters. Durations are seconds.
    Each sequence completes once; manual mode holds the final scene. */
 /* Chapters 01–02 (Boshlanish, Ferma va bozor) were removed on request; beats 0–2 stay defined but unused.
    "O‘z tizimimizga" keeps only the building scene; comparison beat 5 is unused.
-   The building scene runs 4× faster (6 s → 1.5 s). */
+   The building scene runs 4× faster (6 s → 1.5 s).
+   "Mahsulot va odamlar" ends with the product-ring animation (beat 8): the scenes that followed it
+   (9 Qiymat qo‘shiladi, 10 Ish o‘rinlari, 12 Odamlar uchun foyda, 4 cuts) were removed on request
+   and stay defined but unused. */
 var CH=[
   {t:"O‘z tizimimizga", beats:[3], times:[1.5]},
   {t:"Klaster", beats:[6,13,7], times:[5,4,6]},
-  {t:"Mahsulot va odamlar", beats:[8,9,10,12,4], times:[3,2.5,3.5,3,3]},
+  {t:"Mahsulot va odamlar", beats:[8], times:[3]},
   {t:"Iqtisod va yakun", beats:[11,14,15], times:[4,5,5]}
 ];
 CH.forEach(function(c){
@@ -7524,11 +7526,16 @@ function loadFigures(){
 
 /* -------------------------------------------------------------- loop ---- */
 var elapsed=0,frameHandle=0,dirtyUntil=0,lastNow=performance.now();
+var inFrame=false;
 function invalidateScene(ms){
   dirtyUntil=Math.max(dirtyUntil,performance.now()+(ms===undefined?1400:ms));
-  if(!frameHandle&&!document.hidden)frameHandle=requestAnimationFrame(frame);
+  if(!frameHandle&&!document.hidden){
+    /* the loop was idle: drop the idle time so the first frame after a click does not fast-forward transitions */
+    if(!inFrame)lastNow=performance.now();
+    frameHandle=requestAnimationFrame(frame);
+  }
 }
-function frame(now){ frameHandle=0; if(window.FarmPresentation) FarmPresentation.frame(now); }
+function frame(now){ frameHandle=0; inFrame=true; try{ if(window.FarmPresentation) FarmPresentation.frame(now); } finally{ inFrame=false; } }
 
 /* ------------------------------------------------------------- resize -- */
 window.addEventListener("resize",function(){

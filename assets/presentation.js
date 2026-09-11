@@ -5,7 +5,7 @@
   var P=window.FarmPresentation={}, state=presentation={
     currentChapter:0,currentBeat:0,isTransitioning:false,isPlaying:false,isPaused:false,
     remainingTime:0,sequenceElapsed:0,sequenceComplete:false,holdElapsed:0,
-    panel:null,queuedChapter:null,completed:new Set(),transition:null,opening:null
+    panel:null,queuedChapter:null,completed:new Set(),transition:null
   };
   var shell=document.getElementById('overlay'), frameEl=document.getElementById('scene-frame'),
     veil=document.getElementById('scene-veil'), details=document.getElementById('details'),
@@ -33,8 +33,8 @@
   function content(ci){
     var a=ECON.read(0),b=ECON.read(1),c=ECON.read(2),d=ECON.read(3),cut=calcData();
     var all=[
-      {category:'Jarayonlar o‘zimizda',title:'Keyingi bosqich o‘z qo‘limizda.',lead:'So‘yish o‘z qo‘limizda: vositachi yo‘q, tannarx pastroq.',
-       intro:'So‘yish va keyingi jarayonlarni o‘z tizimimizga olish vositachiga bog‘liqlikni kamaytirdi.',
+      {category:'Jarayonlar o‘zimizda',title:'2010-yil 3 nafar Hodim Bilan ',lead:'So‘yish o‘z qo‘limizda: vositachi yo‘q, tannarx pastroq.',
+       intro:`"biznesni boshlash" bosqichidan "kapitalni ko'paytirish" va yirik sanoat bosqichiga o'tdik. O‘zimiz so‘yib, o‘zimiz sotdik.`,
        metrics:[metric('cost','Yangi tannarx',b.cost,costUnit,delta(a.cost,b.cost,true),{featured:true}),metric('prof','Foyda',b.prof,moneyUnit,delta(a.prof,b.prof),{digits:2,featured:true}),metric('sales','Sotuv hajmi',b.sales,'kg','2-bosqich · o‘z so‘yish'),metric('jobs','Bandlik',b.jobs,'ish o‘rni','Avval: '+uzNumber(a.jobs)+' ish o‘rni')],
        compare:[a.cost,b.cost],path:['Ferma','So‘yish','Qadoqlash','Savdo'],
        conclusion:'Qisqaroq va mustahkam zanjir. Ko‘proq nazorat.'},
@@ -143,13 +143,13 @@
     P.updateProgress();
   };
   P.setPlaying=function(v){
-    if(!started||state.opening)return;
+    if(!started)return;
     if(v&&EX.on)return;
     state.isPlaying=!!v&&cur<CH.length-1;playing=state.isPlaying;
     state.isPaused=!v;lastNow=performance.now();P.updateStatus();invalidateScene();
   };
   function announce(){document.getElementById('chapter-announcement').textContent=pad2(cur+1)+' / '+pad2(CH.length)+'. '+CH[cur].t+'. '+content(cur).title;}
-  function blocked(){return !!(state.panel||EX.on||document.hidden||state.opening);}
+  function blocked(){return !!(state.panel||EX.on||document.hidden);}
   function stillOf(idx){return window.STILL&&STILL[idx]||null;}
   function poseAt(p){
     var b=beatAt(cur,p),sc=BEATS[b.idx];
@@ -183,7 +183,6 @@
   }
   P.goTo=function(i,opts){
     opts=opts||{};i=clamp(Math.round(i),0,CH.length-1);
-    if(state.opening)return;
     if(state.panel)return;
     if(EX.on){P.explore(false);}
     if(state.isTransitioning){state.queuedChapter={i:i,opts:opts};return;}
@@ -219,28 +218,16 @@
     }
   }
   P.start=function(replay){
-    if(state.opening)return;
     if(state.panel)P.closePanel();if(EX.on)P.explore(false);
     started=false;playing=false;state.isPlaying=false;state.isPaused=false;state.completed.clear();state.transition=null;state.isTransitioning=false;state.queuedChapter=null;
     layers.forEach(function(l){l.classList.remove('is-leaving','is-entering');l.inert=false;});veil.style.opacity='0';
-    shell.inert=true;loader.classList.add('gone');loader.inert=true;startBtn.disabled=true;
-    var opening=document.getElementById('opening-countdown');opening.hidden=false;
-    document.getElementById('opening-number').textContent='3';
-    commit(0,{instant:true,at:0});
-    state.opening={elapsed:0,number:3};lastNow=performance.now();invalidateScene(3500);
+    loader.classList.add('gone');loader.inert=true;startBtn.disabled=true;
+    setTimeout(function(){loader.hidden=true;},520);
+    started=true;shell.inert=false;ECON.init();ECON.stage=-1;ECON.go(0,true);
+    commit(0,{instant:true});
+    if(!REDUCED){layers.forEach(function(l){l.classList.add('is-entering');});requestAnimationFrame(function(){layers.forEach(function(l){l.classList.remove('is-entering');});});}
+    document.getElementById('next').focus({preventScroll:true});lastNow=performance.now();invalidateScene();
   };
-  function openingTick(dt){
-    var o=state.opening;o.elapsed+=dt;
-    var n=Math.max(1,3-Math.floor(o.elapsed));
-    if(n!==o.number){o.number=n;var el=document.getElementById('opening-number');el.textContent=String(n);if(!REDUCED)el.animate([{opacity:.1,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'});}
-    if(o.elapsed>=3){
-      state.opening=null;document.getElementById('opening-countdown').hidden=true;loader.hidden=true;
-      started=true;shell.inert=false;ECON.init();ECON.stage=-1;ECON.go(0,true);
-      commit(0,{instant:true});
-      if(!REDUCED){layers.forEach(function(l){l.classList.add('is-entering');});requestAnimationFrame(function(){layers.forEach(function(l){l.classList.remove('is-entering');});});}
-      document.getElementById('next').focus({preventScroll:true});invalidateScene();
-    }
-  }
   P.layout=function(){
     var r=frameEl.getBoundingClientRect();
     P.view={left:r.left,top:r.top,width:Math.max(1,r.width),height:Math.max(1,r.height),right:r.right,bottom:r.bottom};
@@ -265,7 +252,7 @@
     detailBody.querySelectorAll('.ci').forEach(function(el){el.setAttribute('aria-label',el.dataset.k==='liveWeight'?'Tirik vazn, kilogramm':'So‘yilgandan keyingi chiqim, foiz');});
   };
   P.openPanel=function(which){
-    if(!started||state.opening||state.isTransitioning)return;
+    if(!started||state.isTransitioning)return;
     if(state.panel){P.closePanel(false);}else panelFocus=document.activeElement;
     state.panel=which;hideTip();
     if(which==='editor')buildEditor();else P.renderDetails();
@@ -288,7 +275,7 @@
     if(curBeat===4){var keys=['shBreast','shThigh','shDrum','shWing','shRest'];ANCH.forEach(function(a,i){var v=a.el.querySelector('.v');if(v)v.textContent=f(keys[i]);});}
   };
   P.explore=function(v){
-    v=!!v;if(v===EX.on||!started||state.isTransitioning||state.panel||state.opening)return;
+    v=!!v;if(v===EX.on||!started||state.isTransitioning||state.panel)return;
     hideTip();clearAnchors();
     if(v){
       var prev=BEATS[curBeat];if(prev&&prev.exit)prev.exit();
@@ -319,13 +306,12 @@
   P.frame=function(now){
     if(document.hidden)return;
     now=now||performance.now();var wallDt=Math.max(0,(now-lastNow)/1000),dt=Math.min(wallDt,.05);lastNow=now;
-    var suspended=!!state.panel, active=started&&!suspended&&!EX.on&&!state.opening&&!state.isTransitioning&&!state.isPaused;
+    var suspended=!!state.panel, active=started&&!suspended&&!EX.on&&!state.isTransitioning&&!state.isPaused;
     var sequence=active&&!state.sequenceComplete;
     var clockRuns=active&&state.isPlaying&&cur<CH.length-1;
     var transitions=state.isTransitioning&&!suspended;
-    var live=state.opening||sequence||clockRuns||transitions||!suspended&&(metricTweens.length||blend.on)||EX.on&&now<dirtyUntil;
+    var live=sequence||clockRuns||transitions||!suspended&&(metricTweens.length||blend.on)||EX.on&&now<dirtyUntil;
     if(!live&&now>dirtyUntil)return;
-    if(state.opening)openingTick(wallDt);
     if(transitions)transitionTick(wallDt);
     if(!started){if(step>=BUILD_STEPS.length){var bootPose=cur>=0?poseAt(prog):null;if(bootPose){lookNow.copy(bootPose.target);camera.lookAt(bootPose.target);envApply(bootPose.target,280);if(window.ENV)ENV.tick();}renderFrame(0);}if(!frameHandle)frameHandle=requestAnimationFrame(frame);return;}
     if(sequence){
@@ -407,7 +393,7 @@
   canvas.addEventListener('pointercancel',function(e){swipe=null;swipePointers.delete(e.pointerId);});
   canvas.addEventListener('pointerleave',hideTip);
   var motion=matchMedia('(prefers-reduced-motion: reduce)');motion.addEventListener('change',function(e){
-    REDUCED=e.matches;if(REDUCED){blend.on=false;metricTweens=[];if(started&&!state.opening){state.sequenceElapsed=CH[cur].dur;state.sequenceComplete=true;prog=1;P.setPlaying(false);P.renderSummary();}}invalidateScene();
+    REDUCED=e.matches;if(REDUCED){blend.on=false;metricTweens=[];if(started){state.sequenceElapsed=CH[cur].dur;state.sequenceComplete=true;prog=1;P.setPlaying(false);P.renderSummary();}}invalidateScene();
   });
   new ResizeObserver(function(){P.layout();invalidateScene(700);}).observe(frameEl);
   P.layout();P.updateStatus();

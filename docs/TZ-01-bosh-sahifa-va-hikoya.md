@@ -1,7 +1,7 @@
 # TZ-01 — "Sokin Savdo": Prezident tashrifi taqdimoti
 
 **Loyiha:** birinchi loyiha — bosh sahifa (hero) va 2010-yildan bugungacha hikoya
-**Kod bazasi:** `index.html` (Three.js r128 klik-taqdimoti, hozirgi nomi "Bir tovuqdan")
+**Kod bazasi:** `index.html` (Three.js r128 klik-taqdimoti, hozirgi nomi "Sokin Savdo")
 **Sana:** 2026-09-11
 **Holat:** tasdiqlashga tayyor. Kod o'zgarishi bu hujjat tasdiqlangandan keyin boshlanadi.
 
@@ -21,11 +21,11 @@ Belgilar: `[TASDIQLANSIN]` — buyurtmachi bergan fakt kerak; `[FAYL]` — buyur
 
 ## 2. Brend
 
-- Nom: **Sokin Savdo**. "Bir tovuqdan" nomi hamma joydan olib tashlanadi:
+- Nom: **Sokin Savdo**. "Sokin Savdo" nomi hamma joydan olib tashlanadi:
   - `index.html:7` `<meta name="description">`, `index.html:8` `<title>`
   - `index.html:26` `#mark` (yuqori panel so'z-belgisi)
   - `index.html:78` `.loader-brand` (loader bilan birga ketadi)
-  - `index.html:7082` `BEATS[15].t` "Bir tovuqdan" (sahna nomi, agar sahna ishlatilsa "Sokin Savdo bugun" ga o'zgaradi)
+  - `index.html:7082` `BEATS[15].t` "Sokin Savdo" (sahna nomi, agar sahna ishlatilsa "Sokin Savdo bugun" ga o'zgaradi)
 - So'z-belgi: logotip fayli yo'q, matnli. `Archivo 800`, `--display`, 27 px, harflar orasi −0,04em (mavjud `#mark b` uslubi, `assets/presentation.css:40`). Nuqta aksenti `--forest-light` rangida saqlanadi: **Sokin Savdo.**
 - Rang tizimi o'zgarmaydi (`assets/presentation.css:2–6`): fon `#f4f2ec`, matn `#101512`, aksent `#174c32` (forest), oltin `#b58a45`, muted `#68716b`.
 - Shrift: Archivo (lokal, `assets/fonts/`).
@@ -261,7 +261,7 @@ Nutqdagi Prezidentga murojaat va iqtiboslar ("Tadbirkor — mening eng yaqin ko'
 
 ## 10. Amalga oshirish bosqichlari (keyingi topshiriq)
 
-1. **Olib tashlash** — 3-bo'lim jadvali bo'yicha; `git mv` bilan hech narsa arxivlanmaydi, tarix gitda. Tekshiruv: `grep -c "Bir tovuqdan\|FIG_SCHEMA\|opening-countdown\|auto-countdown" index.html assets/*.js` → 0.
+1. **Olib tashlash** — 3-bo'lim jadvali bo'yicha; `git mv` bilan hech narsa arxivlanmaydi, tarix gitda. Tekshiruv: `grep -c "Sokin Savdo\|FIG_SCHEMA\|opening-countdown\|auto-countdown" index.html assets/*.js` → 0.
 2. **Hero** — DOM (`#overlay` ichida `#hero` bo'limi), CSS, yuklanish holati, `P.start` soddalashtirish, `CH[0]` hero yozuvi (`{t:"Sokin Savdo", hero:true, beats:[]}`; `commit()` hero uchun 3D'ni yashiradi).
 3. **Bo'limlar** — `CH` 6 yozuv, `BEATS` 0/1/3/2/7/8/10/9/6/13/14/15 matnlari (`dom()` funksiyalari) va `content()` xulosa/raqamlar; zanjir bo'g'in nomlari (beat 7); `FLOCK.setStage` bo'lim `enter`ida; `#explore-btn` faqat 03; `#credit` faqat 03.2.
 4. **Foto overlay** — manifest yuklash, tugma, `openPanel('photo')`, klaviatura, prefetch.
@@ -276,7 +276,7 @@ Taxminiy hajm: 1–2 ish kuni (3.5 Variant A bilan). Variant B (yangi katak inte
 
 - [ ] Sahifa ochilganda 2 s ichida hero matni ko'rinadi (3D yuklanishidan mustaqil); loader ekrani va 3-2-1 sanoq yo'q.
 - [ ] Hero rasmdagi referensga mos: chap yuqori so'z-belgi, o'ng yuqori havola + `00 / 05`, chap past sarlavha + qora pill, o'ng past lead + 3 chip, markaz bo'sh yorug' fon.
-- [ ] DOM va ekranda "Bir tovuqdan" matni yo'q; brend "Sokin Savdo".
+- [ ] DOM va ekranda "Sokin Savdo" matni yo'q; brend "Sokin Savdo".
 - [ ] To'qima raqamlar yo'q: tannarx, foyda, "so'm/kg", "Raqamlar", "Batafsil" hech qayerda chiqmaydi.
 - [ ] 6 bo'lim: hero → 2010 → 25 ming → Klaster 2026 (5 sahna) → Hozirgi bosqich → Kelajak; `#rail`da 6 chip, progress 6 qadam.
 - [ ] Clicker (PageDown/PageUp), →/←, Space, klik bilan to'liq o'tish; F to'liq ekran.
