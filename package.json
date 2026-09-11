@@ -1,0 +1,19 @@
+{
+  "name": "bir-tovuqdan",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "assets": "node scripts/generate-assets.mjs",
+    "test": "node scripts/qa.mjs",
+    "assets:validate": "node scripts/validate-assets.mjs",
+    "assets:node": "node scripts/generate-assets.mjs",
+    "qa": "node scripts/qa.mjs",
+    "qa:quick": "node scripts/qa.mjs --quick"
+  },
+  "devDependencies": {
+    "three": "0.128.0",
+    "sharp": "0.34.3",
+    "playwright": "1.58.2"
+  }
+}

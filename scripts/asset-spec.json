@@ -1,0 +1,1100 @@
+{
+ "units": "metres",
+ "forward": "+Z",
+ "up": "+Y",
+ "source": "scripts/asset-spec.json is the single source of truth for the asset pipeline; validate-assets.mjs checks it against index.html",
+ "hen": {
+  "landmarks": {
+   "foot": 0,
+   "hock": 0.105,
+   "knee": 0.185,
+   "hip": 0.25,
+   "belly": 0.212,
+   "body": 0.268,
+   "chest": 0.3,
+   "neck0": 0.348,
+   "neck1": 0.402,
+   "neck2": 0.43,
+   "head": 0.452,
+   "beakY": 0.444,
+   "tail": 0.296
+  },
+  "chickScale": 0.36,
+  "halfTrack": 0.06,
+  "bones": [
+   {
+    "name": "root",
+    "parent": null,
+    "at": [
+     0,
+     0.25,
+     0
+    ]
+   },
+   {
+    "name": "spine",
+    "parent": "root",
+    "at": [
+     0,
+     0.268,
+     -0.02
+    ]
+   },
+   {
+    "name": "chest",
+    "parent": "spine",
+    "at": [
+     0,
+     0.3,
+     0.06
+    ]
+   },
+   {
+    "name": "neck0",
+    "parent": "chest",
+    "at": [
+     0,
+     0.348,
+     0.098
+    ]
+   },
+   {
+    "name": "neck1",
+    "parent": "neck0",
+    "at": [
+     0,
+     0.402,
+     0.13
+    ]
+   },
+   {
+    "name": "neck2",
+    "parent": "neck1",
+    "at": [
+     0,
+     0.43,
+     0.144
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "neck2",
+    "at": [
+     0,
+     0.452,
+     0.15
+    ]
+   },
+   {
+    "name": "lids",
+    "parent": "head",
+    "at": [
+     0,
+     0.46,
+     0.158
+    ]
+   },
+   {
+    "name": "tail",
+    "parent": "spine",
+    "at": [
+     0,
+     0.296,
+     -0.15
+    ]
+   },
+   {
+    "name": "wingL",
+    "parent": "chest",
+    "at": [
+     0.07,
+     0.296,
+     0.02
+    ]
+   },
+   {
+    "name": "wingTipL",
+    "parent": "wingL",
+    "at": [
+     0.086,
+     0.238,
+     -0.07
+    ]
+   },
+   {
+    "name": "wingR",
+    "parent": "chest",
+    "at": [
+     -0.07,
+     0.296,
+     0.02
+    ]
+   },
+   {
+    "name": "wingTipR",
+    "parent": "wingR",
+    "at": [
+     -0.086,
+     0.238,
+     -0.07
+    ]
+   },
+   {
+    "name": "hipL",
+    "parent": "root",
+    "at": [
+     0.06,
+     0.25,
+     0
+    ]
+   },
+   {
+    "name": "kneeL",
+    "parent": "hipL",
+    "at": [
+     0.06,
+     0.185,
+     -0.012
+    ]
+   },
+   {
+    "name": "hockL",
+    "parent": "kneeL",
+    "at": [
+     0.06,
+     0.105,
+     0.006
+    ]
+   },
+   {
+    "name": "footL",
+    "parent": "hockL",
+    "at": [
+     0.06,
+     0,
+     0.012
+    ]
+   },
+   {
+    "name": "hipR",
+    "parent": "root",
+    "at": [
+     -0.06,
+     0.25,
+     0
+    ]
+   },
+   {
+    "name": "kneeR",
+    "parent": "hipR",
+    "at": [
+     -0.06,
+     0.185,
+     -0.012
+    ]
+   },
+   {
+    "name": "hockR",
+    "parent": "kneeR",
+    "at": [
+     -0.06,
+     0.105,
+     0.006
+    ]
+   },
+   {
+    "name": "footR",
+    "parent": "hockR",
+    "at": [
+     -0.06,
+     0,
+     0.012
+    ]
+   }
+  ],
+  "segs": [
+   {
+    "bone": "spine",
+    "a": "spine",
+    "d": [
+     0,
+     0,
+     -0.12
+    ],
+    "r": 0.21,
+    "w": 1
+   },
+   {
+    "bone": "chest",
+    "a": "chest",
+    "d": [
+     0,
+     -0.05,
+     0.08
+    ],
+    "r": 0.18,
+    "w": 1.15
+   },
+   {
+    "bone": "tail",
+    "a": "tail",
+    "d": [
+     0,
+     0.05,
+     -0.16
+    ],
+    "r": 0.13,
+    "w": 1.8
+   },
+   {
+    "bone": "neck0",
+    "a": "neck0",
+    "d": [
+     0,
+     0.03,
+     0.03
+    ],
+    "r": 0.07,
+    "w": 2.2
+   },
+   {
+    "bone": "neck1",
+    "a": "neck1",
+    "d": [
+     0,
+     0.03,
+     0.02
+    ],
+    "r": 0.058,
+    "w": 2.6
+   },
+   {
+    "bone": "neck2",
+    "a": "neck2",
+    "d": [
+     0,
+     0.02,
+     0.01
+    ],
+    "r": 0.05,
+    "w": 3.0
+   },
+   {
+    "bone": "head",
+    "a": "head",
+    "d": [
+     0,
+     0,
+     0.06
+    ],
+    "r": 0.078,
+    "w": 3.6
+   },
+   {
+    "bone": "lids",
+    "a": "lids",
+    "d": [
+     0,
+     0,
+     0.015
+    ],
+    "r": 0.014,
+    "w": 11
+   },
+   {
+    "bone": "wingL",
+    "a": "wingL",
+    "d": [
+     0.04,
+     -0.02,
+     -0.03
+    ],
+    "r": 0.085,
+    "w": 2.2
+   },
+   {
+    "bone": "wingTipL",
+    "a": "wingTipL",
+    "d": [
+     0.02,
+     -0.01,
+     -0.05
+    ],
+    "r": 0.075,
+    "w": 3.0
+   },
+   {
+    "bone": "wingR",
+    "a": "wingR",
+    "d": [
+     -0.04,
+     -0.02,
+     -0.03
+    ],
+    "r": 0.085,
+    "w": 2.2
+   },
+   {
+    "bone": "wingTipR",
+    "a": "wingTipR",
+    "d": [
+     -0.02,
+     -0.01,
+     -0.05
+    ],
+    "r": 0.075,
+    "w": 3.0
+   },
+   {
+    "bone": "hipL",
+    "a": "hipL",
+    "d": [
+     0,
+     -0.05,
+     0
+    ],
+    "r": 0.072,
+    "w": 1.5
+   },
+   {
+    "bone": "kneeL",
+    "a": "kneeL",
+    "d": [
+     0,
+     -0.05,
+     0
+    ],
+    "r": 0.044,
+    "w": 2.4
+   },
+   {
+    "bone": "hockL",
+    "a": "hockL",
+    "d": [
+     0,
+     -0.06,
+     0.01
+    ],
+    "r": 0.034,
+    "w": 3.4
+   },
+   {
+    "bone": "footL",
+    "a": "footL",
+    "d": [
+     0,
+     0,
+     0.035
+    ],
+    "r": 0.046,
+    "w": 6
+   },
+   {
+    "bone": "hipR",
+    "a": "hipR",
+    "d": [
+     0,
+     -0.05,
+     0
+    ],
+    "r": 0.072,
+    "w": 1.5
+   },
+   {
+    "bone": "kneeR",
+    "a": "kneeR",
+    "d": [
+     0,
+     -0.05,
+     0
+    ],
+    "r": 0.044,
+    "w": 2.4
+   },
+   {
+    "bone": "hockR",
+    "a": "hockR",
+    "d": [
+     0,
+     -0.06,
+     0.01
+    ],
+    "r": 0.034,
+    "w": 3.4
+   },
+   {
+    "bone": "footR",
+    "a": "footR",
+    "d": [
+     0,
+     0,
+     0.035
+    ],
+    "r": 0.046,
+    "w": 6
+   }
+  ],
+  "plumageVariants": [
+   "white",
+   "brown",
+   "grey",
+   "black"
+  ],
+  "nodes": {
+   "hero": [
+    "plumage",
+    "keratin",
+    "eyes"
+   ],
+   "heroOptional": [
+    "cards"
+   ],
+   "lod": [
+    "plumage",
+    "keratin",
+    "eyes"
+   ]
+  },
+  "slots": {
+   "plumage": 0,
+   "keratin": 1,
+   "eyes": 2,
+   "cards": 3
+  },
+  "budgets": {
+   "hero": 30000,
+   "mid": 8000,
+   "lod": 1900
+  },
+  "bounds": {
+   "adult": {
+    "minY": [
+     -0.004,
+     0.012
+    ],
+    "maxY": [
+     0.44,
+     0.53
+    ],
+    "minZ": [
+     -0.34,
+     -0.2
+    ],
+    "maxZ": [
+     0.17,
+     0.26
+    ],
+    "eyeY": [
+     0.435,
+     0.475
+    ],
+    "eyeAbsX": [
+     0.018,
+     0.036
+    ]
+   },
+   "chick": {
+    "minY": [
+     -0.004,
+     0.012
+    ],
+    "maxY": [
+     0.14,
+     0.2
+    ]
+   }
+  },
+  "textures": {
+   "hero": 2048,
+   "lod": 2048,
+   "mobile": 512
+  }
+ },
+ "chick": {
+  "budgets": {
+   "hero": 24000,
+   "mid": 6500,
+   "lod": 1600
+  }
+ },
+ "dressed": {
+  "parts": [
+   "breastL",
+   "breastR",
+   "tenderL",
+   "tenderR",
+   "thighL",
+   "thighR",
+   "drumL",
+   "drumR",
+   "wingL",
+   "wingR",
+   "back",
+   "rest",
+   "drumBoneL",
+   "drumBoneR",
+   "thighBoneL",
+   "thighBoneR"
+  ],
+  "attachTo": {
+   "drumBoneL": "drumL",
+   "drumBoneR": "drumR",
+   "thighBoneL": "thighL",
+   "thighBoneR": "thighR"
+  },
+  "dirs": {
+   "breastL": [
+    0.44,
+    0.69,
+    0.3
+   ],
+   "breastR": [
+    -0.44,
+    0.69,
+    0.3
+   ],
+   "tenderL": [
+    0.19,
+    0.3,
+    0.53
+   ],
+   "tenderR": [
+    -0.19,
+    0.3,
+    0.53
+   ],
+   "thighL": [
+    0.73,
+    0.03,
+    -0.3
+   ],
+   "thighR": [
+    -0.73,
+    0.03,
+    -0.3
+   ],
+   "drumL": [
+    0.65,
+    -0.06,
+    0.63
+   ],
+   "drumR": [
+    -0.65,
+    -0.06,
+    0.63
+   ],
+   "wingL": [
+    1.1,
+    0.37,
+    -0.12
+   ],
+   "wingR": [
+    -1.1,
+    0.37,
+    -0.12
+   ],
+   "back": [
+    0,
+    -0.1,
+    -0.08
+   ],
+   "rest": [
+    0,
+    0.06,
+    -0.74
+   ]
+  },
+  "whole": [
+   "whole",
+   "cavity",
+   "neckCavity"
+  ],
+  "economics": {
+   "breastL": 0,
+   "breastR": 0,
+   "tenderL": 0,
+   "tenderR": 0,
+   "thighL": 1,
+   "thighR": 1,
+   "thighBoneL": 1,
+   "thighBoneR": 1,
+   "drumL": 2,
+   "drumR": 2,
+   "drumBoneL": 2,
+   "drumBoneR": 2,
+   "wingL": 3,
+   "wingR": 3,
+   "back": 4,
+   "rest": 4
+  },
+  "budgets": {
+   "total": 42000
+  },
+  "bounds": {
+   "wholeLengthZ": [
+    0.55,
+    0.9
+   ],
+   "wholeWidthX": [
+    0.36,
+    0.72
+   ]
+  },
+  "materials": [
+   "meat",
+   "skin",
+   "bone",
+   "cavity"
+  ]
+ },
+ "worker": {
+  "landmarks": {
+   "hip": 0.94,
+   "spine": 1.06,
+   "chest": 1.25,
+   "neck": 1.45,
+   "head": 1.585,
+   "sh": 1.425,
+   "elbow": 1.155,
+   "hand": 0.9,
+   "shx": 0.185,
+   "hipx": 0.095,
+   "knee": 0.505,
+   "ankle": 0.085,
+   "toe": 0.02
+  },
+  "bones": [
+   {
+    "name": "root",
+    "parent": null,
+    "at": [
+     0,
+     0.94,
+     0
+    ]
+   },
+   {
+    "name": "spine",
+    "parent": "root",
+    "at": [
+     0,
+     1.06,
+     0
+    ]
+   },
+   {
+    "name": "chest",
+    "parent": "spine",
+    "at": [
+     0,
+     1.25,
+     0
+    ]
+   },
+   {
+    "name": "neck",
+    "parent": "chest",
+    "at": [
+     0,
+     1.45,
+     0
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "neck",
+    "at": [
+     0,
+     1.555,
+     0
+    ]
+   },
+   {
+    "name": "shL",
+    "parent": "chest",
+    "at": [
+     0.185,
+     1.425,
+     0
+    ]
+   },
+   {
+    "name": "elL",
+    "parent": "shL",
+    "at": [
+     0.185,
+     1.155,
+     0
+    ]
+   },
+   {
+    "name": "haL",
+    "parent": "elL",
+    "at": [
+     0.185,
+     0.9,
+     0
+    ]
+   },
+   {
+    "name": "shR",
+    "parent": "chest",
+    "at": [
+     -0.185,
+     1.425,
+     0
+    ]
+   },
+   {
+    "name": "elR",
+    "parent": "shR",
+    "at": [
+     -0.185,
+     1.155,
+     0
+    ]
+   },
+   {
+    "name": "haR",
+    "parent": "elR",
+    "at": [
+     -0.185,
+     0.9,
+     0
+    ]
+   },
+   {
+    "name": "hiL",
+    "parent": "root",
+    "at": [
+     0.095,
+     0.9,
+     0
+    ]
+   },
+   {
+    "name": "knL",
+    "parent": "hiL",
+    "at": [
+     0.095,
+     0.505,
+     0
+    ]
+   },
+   {
+    "name": "anL",
+    "parent": "knL",
+    "at": [
+     0.095,
+     0.085,
+     0
+    ]
+   },
+   {
+    "name": "toL",
+    "parent": "anL",
+    "at": [
+     0.095,
+     0.02,
+     0.1
+    ]
+   },
+   {
+    "name": "hiR",
+    "parent": "root",
+    "at": [
+     -0.095,
+     0.9,
+     0
+    ]
+   },
+   {
+    "name": "knR",
+    "parent": "hiR",
+    "at": [
+     -0.095,
+     0.505,
+     0
+    ]
+   },
+   {
+    "name": "anR",
+    "parent": "knR",
+    "at": [
+     -0.095,
+     0.085,
+     0
+    ]
+   },
+   {
+    "name": "toR",
+    "parent": "anR",
+    "at": [
+     -0.095,
+     0.02,
+     0.1
+    ]
+   }
+  ],
+  "segs": [
+   {
+    "bone": "root",
+    "a": "root",
+    "d": [
+     0,
+     -0.06,
+     0
+    ],
+    "r": 0.22,
+    "w": 1
+   },
+   {
+    "bone": "spine",
+    "a": "spine",
+    "d": [
+     0,
+     0.06,
+     0
+    ],
+    "r": 0.24,
+    "w": 1.1
+   },
+   {
+    "bone": "chest",
+    "a": "chest",
+    "d": [
+     0,
+     0.1,
+     0
+    ],
+    "r": 0.26,
+    "w": 1.2
+   },
+   {
+    "bone": "neck",
+    "a": "neck",
+    "d": [
+     0,
+     0.04,
+     0
+    ],
+    "r": 0.1,
+    "w": 2.4
+   },
+   {
+    "bone": "head",
+    "a": "head",
+    "d": [
+     0,
+     0.09,
+     0.02
+    ],
+    "r": 0.17,
+    "w": 3.2
+   },
+   {
+    "bone": "shL",
+    "a": "shL",
+    "d": [
+     0.02,
+     -0.1,
+     0
+    ],
+    "r": 0.115,
+    "w": 1.6
+   },
+   {
+    "bone": "elL",
+    "a": "elL",
+    "d": [
+     0,
+     -0.12,
+     0
+    ],
+    "r": 0.085,
+    "w": 2.4
+   },
+   {
+    "bone": "haL",
+    "a": "haL",
+    "d": [
+     0,
+     -0.05,
+     0.02
+    ],
+    "r": 0.075,
+    "w": 3.4
+   },
+   {
+    "bone": "shR",
+    "a": "shR",
+    "d": [
+     -0.02,
+     -0.1,
+     0
+    ],
+    "r": 0.115,
+    "w": 1.6
+   },
+   {
+    "bone": "elR",
+    "a": "elR",
+    "d": [
+     0,
+     -0.12,
+     0
+    ],
+    "r": 0.085,
+    "w": 2.4
+   },
+   {
+    "bone": "haR",
+    "a": "haR",
+    "d": [
+     0,
+     -0.05,
+     0.02
+    ],
+    "r": 0.075,
+    "w": 3.4
+   },
+   {
+    "bone": "hiL",
+    "a": "hiL",
+    "d": [
+     0,
+     -0.16,
+     0
+    ],
+    "r": 0.15,
+    "w": 1.4
+   },
+   {
+    "bone": "knL",
+    "a": "knL",
+    "d": [
+     0,
+     -0.16,
+     0
+    ],
+    "r": 0.115,
+    "w": 2.2
+   },
+   {
+    "bone": "anL",
+    "a": "anL",
+    "d": [
+     0,
+     -0.04,
+     0.03
+    ],
+    "r": 0.1,
+    "w": 3.4
+   },
+   {
+    "bone": "toL",
+    "a": "toL",
+    "d": [
+     0,
+     0,
+     0.06
+    ],
+    "r": 0.09,
+    "w": 4
+   },
+   {
+    "bone": "hiR",
+    "a": "hiR",
+    "d": [
+     0,
+     -0.16,
+     0
+    ],
+    "r": 0.15,
+    "w": 1.4
+   },
+   {
+    "bone": "knR",
+    "a": "knR",
+    "d": [
+     0,
+     -0.16,
+     0
+    ],
+    "r": 0.115,
+    "w": 2.2
+   },
+   {
+    "bone": "anR",
+    "a": "anR",
+    "d": [
+     0,
+     -0.04,
+     0.03
+    ],
+    "r": 0.1,
+    "w": 3.4
+   },
+   {
+    "bone": "toR",
+    "a": "toR",
+    "d": [
+     0,
+     0,
+     0.06
+    ],
+    "r": 0.09,
+    "w": 4
+   }
+  ],
+  "nodes": {
+   "required": [
+    "torso",
+    "trousers",
+    "palms",
+    "boots"
+   ],
+   "optional": [
+    "face",
+    "eyes",
+    "pupils",
+    "hair",
+    "cap",
+    "net",
+    "helmet"
+   ]
+  },
+  "slots": {
+   "torso": 0,
+   "trousers": 0,
+   "palms": 1,
+   "boots": 2,
+   "face": 1,
+   "eyes": 2,
+   "pupils": 2,
+   "hair": 2,
+   "cap": 2,
+   "net": 2,
+   "helmet": 2
+  },
+  "budgets": {
+   "total": 14000
+  },
+  "bounds": {
+   "bootsMinY": [
+    -0.005,
+    0.012
+   ],
+   "topY": [
+    1.6,
+    1.8
+   ]
+  }
+ },
+ "tolerances": {
+  "jointPosMm": 1.5,
+  "weightSum": 0.02,
+  "normalLen": 0.02,
+  "weldEps": 0.0003
+ }
+}

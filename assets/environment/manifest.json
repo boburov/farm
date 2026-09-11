@@ -1,0 +1,414 @@
+{
+  "version": 1,
+  "generator": "scripts/prep-environment.mjs",
+  "license": "CC0 1.0 (Poly Haven)",
+  "shift": "sky shader samples u = fract(u + shiftU)",
+  "states": {
+    "dawn": {
+      "file": "dawn.hdr",
+      "lo": "dawn-lo.hdr",
+      "width": 2048,
+      "height": 1024,
+      "source": "syferfontein_6d_clear_puresky",
+      "res": "2k",
+      "candidates": [
+        {
+          "slug": "syferfontein_6d_clear_puresky",
+          "elevDeg": 6.2,
+          "sunSkyRatio": 12.2,
+          "score": 6.8
+        },
+        {
+          "slug": "syferfontein_18d_clear_puresky",
+          "elevDeg": 18.9,
+          "sunSkyRatio": 34.39,
+          "score": 7.4
+        },
+        {
+          "slug": "kloppenheim_06_puresky",
+          "elevDeg": 25.9,
+          "sunSkyRatio": 0.01,
+          "score": 23.9
+        },
+        {
+          "slug": "spruit_sunrise",
+          "elevDeg": 7.6,
+          "sunSkyRatio": 17.93,
+          "score": 19.9
+        }
+      ],
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/syferfontein_6d_clear_puresky_2k.hdr",
+      "hasSun": true,
+      "sunElevDeg": 6.24,
+      "sunAzimuthFileDeg": 35.95,
+      "siteElevDeg": 13.04,
+      "shiftU": 0.463,
+      "sunDir": [
+        -0.6487,
+        0.1087,
+        -0.7533
+      ],
+      "gain": 1.2196,
+      "sunClamp": 3.153,
+      "sunI": 1.185,
+      "softSun": false,
+      "sunColor": "#ffe896",
+      "skyIrradiance": 1.182,
+      "sunIrradiance": 10.818,
+      "horizon": [
+        1.2128,
+        1.2074,
+        0.833
+      ],
+      "horizonHex": "#ffffeb",
+      "zenith": [
+        0.1014,
+        0.1717,
+        0.3102
+      ],
+      "zenithHex": "#5a7296"
+    },
+    "morning": {
+      "file": "morning.hdr",
+      "lo": "morning-lo.hdr",
+      "width": 2048,
+      "height": 1024,
+      "source": "kloofendal_38d_partly_cloudy_puresky",
+      "res": "2k",
+      "candidates": [
+        {
+          "slug": "kloofendal_38d_partly_cloudy_puresky",
+          "elevDeg": 38.6,
+          "sunSkyRatio": 3.12,
+          "score": 12.3
+        },
+        {
+          "slug": "mud_road_puresky",
+          "elevDeg": 63.9,
+          "sunSkyRatio": 0,
+          "score": 47.1
+        },
+        {
+          "slug": "kloofendal_28d_misty_puresky",
+          "elevDeg": 28.7,
+          "sunSkyRatio": 0.66,
+          "score": 13.4
+        },
+        {
+          "slug": "kloofendal_48d_partly_cloudy_puresky",
+          "elevDeg": 47,
+          "sunSkyRatio": 4.32,
+          "score": 25.2
+        }
+      ],
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_38d_partly_cloudy_puresky_2k.hdr",
+      "hasSun": true,
+      "sunElevDeg": 38.58,
+      "sunAzimuthFileDeg": 35.95,
+      "siteElevDeg": 26.32,
+      "shiftU": 0.43876,
+      "sunDir": [
+        -0.4143,
+        0.6237,
+        -0.6629
+      ],
+      "gain": 0.6206,
+      "sunClamp": 1.465,
+      "sunI": 0.581,
+      "softSun": false,
+      "sunColor": "#fff9ed",
+      "skyIrradiance": 0.7805,
+      "sunIrradiance": 1.824,
+      "horizon": [
+        0.231,
+        0.2509,
+        0.2652
+      ],
+      "horizonHex": "#83888b",
+      "zenith": [
+        0.0555,
+        0.0777,
+        0.1194
+      ],
+      "zenithHex": "#455061"
+    },
+    "day": {
+      "file": "day.hdr",
+      "lo": "day-lo.hdr",
+      "width": 2048,
+      "height": 1024,
+      "source": "kloofendal_48d_partly_cloudy_puresky",
+      "res": "2k",
+      "candidates": [
+        {
+          "slug": "kloofendal_48d_partly_cloudy_puresky",
+          "elevDeg": 47,
+          "sunSkyRatio": 4.32,
+          "score": 2
+        },
+        {
+          "slug": "citrus_orchard_puresky",
+          "elevDeg": 14.7,
+          "sunSkyRatio": 0,
+          "score": 43.8
+        },
+        {
+          "slug": "sunflowers_puresky",
+          "elevDeg": 44.2,
+          "sunSkyRatio": 4.03,
+          "score": 7.8
+        },
+        {
+          "slug": "kloofendal_43d_clear_puresky",
+          "elevDeg": 42.8,
+          "sunSkyRatio": 6.68,
+          "score": 10.7
+        }
+      ],
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      "hasSun": true,
+      "sunElevDeg": 47.02,
+      "sunAzimuthFileDeg": 34.54,
+      "siteElevDeg": 48.97,
+      "shiftU": 0.42542,
+      "sunDir": [
+        -0.3264,
+        0.7316,
+        -0.5985
+      ],
+      "gain": 0.4085,
+      "sunClamp": 1.647,
+      "sunI": 0.592,
+      "softSun": false,
+      "sunColor": "#fefff5",
+      "skyIrradiance": 0.5749,
+      "sunIrradiance": 1.861,
+      "horizon": [
+        0.175,
+        0.1883,
+        0.2278
+      ],
+      "horizonHex": "#737782",
+      "zenith": [
+        0.2053,
+        0.223,
+        0.2846
+      ],
+      "zenithHex": "#7c8190"
+    },
+    "golden": {
+      "file": "golden.hdr",
+      "lo": "golden-lo.hdr",
+      "width": 2048,
+      "height": 1024,
+      "source": "evening_road_01_puresky",
+      "res": "2k",
+      "candidates": [
+        {
+          "slug": "belfast_sunset_puresky",
+          "elevDeg": 3.4,
+          "sunSkyRatio": 0.16,
+          "score": 8.7
+        },
+        {
+          "slug": "industrial_sunset_puresky",
+          "elevDeg": 4.8,
+          "sunSkyRatio": 0.06,
+          "score": 8.8
+        },
+        {
+          "slug": "evening_road_01_puresky",
+          "elevDeg": 17.5,
+          "sunSkyRatio": 0.01,
+          "score": 8.4
+        },
+        {
+          "slug": "kloppenheim_06_puresky",
+          "elevDeg": 25.9,
+          "sunSkyRatio": 0.01,
+          "score": 18.3
+        }
+      ],
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/evening_road_01_puresky_2k.hdr",
+      "hasSun": true,
+      "sunElevDeg": 17.49,
+      "sunAzimuthFileDeg": 41.57,
+      "siteElevDeg": 12.11,
+      "shiftU": 0.53687,
+      "sunDir": [
+        -0.8398,
+        0.3005,
+        -0.4522
+      ],
+      "gain": 0.3428,
+      "sunClamp": 3.19,
+      "sunI": 0.641,
+      "softSun": true,
+      "sunColor": null,
+      "skyIrradiance": 1.1193,
+      "sunIrradiance": 0.011,
+      "horizon": [
+        0.2841,
+        0.3183,
+        0.317
+      ],
+      "horizonHex": "#909897",
+      "zenith": [
+        0.083,
+        0.1558,
+        0.2529
+      ],
+      "zenithHex": "#526e89"
+    },
+    "dusk": {
+      "file": "dusk.hdr",
+      "lo": "dusk-lo.hdr",
+      "width": 2048,
+      "height": 1024,
+      "source": "qwantani_sunset_puresky",
+      "res": "2k",
+      "candidates": [
+        {
+          "slug": "qwantani_dusk_2_puresky",
+          "elevDeg": 10.5,
+          "sunSkyRatio": 0,
+          "score": 6
+        },
+        {
+          "slug": "qwantani_sunset_puresky",
+          "elevDeg": 6.2,
+          "sunSkyRatio": 2.02,
+          "score": 3.3
+        },
+        {
+          "slug": "belfast_sunset_puresky",
+          "elevDeg": 3.4,
+          "sunSkyRatio": 0.16,
+          "score": 4
+        }
+      ],
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/qwantani_sunset_puresky_2k.hdr",
+      "hasSun": true,
+      "sunElevDeg": 6.24,
+      "sunAzimuthFileDeg": 35.95,
+      "siteElevDeg": 4.44,
+      "shiftU": 0.54585,
+      "sunDir": [
+        -0.9374,
+        0.1087,
+        -0.3308
+      ],
+      "gain": 0.4333,
+      "sunClamp": 2.695,
+      "sunI": 0.483,
+      "softSun": false,
+      "sunColor": "#ffa037",
+      "skyIrradiance": 1.0012,
+      "sunIrradiance": 1.518,
+      "horizon": [
+        0.7517,
+        0.6171,
+        0.4625
+      ],
+      "horizonHex": "#e0cdb4",
+      "zenith": [
+        0.0953,
+        0.1542,
+        0.2654
+      ],
+      "zenithHex": "#586d8c"
+    },
+    "studio": {
+      "file": "studio.hdr",
+      "lo": "studio-lo.hdr",
+      "width": 1024,
+      "height": 512,
+      "source": "studio_small_09",
+      "res": "1k",
+      "candidates": [
+        {
+          "slug": "studio_small_09",
+          "elevDeg": 12.5,
+          "sunSkyRatio": 0,
+          "score": 0
+        }
+      ],
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+      "hasSun": false,
+      "sunElevDeg": 12.48,
+      "sunAzimuthFileDeg": -150.29,
+      "siteElevDeg": 34.74,
+      "shiftU": 0,
+      "sunDir": [
+        -0.4558,
+        0.5698,
+        -0.6838
+      ],
+      "gain": 0.8289,
+      "sunClamp": null,
+      "sunI": 0,
+      "softSun": false,
+      "sunColor": "#ffffff",
+      "skyIrradiance": 2.1119,
+      "sunIrradiance": 0,
+      "horizon": [
+        0.3837,
+        0.3757,
+        0.3768
+      ],
+      "horizonHex": "#a5a3a4",
+      "zenith": [
+        0.0188,
+        0.017,
+        0.0161
+      ],
+      "zenithHex": "#2a2827"
+    },
+    "interior": {
+      "file": "interior.hdr",
+      "lo": "interior-lo.hdr",
+      "width": 1024,
+      "height": 512,
+      "source": "empty_warehouse_01",
+      "res": "1k",
+      "candidates": [
+        {
+          "slug": "empty_warehouse_01",
+          "elevDeg": 49,
+          "sunSkyRatio": 0,
+          "score": 0
+        }
+      ],
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/empty_warehouse_01_1k.hdr",
+      "hasSun": false,
+      "sunElevDeg": 49.04,
+      "sunAzimuthFileDeg": 32.52,
+      "siteElevDeg": 59.59,
+      "shiftU": 0,
+      "sunDir": [
+        -0.4212,
+        0.8624,
+        -0.2808
+      ],
+      "gain": 0.5609,
+      "sunClamp": null,
+      "sunI": 0,
+      "softSun": false,
+      "sunColor": "#ffffff",
+      "skyIrradiance": 2.1119,
+      "sunIrradiance": 0,
+      "horizon": [
+        0.2218,
+        0.2127,
+        0.1796
+      ],
+      "horizonHex": "#817e75",
+      "zenith": [
+        0.0319,
+        0.0276,
+        0.0165
+      ],
+      "zenithHex": "#353227"
+    }
+  }
+}
