@@ -53,7 +53,7 @@ async function boot(page) {
 }
 const innerHeightOf = () => 900;
 const seek = (page, id, at = .62) => page.evaluate(([id, at]) => { const ci = CH.findIndex(c => c.beats.includes(id)), c = CH[ci], n = c.beats.indexOf(id), before = c.beats.slice(0, n).reduce((a, b) => a + BEATS[b].dur, 0); goTo(ci, { force: true, at: (before + BEATS[id].dur * at) / c.dur, instant: true }); setPlaying(false); window.__qa.gap = 0; window.__qa.last = performance.now(); }, [id, at]);
-const state = (page) => page.evaluate(() => ({ beat: curBeat, progress: +prog.toFixed(4), playing, overflow: document.documentElement.scrollWidth > innerWidth, geometry: renderer.info.memory.geometries, textures: renderer.info.memory.textures, cam: camera.position.toArray().map(v => +v.toFixed(2)), fov: +camera.fov.toFixed(1), modelLoaded: !!PoultryAssets.ready, failures: PoultryAssets.failures, env: (window.ENV && ENV.status) ? ENV.status() : null, stats: window.CINEMA_STATS ? Object.assign({}, CINEMA_STATS) : null, maxGapMs: +window.__qa.gap.toFixed(1) }));
+const state = (page) => page.evaluate(() => ({ beat: curBeat, progress: +prog.toFixed(4), playing, still: !!(window.STILL && STILL[curBeat]), manual: !!(TRUCKS[0] && TRUCKS[0].veh.manual), speed: TRUCKS[0] ? +TRUCKS[0].veh.speed.toFixed(3) : null, near: camera.near, overflow: document.documentElement.scrollWidth > innerWidth, geometry: renderer.info.memory.geometries, textures: renderer.info.memory.textures, cam: camera.position.toArray().map(v => +v.toFixed(2)), fov: +camera.fov.toFixed(1), modelLoaded: !!PoultryAssets.ready, failures: PoultryAssets.failures, env: (window.ENV && ENV.status) ? ENV.status() : null, stats: window.CINEMA_STATS ? Object.assign({}, CINEMA_STATS) : null, maxGapMs: +window.__qa.gap.toFixed(1) }));
 
 // ---------- main sweep ----------
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
@@ -76,6 +76,17 @@ for (const [width, height] of SIZES) {
     if (s.maxGapMs > 1500) fail(`frame stall ${s.maxGapMs} ms entering beat ${id} at ${width}x${height}`);
     if (process.env.QA_BUDGET && BUDGET[id] && s.stats && s.stats.triangles > BUDGET[id]) fail(`triangles ${s.stats.triangles} > budget ${BUDGET[id]} at beat ${id}`);
     if (s.stats && s.stats.calls > MAX_CALLS) fail(`draw calls ${s.stats.calls} > ${MAX_CALLS} at beat ${id} ${width}x${height}`);
+    if (s.still) {
+      // still beats: same pose anywhere in the slot, camera + world clock frozen while the slot plays
+      await seek(page, id, .12); await page.waitForTimeout(400);
+      const early = await page.evaluate(() => camera.position.toArray().map(v => +v.toFixed(2)));
+      if (early.join() !== s.cam.join()) fail(`still beat ${id} pose depends on the seek position at ${width}x${height}`);
+      const frozen = await page.evaluate(async () => { const a = camera.position.toArray(), e0 = elapsed; presentation.isPaused = false; invalidateScene(); await new Promise(r => setTimeout(r, 600)); presentation.isPaused = true; return { moved: camera.position.toArray().some((v, i) => v !== a[i]), ticked: elapsed !== e0 }; });
+      if (frozen.moved) fail(`still beat ${id} camera moved while its slot played`);
+      if (frozen.ticked) fail(`still beat ${id} world clock advanced while its slot played`);
+      if (id === 12 && !(s.manual && s.speed === 0)) fail(`still beat 12 lorry not parked (manual ${s.manual}, speed ${s.speed})`);
+      if (id === 10 && s.near !== 0.06) fail(`still beat 10 interior clip not pre-staged (near ${s.near})`);
+    }
   }
 }
 
@@ -172,8 +183,9 @@ if (!quick || flag('--contexts')) {
   const p2 = await rm.newPage(); wire(p2, 'reduced');
   await boot(p2);
   await p2.waitForTimeout(2400); // let the boot-time sky crossfade settle before sampling the idle loop
-  report.interactions.reducedMotion = await p2.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return { REDUCED, playing, idleFrames: CINEMA_STATS.frames - a }; });
+  report.interactions.reducedMotion = await p2.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return { REDUCED, playing, idleFrames: CINEMA_STATS.frames - a, beat: curBeat, still: !!(window.STILL && STILL[curBeat]) }; });
   if (report.interactions.reducedMotion.idleFrames > 3) fail('render loop kept running under reduced motion');
+  if (!(report.interactions.reducedMotion.beat === 5 && report.interactions.reducedMotion.still)) fail(`reduced motion did not land on the chapter-0 still (beat ${report.interactions.reducedMotion.beat})`);
   if (!report.interactions.reducedMotion.REDUCED) fail('prefers-reduced-motion not detected');
   if (report.interactions.reducedMotion.playing) fail('autoplay started under reduced motion');
   await p2.screenshot({ path: `${out}/reduced-motion.png` }); await rm.close();

@@ -150,14 +150,17 @@
   };
   function announce(){document.getElementById('chapter-announcement').textContent=pad2(cur+1)+' / '+pad2(CH.length)+'. '+CH[cur].t+'. '+content(cur).title;}
   function blocked(){return !!(state.panel||EX.on||document.hidden||state.opening);}
+  function stillOf(idx){return window.STILL&&STILL[idx]||null;}
   function poseAt(p){
     var b=beatAt(cur,p),sc=BEATS[b.idx];
     if(b.idx!==curBeat)enterBeat(b.idx,false);
-    if(sc.up)sc.up(b.local,elapsed);
-    var target;
-    if(sc.camFn)target=sc.camFn(b.local,elapsed);
-    else{var e=easeInOut(b.local);camera.position.copy(curves.p.getPointAt(e));target=curves.l.getPointAt(e);}
-    return {target:target,beat:b,sc:sc};
+    /* a still pins camera and object progress independently of the slot's local progress */
+    var st=stillOf(b.idx), camP=st?st.cam:b.local, upP=st?st.up:b.local;
+    if(sc.up)sc.up(upP,elapsed);
+    var target, camFn=st&&st.camFn||sc.camFn;
+    if(camFn)target=camFn.call(sc,camP,elapsed);
+    else{var e=easeInOut(camP);camera.position.copy(curves.p.getPointAt(e));target=curves.l.getPointAt(e);}
+    return {target:target,beat:b,sc:sc,still:st,camP:camP,upP:upP};
   }
   function commit(i,opts){
     opts=opts||{};
@@ -170,7 +173,7 @@
     if(infoExpanded)setExpanded(false);
     renderBeatNav();var b=beatAt(cur,prog);enterBeat(b.idx,true);
     P.renderSummary();var pose=poseAt(prog);
-    if(!REDUCED&&opts.animate){
+    if(!REDUCED&&opts.animate&&!pose.still){
       var far=oldPos.distanceTo(camera.position)>420||oldEnv!==pose.sc.env;
       blend.pos.copy(far?camera.position.clone().sub(pose.target).multiplyScalar(1.10).add(pose.target):oldPos);
       blend.look.copy(far?pose.target:oldLook);blend.on=true;blend.t=0;blend.dur=1.08;
@@ -329,7 +332,9 @@
       state.sequenceElapsed=Math.min(CH[cur].dur,state.sequenceElapsed+wallDt);prog=state.sequenceElapsed/CH[cur].dur;
       if(prog>=1){state.sequenceComplete=true;state.completed.add(cur);P.updateHUD();invalidateScene(600);}
     }else if(clockRuns&&state.sequenceComplete){state.holdElapsed+=wallDt;if(state.holdElapsed>=CH[cur].hold)P.goTo(cur+1);}
-    var animateWorld=!REDUCED&&!suspended&&(sequence||transitions||EX.on&&now<dirtyUntil);
+    /* the beat about to be posed (not curBeat): keeps the entry frame of a still frozen too */
+    var stillB=!EX.on&&cur>=0?stillOf(beatAt(cur,prog).idx):null;
+    var animateWorld=!REDUCED&&!suspended&&!stillB&&(sequence||transitions||EX.on&&now<dirtyUntil);
     if(animateWorld)elapsed+=dt;
     if(EX.on){
       var exTarget=exTick(REDUCED?1:dt);envMix('day',clamp(dt*1.6,0,1));envApply(exTarget,420);maybeBakeEnv(elapsed);
@@ -345,11 +350,15 @@
       }
       lookNow.copy(target);camera.lookAt(target);
       envMix(sc.env,REDUCED?1:clamp(dt*1.6,0,1));envApply(target,sc.r||200);maybeBakeEnv(elapsed);
-      var focus=sc.focusFn?camera.position.distanceTo(sc.focusFn(pose.beat.local,elapsed)):camera.position.distanceTo(target);
-      focusNow=REDUCED?focus:damp(focusNow,focus,6.5,dt);compMat.uniforms.focus.value=focusNow;compMat.uniforms.range.value=Math.max(8,focusNow*1.4);
+      var focus=sc.focusFn?camera.position.distanceTo(sc.focusFn(pose.camP,elapsed)):camera.position.distanceTo(target);
+      focusNow=(REDUCED||pose.still)?focus:damp(focusNow,focus,6.5,dt);compMat.uniforms.focus.value=focusNow;compMat.uniforms.range.value=Math.max(8,focusNow*1.4);
       ECON.tick(REDUCED?2:dt);
-      if(animateWorld)worldTick(elapsed,dt,camera);else{if(window.ENV)ENV.tick();}
-      if(curBeat===4)updateAnchors(!state.isTransitioning&&!state.panel&&pose.beat.local>.42);else updateAnchors(false);
+      if(animateWorld)worldTick(elapsed,dt,camera);
+      else if(pose.still&&stillPrime&&started){
+        /* one settle tick with the still camera: crew LOD, flock packing, doors, hero pose, caster cull */
+        stillPrime=false;camera.updateMatrixWorld();worldTick(elapsed,1/60,camera);
+      }else{if(window.ENV)ENV.tick();}
+      if(curBeat===4)updateAnchors(!state.isTransitioning&&!state.panel&&pose.upP>.42);else updateAnchors(false);
       if(!suspended)tickMetrics(dt);updateChain(pose.beat.local);P.updateProgress();renderFrame(elapsed);
     }
     if(!frameHandle)frameHandle=requestAnimationFrame(frame);

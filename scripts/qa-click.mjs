@@ -28,7 +28,7 @@ function wire(page, tag) {
   page.on('response', r => { if (r.status() >= 400 && !/favicon/.test(r.url())) { R.missing.push(r.url()); console.log('MISSING', r.status(), r.url()); } });
   page.on('requestfailed', r => { if (!/favicon/.test(r.url())) { R.missing.push(r.url()); console.log('REQFAIL', r.url()); } });
 }
-const S = (page) => page.evaluate(() => ({ cur, curBeat, prog: +prog.toFixed(3), started, playing, tr: presentation.isTransitioning, panel: presentation.panel, ex: EX.on, remaining: +presentation.remainingTime.toFixed(1), complete: presentation.sequenceComplete, opening: !!presentation.opening, clock: document.getElementById('clock').textContent, autoHidden: document.getElementById('auto-countdown').hidden, status: document.getElementById('presentation-status').textContent.trim(), play: document.getElementById('play').textContent.trim(), title: document.getElementById('slide-title')?.textContent, count: document.getElementById('chapter-count').textContent.replace(/\s+/g, ' '), scrollY: window.scrollY, docH: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth, frames: CINEMA_STATS.frames }));
+const S = (page) => page.evaluate(() => ({ cur, curBeat, prog: +prog.toFixed(3), started, playing, still: !!(window.STILL && STILL[curBeat]), manual: !!(TRUCKS[0] && TRUCKS[0].veh.manual), speed: TRUCKS[0] ? +TRUCKS[0].veh.speed.toFixed(3) : null, paused: presentation.isPaused, elapsedT: elapsed, cam: camera.position.toArray().map(v => +v.toFixed(3)), near: camera.near, shell: FAC.processing.userData.stages.shell.visible, flashAnims: document.getElementById('flash').getAnimations().length, tr: presentation.isTransitioning, panel: presentation.panel, ex: EX.on, remaining: +presentation.remainingTime.toFixed(1), complete: presentation.sequenceComplete, opening: !!presentation.opening, clock: document.getElementById('clock').textContent, autoHidden: document.getElementById('auto-countdown').hidden, status: document.getElementById('presentation-status').textContent.trim(), play: document.getElementById('play').textContent.trim(), title: document.getElementById('slide-title')?.textContent, count: document.getElementById('chapter-count').textContent.replace(/\s+/g, ' '), scrollY: window.scrollY, docH: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth, frames: CINEMA_STATS.frames }));
 const shot = (page, name) => page.screenshot({ path: `${out}/${name}.png` });
 const wait = (page, ms) => page.waitForTimeout(ms);
 
@@ -106,6 +106,12 @@ async function boot(page, tag) {
   await page.locator('#beat-nav button').nth(2).click(); await wait(page, 1900); s = await S(page);
   ok('beat-nav', s.curBeat === thirdBeat, { curBeat: s.curBeat, want: thirdBeat });
   await shot(page, 'd5-ch4-beat3');
+  // beat 15 is a still: the slot keeps counting, but camera and world clock are pinned
+  ok('beat-nav-still-pinned', s.still && !s.paused, { still: s.still, paused: s.paused });
+  const st1 = s; await wait(page, 700); s = await S(page);
+  ok('still-sequence-advances', s.prog > st1.prog, { from: st1.prog, to: s.prog });
+  ok('still-camera-fixed', s.cam.join() === st1.cam.join(), { from: st1.cam, to: s.cam });
+  ok('still-world-frozen', s.elapsedT === st1.elapsedT, { from: st1.elapsedT, to: s.elapsedT });
   // autoplay countdown
   await page.keyboard.press('Home'); await wait(page, 1900);
   await page.click('#play'); await wait(page, 400); s = await S(page);
@@ -171,6 +177,22 @@ async function boot(page, tag) {
   const tip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 80) }));
   ok('part-tooltip', tip.on, tip);
   await shot(page, 'd10-cuts-tooltip');
+  // still beats 12 (parked lorry) and 10 (pre-staged hall interior) in the same chapter
+  await page.locator('#beat-nav button').nth(3).click(); await wait(page, 1900); s = await S(page);
+  ok('truck-still-parked', s.curBeat === 12 && s.manual && s.speed === 0 && !s.paused, { curBeat: s.curBeat, manual: s.manual, speed: s.speed });
+  await shot(page, 'd13-truck-still');
+  await page.click('#explore-btn'); await wait(page, 800); s = await S(page);
+  ok('explore-unparks-truck', s.ex && !s.manual, { ex: s.ex, manual: s.manual });
+  await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
+  ok('explore-back-reparks', !s.ex && s.curBeat === 12 && s.manual, { ex: s.ex, curBeat: s.curBeat, manual: s.manual });
+  await page.locator('#beat-nav button').nth(2).click(); await wait(page, 300);
+  const flashes = [];
+  for (const t of [300, 900, 1200]) { await wait(page, t); flashes.push((await S(page)).flashAnims); }
+  s = await S(page);
+  ok('interior-still-staged', s.curBeat === 10 && s.near === 0.06 && s.shell === false, { curBeat: s.curBeat, near: s.near, shell: s.shell });
+  ok('truck-unparked-on-exit', !s.manual, { manual: s.manual });
+  ok('interior-still-no-mid-beat-flash', flashes.every(f => f === 0), flashes);
+  await shot(page, 'd14-interior-still');
   // number formatting consistency
   const nums = await page.evaluate(() => Array.from(document.querySelectorAll('.metric-value')).map(e => e.textContent));
   ok('numbers-uz-format', nums.every(n => !/\d\.\d{3}/.test(n) && !/\d{4,}/.test(n)), nums);

@@ -22,23 +22,23 @@
 
   <div id="scene-frame" aria-hidden="true"><div id="scene-veil"><span id="transition-number">01</span></div></div>
   <div id="overlay" inert>
-    <header id="hud-top">
-      <div id="mark"><b>Bir tovuqdan<span>.</span></b><span class="header-divider"></span><button id="play" class="round" aria-pressed="false"></button></div>
+    <header id="hud-top" hidden>
+      <div id="mark"><b>Bir tovuqdan<span>.</span></b></div>
       <div id="chapter-meta"><span class="num" id="ch-num">01</span><span class="meta-divider"></span><span id="ch-title">O‘z tizimimizga</span><span id="chapter-count">01 <span>/ 04</span></span></div>
-      <div class="header-actions">
-        <span id="presentation-status"><i></i> Sizning sur’atingizda</span>
-        <button id="explore-btn" class="text-button" aria-pressed="false">Klasterni kezish <span aria-hidden="true">↗</span></button>
-        <button id="edit-open" class="text-button">Raqamlar <span aria-hidden="true">↗</span></button>
-        <span class="header-divider"></span>
-        <button id="details-open" class="lines" aria-label="Batafsil ma’lumot"><i></i><i></i></button>
-      </div>
+      <span id="presentation-status"><i></i> Sizning sur’atingizda</span>
     </header>
     <main id="scene-layer" aria-labelledby="slide-title">
       <button id="info-toggle" aria-expanded="false" aria-label="Barcha asosiy raqamlarni ko‘rsatish" hidden></button>
       <div id="slide-copy"></div>
-      <div class="slide-actions"><button id="next" class="pill"></button><button id="prev" class="text-button" aria-label="Oldingi bo‘lim"></button></div>
+      <div class="slide-actions"><button id="next" class="pill"></button><button id="prev" class="text-button" aria-label="Oldingi bo‘lim"></button><button id="play" class="round" aria-pressed="false"></button></div>
     </main>
-    <aside id="data-layer" aria-label="Bo‘lim ko‘rsatkichlari"><div id="data-copy"></div><nav id="rail" aria-label="Taqdimot bo‘limlari"></nav></aside>
+    <aside id="data-layer" aria-label="Bo‘lim ko‘rsatkichlari"><div id="data-copy"></div><nav id="rail" aria-label="Taqdimot bo‘limlari"></nav>
+      <div class="data-links">
+        <button id="explore-btn" class="text-button" aria-pressed="false">Klasterni kezish <span aria-hidden="true">↗</span></button>
+        <button id="edit-open" class="text-button">Raqamlar <span aria-hidden="true">↗</span></button>
+        <button id="details-open" class="text-button">Batafsil <span aria-hidden="true">↗</span></button>
+      </div>
+    </aside>
     <div id="scene-caption"><div class="scene-description"><span id="beat-index">01</span><span id="beat-title">Boshlanish</span></div><nav id="beat-nav" aria-label="Bo‘lim ichidagi sahnalar"></nav></div>
     <footer id="hud-bottom">
       <div id="progress" role="progressbar" aria-label="Taqdimot bo‘limlari" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1"><div class="done"></div></div>
@@ -7002,6 +7002,7 @@ var BEATS=[
 {t:"Odamlar uchun foyda",cut:true,dur:REDUCED?16:23,env:"day",r:300,st:["farm","slaughter","cluster","flows","roads","roads2","trucks","dust","crew","sky"],
  hand:.8,
  enter:function(){ this._beat=-1; this.env="day"; this.r=520; setClip(false); },
+ exit:function(){ unparkTruck(); },
  up:function(p){
    /* ikki qadam: yo'ldagi mashina -> do'kon javoni */
    var b=p<.42?0:1;
@@ -7116,6 +7117,46 @@ CH.forEach(function(c){
   c.dur=0; c.beats.forEach(function(b,i){ BEATS[b].dur=c.times[i]; c.dur+=c.times[i]; });
   c.hold=4; c.cut=BEATS[c.beats[0]].cut;
 });
+/* ---- still beats ---------------------------------------------------------
+   A still holds one authored frame for its whole slot (the CH seconds still
+   count, so autoplay stays truthful). cam/up replace the slot's local progress
+   in camFn/up; camFn (optional) replaces the beat's camera; enter runs after
+   the beat's own enter with this = the BEATS entry. Stills are always cuts and
+   the ambient world does not tick while one is shown.                        */
+var STILL={
+  4:{cam:1,up:1},
+  5:{cam:1,up:1},
+  9:{cam:.5,up:1,dist:16,camFn:function(p,t){
+      /* centred pull-back so all four stations (x = -9 … +9) share the frame: never closer than
+         `dist`, and far enough that ±13.5 fits the horizontal field the lookAt wrapper gives
+         this frame (studio fov 48° at aspect ≥ 1.24, widened below that) */
+      var a=viewAspect(), need=13.5/(Math.tan(24*Math.PI/180)*Math.max(a,1.24)), d=Math.max(STILL[9].dist,need);
+      camera.position.set(SX,SY+4.2,SZ+d); return V3(SX,SY+1.3,SZ); }},
+  10:{cam:.63,up:1,enter:function(){
+      /* pre-apply the hall interior so up(1) finds _in latched: no re-stage, no flashCut */
+      this._in=true; this.env="interior"; this.r=60;
+      stage(["cluster","slaughter","roads","roads2","interiorP","crew"]); setClip(true); }},
+  12:{cam:.2,up:.2,u0:.52,enter:function(){ parkTruck(STILL[12].u0); }},
+  15:{cam:.5,up:1}
+};
+var stillPrime=false;   /* set by enterBeat; P.frame runs one world tick with the still camera */
+/* park the trunk-road lorry at a fixed point of its lane (deterministic, self-healing) */
+function parkTruck(u0){
+  var tv=TRUCKS[0]; if(!tv||!TRAFFIC) return;
+  var v=tv.veh, L=v.homeLane||v.lane;
+  TRAFFIC.queue=TRAFFIC.queue.filter(function(q){ return q.v!==v; });   /* may sit in the respawn queue */
+  if(v.lane!==L){ v.lane.drop(v); v.lane=L; }                            /* may be in the overtaking lane */
+  if(L.vehicles.indexOf(v)<0) L.vehicles.push(v);
+  v.active=true; v.wantVisible=true; v.node.visible=true; v.brakeAmt=0;
+  TRAFFIC.reset(v,L.len*u0,0); v.manual=true;
+  var s0=L.pToS(v.p);
+  for(var i=0;i<TRAFFIC.vehicles.length;i++){                           /* same-direction neighbours: 70 m behind the camera */
+    var o=TRAFFIC.vehicles[i];
+    if(o===v||!o.active||o.lane.road!==L.road||o.lane.dir!==L.dir) continue;
+    if(Math.abs(o.lane.pToS(o.p)-s0)<30) TRAFFIC.reset(o,clamp(o.lane.pFromS(s0-70),1,o.lane.len-1),o.speed);
+  }
+}
+function unparkTruck(){ if(TRUCKS[0]) TRUCKS[0].veh.manual=false; }
 /* bob ichidagi joriy parchani va uning o'z jarayonini topadi */
 function beatAt(ci,p){
   var c=CH[ci], acc=0, tp=p*c.dur;
@@ -7268,12 +7309,15 @@ function enterBeat(idx,hard){
   setClip(sc.env==="studio");
   clearAnchors(); measureAnchorBand();
   if(sc.enter) sc.enter();
+  var st=window.STILL&&STILL[idx]; if(st&&st.enter) st.enter.call(sc);   /* after sc.enter, before envSnap */
+  stillPrime=!!st;
   timed=[];
   document.body.dataset.beat=String(idx);
   if(window.FarmPresentation) FarmPresentation.onBeat(idx);
-  if(sc.cut||hard){
+  var cutIn=!!(sc.cut||st);                                              /* a still is always a cut */
+  if(cutIn||hard){
     envSnap(sc.env); blend.on=false;
-    if(sc.cut&&prev&&!hard&&performance.now()-lastDip>900){ flashCut(.7); lastDip=performance.now(); }
+    if(cutIn&&prev&&!hard&&performance.now()-lastDip>900){ flashCut(.7); lastDip=performance.now(); }
   }else{
     blend.on=true; blend.t=0; blend.pos.copy(wasPos); blend.look.copy(wasLook);
   }
