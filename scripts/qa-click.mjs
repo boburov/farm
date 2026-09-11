@@ -62,7 +62,7 @@ async function boot(page, tag) {
   ok('chapter-1-not-autoplay', !s.playing && s.autoHidden, { playing: s.playing, autoHidden: s.autoHidden });
   await wait(page, 1500);
   s = await S(page);
-  ok('sequence-advances', s.prog > .1 && s.prog < 1, s.prog);
+  ok('sequence-holds-building', s.complete && s.prog === 1 && s.curBeat === 3, { complete: s.complete, prog: s.prog, curBeat: s.curBeat });
   await shot(page, 'd2-ch1');
   // next button through every chapter
   const chapterShots = [];

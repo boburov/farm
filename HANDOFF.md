@@ -42,7 +42,7 @@ User request: replace scrolling with a premium white, six-chapter click-controll
 ## Header removed + data card (session 2, latest)
 - User request: no top bar; the right-hand information block needs its own background because it blended into the hazy page.
 - `#hud-top` is now `hidden` (brand, chapter meta, status stay in the DOM for the JS that updates them). `#play` (round) moved into `.slide-actions` next to Oldingi; `#explore-btn`, `#edit-open`, `#details-open` (now a text link "Batafsil ↗") live in `#data-links`, a small link row directly under the data card (bottom-right). `#data-links` is a sibling of `#data-layer` on purpose: the card is made `inert` during transitions/Explore, the links must stay clickable.
-- `#data-layer` keeps the soft "cloud" scrim (user preferred it over a card), now denser: a wide faint halo (`::before`, rgba(244,242,236,.97), blur 34 px) plus a tighter core (`::after`, blur 16 px); the left copy block's cloud is slightly stronger too (.84).
+- `#data-layer` keeps the original soft "cloud" scrim (`::before`, rgba(244,242,236,.78), blur 28 px) — a card and a denser cloud were both tried and reverted on request.
 - Explore: desktop keeps the link row at the bottom-right ("Taqdimotga qaytish" highlighted); mobile pins `#data-links` as a fixed pill at the top-right with only the return link visible.
 - `--header` is now 28 px desktop / 16 px mobile (only used for the composition rectangle and `#credit`).
 - QA: qa-click PASS (72 checks), qa quick DONE clean (`qa/click-noheader/`, `qa/noheader-std/`); screenshots `qa/noheader/`.

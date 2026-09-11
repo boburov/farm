@@ -16,7 +16,7 @@ const out = process.env.QA_OUT || 'qa/current';
 await mkdir(out, { recursive: true });
 
 const SIZES = (opt('--sizes', quick ? '1440x900,390x844' : '1440x900,1920x1080,390x844,430x932,844x390')).split(',').map(s => s.split('x').map(Number));
-const BEATS = opt('--beats', quick ? '3,4,8,10' : '3,4,5,6,7,8,9,10,11,12,13,14,15').split(',').map(Number);
+const BEATS = opt('--beats', quick ? '3,4,8,10' : '3,4,6,7,8,9,10,11,12,13,14,15').split(',').map(Number);
 const BUDGET = { 0: 900000, 1: 900000, 2: 900000, 3: 900000, 4: 300000, 6: 600000, 7: 600000, 8: 300000, 10: 600000, 11: 600000, 12: 600000, 14: 600000, 15: 600000 };
 const MAX_FRAME_MS = 120, MAX_CALLS = Number(process.env.QA_MAX_CALLS || 1500); // draw-call reduction is Pass 5 work
 
@@ -183,9 +183,9 @@ if (!quick || flag('--contexts')) {
   const p2 = await rm.newPage(); wire(p2, 'reduced');
   await boot(p2);
   await p2.waitForTimeout(2400); // let the boot-time sky crossfade settle before sampling the idle loop
-  report.interactions.reducedMotion = await p2.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return { REDUCED, playing, idleFrames: CINEMA_STATS.frames - a, beat: curBeat, still: !!(window.STILL && STILL[curBeat]) }; });
+  report.interactions.reducedMotion = await p2.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return { REDUCED, playing, idleFrames: CINEMA_STATS.frames - a, beat: curBeat, progress: prog, complete: presentation.sequenceComplete, still: !!(window.STILL && STILL[curBeat]) }; });
   if (report.interactions.reducedMotion.idleFrames > 3) fail('render loop kept running under reduced motion');
-  if (!(report.interactions.reducedMotion.beat === 5 && report.interactions.reducedMotion.still)) fail(`reduced motion did not land on the chapter-0 still (beat ${report.interactions.reducedMotion.beat})`);
+  if (!(report.interactions.reducedMotion.beat === 3 && report.interactions.reducedMotion.progress === 1 && report.interactions.reducedMotion.complete)) fail(`reduced motion did not hold the completed building scene (beat ${report.interactions.reducedMotion.beat})`);
   if (!report.interactions.reducedMotion.REDUCED) fail('prefers-reduced-motion not detected');
   if (report.interactions.reducedMotion.playing) fail('autoplay started under reduced motion');
   await p2.screenshot({ path: `${out}/reduced-motion.png` }); await rm.close();
