@@ -4,12 +4,13 @@
 
 - **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
   (`Gemini_Generated_Image_sjv6jvsjv6jvsjv6.jpg`, 2528x1684).
-- **Tahrir:** tepadagi bo'sh osmon va elektr simlari hamda pastdagi bo'sh beton
-  kesib tashlandi (`extract {top:440, bottom:64}`), eni 2400 px ga keltirildi,
-  JPEG q82 → 2400x1120 (2.14:1), 327 KB.
+- **Tahrir:** faqat eng chetlari kesildi (`extract {top:56, bottom:40}`), eni
+  2400 px ga keltirildi, JPEG q82 → 2400x1508 (1.59:1), 351 KB.
+  Osmon ataylab saqlandi — referens kompozitsiyasida statistika kartalari
+  aynan osmon ustida yotadi.
 - **Kadr:** chapda ishlab chiqaruvchi, o'rtada yashiklarni yuk mashinasiga
   ortish, o'ngda bozor rastasi — sahifadagi uch bo'g'inga aynan mos tushadi,
-  shuning uchun u butun panel bandini qoplaydi va yashil strelkalar zonalar
+  shuning uchun u butun ekranni qoplaydi va qalin egri strelkalar zonalar
   chegarasiga tushadi.
 
 Kadrda o'qiladigan yozuv, brend logotipi, avtomobil raqami yoki 2010-yilga

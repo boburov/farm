@@ -110,7 +110,7 @@
         nodes=[];
     at.forEach(function(f,i){
       var a=el('div','panel-arrow reveal');
-      a.innerHTML=window.ICONS?ICONS('curl'):'';
+      a.innerHTML=window.ICONS?ICONS('swoosh'):'';
       host.appendChild(a);
       nodes.push(a);
     });
@@ -179,7 +179,6 @@
     page.appendChild(arrowsNode(y));
 
     page.appendChild(chainNode(y.chain));
-    page.appendChild(el('div','footer-bar'));
 
     document.title=y.title+' — Sokin Savdo';
 

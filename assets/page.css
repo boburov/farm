@@ -58,34 +58,35 @@ html,body{
 
 .stat{
   display:flex;align-items:center;
-  gap:clamp(10px,1vw,20px);
-  padding:clamp(9px,1.1vh,18px) clamp(14px,1.3vw,26px);
-  min-width:clamp(190px,18.5vw,350px);
-  border-radius:var(--radius);
-  background:var(--surface);
-  box-shadow:0 1px 2px rgba(15,61,34,.07),0 14px 30px -22px rgba(15,61,34,.55);
+  gap:clamp(10px,1.5vw,30px);
+  padding:clamp(10px,1.5vh,26px) clamp(16px,1.8vw,40px);
+  min-width:clamp(200px,24vw,470px);
+  border-radius:clamp(14px,1.5vw,28px);
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(10px);
+  box-shadow:0 2px 4px rgba(15,61,34,.06),0 18px 44px -28px rgba(15,61,34,.5);
 }
 .stat--right{justify-self:end;flex-direction:row}
 .stat--left{justify-self:start}
 
 .stat-icon{
   flex:0 0 auto;
-  width:clamp(34px,3.3vw,62px);
-  height:clamp(34px,3.3vw,62px);
+  width:clamp(44px,6.3vw,132px);
+  height:clamp(44px,6.3vw,132px);
   color:var(--forest);
 }
 .stat-icon svg{width:100%;height:100%;display:block}
 
 .stat-body{display:flex;flex-direction:column;min-width:0}
 .stat-label{
-  font-size:clamp(11px,1.02vw,19px);
-  font-weight:600;
-  line-height:1.15;
+  font-size:clamp(13px,1.55vw,34px);
+  font-weight:700;
+  line-height:1.1;
   color:var(--ink);
 }
 .stat-value{
   display:flex;align-items:baseline;gap:.22em;flex-wrap:wrap;
-  font-size:clamp(26px,3.1vw,58px);
+  font-size:clamp(30px,4.3vw,92px);
   font-weight:800;
   line-height:1.02;
   letter-spacing:-.03em;
@@ -93,15 +94,15 @@ html,body{
   font-variant-numeric:tabular-nums;
 }
 .stat-unit{
-  font-size:.42em;
-  font-weight:700;
+  font-size:.44em;
+  font-weight:800;
   letter-spacing:-.01em;
   color:var(--ink);
 }
 .stat-note{
   margin-top:2px;
-  font-size:clamp(10px,.84vw,15px);
-  font-weight:600;
+  font-size:clamp(11px,1.05vw,22px);
+  font-weight:700;
   color:var(--forest-light);
 }
 /* o'ng kartada: nom tepada, raqam ostida */
@@ -109,11 +110,11 @@ html,body{
 
 .year-badge{
   align-self:start;
-  padding:clamp(4px,.7vh,14px) clamp(20px,2.4vw,54px);
-  border-radius:clamp(10px,1vw,18px);
+  padding:clamp(6px,1.1vh,24px) clamp(24px,3.2vw,76px);
+  border-radius:clamp(14px,1.9vw,36px);
   background:var(--forest);
   color:#fff;
-  font-size:clamp(32px,4.6vw,86px);
+  font-size:clamp(36px,5.6vw,116px);
   font-weight:800;
   line-height:1.08;
   letter-spacing:-.03em;
@@ -133,7 +134,7 @@ html,body{
   background:var(--page);
 }
 /* kontent fon ustida */
-.top,.arrows,.chain,.footer-bar{position:relative;z-index:1}
+.top,.arrows,.chain{position:relative;z-index:1}
 .backdrop-scenes{
   position:absolute;inset:0;
   display:grid;grid-template-columns:1fr 1fr 1fr;
@@ -148,7 +149,7 @@ html,body{
   position:absolute;inset:0;
   width:100%;height:100%;
   object-fit:cover;
-  object-position:center 56%;
+  object-position:center 48%;
   display:block;
   opacity:0;
   transition:opacity .9s var(--ease-out);
@@ -159,9 +160,8 @@ html,body{
 .backdrop::after{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(238,244,240,.72) 0%,rgba(238,244,240,.12) 18%,
-                    rgba(238,244,240,0) 34%,rgba(238,244,240,0) 72%,
-                    rgba(238,244,240,.55) 100%);
+    linear-gradient(180deg,rgba(238,244,240,.34) 0%,rgba(238,244,240,0) 26%,
+                    rgba(238,244,240,0) 74%,rgba(238,244,240,.42) 100%);
 }
 
 /* ------------------------------------------------------------- strelkalar */
@@ -175,43 +175,45 @@ html,body{
 .panel-arrow{
   position:absolute;top:50%;
   transform:translate(-50%,-50%);
-  width:clamp(40px,4.4vw,84px);
-  height:clamp(40px,4.4vw,84px);
+  width:clamp(64px,8.4vw,190px);
   display:grid;place-items:center;
-  color:#fff;
-  background:var(--forest-light);
-  border-radius:50%;
-  box-shadow:0 10px 28px -10px rgba(15,61,34,.85);
+  color:var(--forest-light);
   pointer-events:none;
   z-index:2;
+  filter:drop-shadow(0 3px 10px rgba(255,255,255,.55))
+         drop-shadow(0 8px 22px rgba(15,61,34,.35));
 }
-.panel-arrow svg{width:58%;height:58%}
+.panel-arrow svg{width:100%;height:auto;display:block}
 
 /* ---------------------------------------------------------------- zanjir */
 
+/* Pastki qator referensdagidek och panel ustida turadi, chetlari sahifa
+   chekkasigacha yetadi. */
 .chain{
   flex:0 0 auto;
-  list-style:none;margin:0;padding:0;
+  list-style:none;margin:0 calc(var(--gutter) * -1);
+  padding:clamp(8px,1.2vh,22px) var(--gutter) clamp(10px,1.5vh,26px);
   display:flex;align-items:stretch;justify-content:center;
-  gap:clamp(6px,.8vw,18px);
+  gap:clamp(6px,1vw,24px);
+  background:linear-gradient(180deg,rgba(240,246,242,.72) 0%,rgba(240,246,242,.95) 40%,#eff5f1 100%);
 }
 .chain li{
   flex:1 1 0;min-width:0;
   display:flex;align-items:center;
-  gap:clamp(8px,.8vw,16px);
-  padding:clamp(8px,1.1vh,17px) clamp(12px,1.1vw,22px);
-  border-radius:var(--radius);
+  gap:clamp(9px,1.2vw,26px);
+  padding:clamp(9px,1.4vh,24px) clamp(14px,1.5vw,34px);
+  border-radius:clamp(12px,1.4vw,26px);
   background:var(--surface);
   color:var(--ink);
-  font-size:clamp(11px,.98vw,18px);
-  font-weight:600;
-  line-height:1.2;
+  font-size:clamp(12px,1.3vw,29px);
+  font-weight:700;
+  line-height:1.16;
   box-shadow:0 1px 2px rgba(15,61,34,.06);
 }
 .chain-icon{
   flex:0 0 auto;
-  width:clamp(24px,2.3vw,42px);
-  height:clamp(24px,2.3vw,42px);
+  width:clamp(30px,4.3vw,90px);
+  height:clamp(30px,4.3vw,90px);
   color:var(--forest);
 }
 .chain-icon svg{width:100%;height:100%;display:block}
@@ -219,18 +221,11 @@ html,body{
   flex:0 0 auto;
   background:none;box-shadow:none;padding:0;
   color:var(--forest-light);
-  width:clamp(22px,2vw,38px);
+  width:clamp(24px,2.4vw,52px);
   justify-content:center;
 }
 .chain .arrow svg{width:100%;height:100%}
 
-/* pastki to'q yashil chiziq — referens kompozitsiyasidagi asos */
-.footer-bar{
-  flex:0 0 auto;
-  height:clamp(10px,1.6vh,26px);
-  margin:0 calc(var(--gutter) * -1);
-  background:var(--forest);
-}
 
 /* ------------------------------------------------------------ animatsiya */
 

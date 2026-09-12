@@ -47,6 +47,14 @@ Talablar va almashtirish tartibi — `assets/photos/CREDITS.md`.
 ishlatilmaydi — `body` foni uni bekitib qo'yadi. QA shuni tekshiradi
 (`backdrop-fullscreen`, `bodyBg === 'none'`).
 
+### Vizual uslub
+
+Buyurtmachi referensiga moslangan: **to'ldirilgan** (kontur emas) yashil
+piktogrammalar, yirik tipografika, shaffof oynasimon statistika kartalari,
+strelkalar doira ichida emas — yaxlit egri shakl. `assets/icons.js` da ikki
+oila bor: `FILL` (ishlatilayotgani) va `LINE` (zaxira). Pastdagi zanjir och
+panel ustida, sahifa chetigacha cho'ziladi.
+
 ---
 
 ## ENG MUHIM QOIDA
