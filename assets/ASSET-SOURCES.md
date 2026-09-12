@@ -1,101 +1,32 @@
-# External asset sources
+# Tashqi asset manbalari
 
-All files below come from Poly Haven (https://polyhaven.com) and are released under CC0 1.0 Universal
-(https://creativecommons.org/publicdomain/zero/1.0/). No attribution is legally required; it is given here for provenance.
-Downloaded by `scripts/fetch-assets.mjs`; JPG sources are converted to WebP and resized by the same script.
+Hammasi lokal saqlanadi — sahifa internetsiz to'liq ishlaydi
+(`no-external-requests` QA kafolati). CDN havolasi yo'q.
 
-| kind | asset | map | res | shipped file | use | source URL |
-|---|---|---|---|---|---|---|
-| HDRI | belfast_sunset_puresky | golden state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/belfast_sunset_puresky_2k.hdr |
-| HDRI | citrus_orchard_puresky | day-alt state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/citrus_orchard_puresky_2k.hdr |
-| HDRI | empty_warehouse_01 | interior state | 1k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/empty_warehouse_01_1k.hdr |
-| HDRI | evening_road_01_puresky | golden-alt4 state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/evening_road_01_puresky_2k.hdr |
-| HDRI | industrial_sunset_puresky | golden-alt state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/industrial_sunset_puresky_2k.hdr |
-| HDRI | kloofendal_28d_misty_puresky | morning-alt state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_28d_misty_puresky_2k.hdr |
-| HDRI | kloofendal_38d_partly_cloudy_puresky | morning-alt2 state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_38d_partly_cloudy_puresky_2k.hdr |
-| HDRI | kloofendal_43d_clear_puresky | day state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_43d_clear_puresky_2k.hdr |
-| HDRI | kloofendal_48d_partly_cloudy_puresky | morning state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_48d_partly_cloudy_puresky_2k.hdr |
-| HDRI | kloppenheim_06_puresky | golden-alt3 state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloppenheim_06_puresky_2k.hdr |
-| HDRI | mud_road_puresky | morning-alt3 state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/mud_road_puresky_2k.hdr |
-| HDRI | qwantani_dusk_2_puresky | dusk state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/qwantani_dusk_2_puresky_2k.hdr |
-| HDRI | qwantani_sunset_puresky | dusk-alt state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/qwantani_sunset_puresky_2k.hdr |
-| HDRI | spruit_sunrise | dawn state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/spruit_sunrise_2k.hdr |
-| HDRI | studio_small_09 | studio state | 1k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr |
-| HDRI | sunflowers_puresky | day-alt2 state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/sunflowers_puresky_2k.hdr |
-| HDRI | syferfontein_18d_clear_puresky | dawn-alt state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/syferfontein_18d_clear_puresky_2k.hdr |
-| HDRI | syferfontein_6d_clear_puresky | golden-alt2 state | 2k | assets/environment/<state>.hdr (selected by scripts/prep-environment.mjs) |  | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/syferfontein_6d_clear_puresky_2k.hdr |
-| texture | aerial_grass_rock | arm | 1k | assets/textures/pbr/aerial_grass_rock_arm.webp, assets/textures/pbr/aerial_grass_rock_arm-512.webp | ground grass | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_grass_rock/aerial_grass_rock_arm_1k.jpg |
-| texture | aerial_grass_rock | diff | 1k | assets/textures/pbr/aerial_grass_rock_diff.webp, assets/textures/pbr/aerial_grass_rock_diff-512.webp | ground grass | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_grass_rock/aerial_grass_rock_diff_1k.jpg |
-| texture | aerial_grass_rock | diff | 2k | assets/textures/pbr/aerial_grass_rock_diff-2k.webp | ground grass | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/aerial_grass_rock/aerial_grass_rock_diff_2k.jpg |
-| texture | aerial_grass_rock | nor_gl | 1k | assets/textures/pbr/aerial_grass_rock_nor_gl.webp, assets/textures/pbr/aerial_grass_rock_nor_gl-512.webp | ground grass | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_grass_rock/aerial_grass_rock_nor_gl_1k.jpg |
-| texture | asphalt_02 | arm | 1k | assets/textures/pbr/asphalt_02_arm.webp, assets/textures/pbr/asphalt_02_arm-512.webp | roads | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_arm_1k.jpg |
-| texture | asphalt_02 | diff | 1k | assets/textures/pbr/asphalt_02_diff.webp, assets/textures/pbr/asphalt_02_diff-512.webp | roads | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_diff_1k.jpg |
-| texture | asphalt_02 | nor_gl | 1k | assets/textures/pbr/asphalt_02_nor_gl.webp, assets/textures/pbr/asphalt_02_nor_gl-512.webp | roads | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_nor_gl_1k.jpg |
-| texture | brown_mud_dry | arm | 1k | assets/textures/pbr/brown_mud_dry_arm.webp, assets/textures/pbr/brown_mud_dry_arm-512.webp | dry mud / worn paths | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_dry/brown_mud_dry_arm_1k.jpg |
-| texture | brown_mud_dry | diff | 1k | assets/textures/pbr/brown_mud_dry_diff.webp, assets/textures/pbr/brown_mud_dry_diff-512.webp | dry mud / worn paths | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_dry/brown_mud_dry_diff_1k.jpg |
-| texture | brown_mud_dry | diff | 2k | assets/textures/pbr/brown_mud_dry_diff-2k.webp | dry mud / worn paths | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_mud_dry/brown_mud_dry_diff_2k.jpg |
-| texture | brown_mud_dry | nor_gl | 1k | assets/textures/pbr/brown_mud_dry_nor_gl.webp, assets/textures/pbr/brown_mud_dry_nor_gl-512.webp | dry mud / worn paths | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_dry/brown_mud_dry_nor_gl_1k.jpg |
-| texture | concrete_floor_worn_001 | arm | 1k | assets/textures/pbr/concrete_floor_worn_001_arm.webp, assets/textures/pbr/concrete_floor_worn_001_arm-512.webp | factory floors, docks | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_arm_1k.jpg |
-| texture | concrete_floor_worn_001 | diff | 1k | assets/textures/pbr/concrete_floor_worn_001_diff.webp, assets/textures/pbr/concrete_floor_worn_001_diff-512.webp | factory floors, docks | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_diff_1k.jpg |
-| texture | concrete_floor_worn_001 | nor_gl | 1k | assets/textures/pbr/concrete_floor_worn_001_nor_gl.webp, assets/textures/pbr/concrete_floor_worn_001_nor_gl-512.webp | factory floors, docks | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_nor_gl_1k.jpg |
-| texture | concrete_wall_008 | arm | 1k | assets/textures/pbr/concrete_wall_008_arm.webp, assets/textures/pbr/concrete_wall_008_arm-512.webp | facility walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_wall_008/concrete_wall_008_arm_1k.jpg |
-| texture | concrete_wall_008 | diff | 1k | assets/textures/pbr/concrete_wall_008_diff.webp, assets/textures/pbr/concrete_wall_008_diff-512.webp | facility walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_wall_008/concrete_wall_008_diff_1k.jpg |
-| texture | concrete_wall_008 | nor_gl | 1k | assets/textures/pbr/concrete_wall_008_nor_gl.webp, assets/textures/pbr/concrete_wall_008_nor_gl-512.webp | facility walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_wall_008/concrete_wall_008_nor_gl_1k.jpg |
-| texture | corrugated_iron_02 | arm | 1k | assets/textures/pbr/corrugated_iron_02_arm.webp, assets/textures/pbr/corrugated_iron_02_arm-512.webp | barn roofs | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_arm_1k.jpg |
-| texture | corrugated_iron_02 | diff | 1k | assets/textures/pbr/corrugated_iron_02_diff.webp, assets/textures/pbr/corrugated_iron_02_diff-512.webp | barn roofs | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_diff_1k.jpg |
-| texture | corrugated_iron_02 | nor_gl | 1k | assets/textures/pbr/corrugated_iron_02_nor_gl.webp, assets/textures/pbr/corrugated_iron_02_nor_gl-512.webp | barn roofs | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_nor_gl_1k.jpg |
-| texture | corrugated_iron_03 | arm | 1k | assets/textures/pbr/corrugated_iron_03_arm.webp, assets/textures/pbr/corrugated_iron_03_arm-512.webp | barn walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_03/corrugated_iron_03_arm_1k.jpg |
-| texture | corrugated_iron_03 | diff | 1k | assets/textures/pbr/corrugated_iron_03_diff.webp, assets/textures/pbr/corrugated_iron_03_diff-512.webp | barn walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_03/corrugated_iron_03_diff_1k.jpg |
-| texture | corrugated_iron_03 | nor_gl | 1k | assets/textures/pbr/corrugated_iron_03_nor_gl.webp, assets/textures/pbr/corrugated_iron_03_nor_gl-512.webp | barn walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_03/corrugated_iron_03_nor_gl_1k.jpg |
-| texture | grassy_cobblestone | arm | 1k | assets/textures/pbr/grassy_cobblestone_arm.webp, assets/textures/pbr/grassy_cobblestone_arm-512.webp | market square | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grassy_cobblestone/grassy_cobblestone_arm_1k.jpg |
-| texture | grassy_cobblestone | diff | 1k | assets/textures/pbr/grassy_cobblestone_diff.webp, assets/textures/pbr/grassy_cobblestone_diff-512.webp | market square | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grassy_cobblestone/grassy_cobblestone_diff_1k.jpg |
-| texture | grassy_cobblestone | nor_gl | 1k | assets/textures/pbr/grassy_cobblestone_nor_gl.webp, assets/textures/pbr/grassy_cobblestone_nor_gl-512.webp | market square | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grassy_cobblestone/grassy_cobblestone_nor_gl_1k.jpg |
-| texture | gravel_road | arm | 1k | assets/textures/pbr/gravel_road_arm.webp, assets/textures/pbr/gravel_road_arm-512.webp | road shoulders, aprons | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravel_road/gravel_road_arm_1k.jpg |
-| texture | gravel_road | diff | 1k | assets/textures/pbr/gravel_road_diff.webp, assets/textures/pbr/gravel_road_diff-512.webp | road shoulders, aprons | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravel_road/gravel_road_diff_1k.jpg |
-| texture | gravel_road | nor_gl | 1k | assets/textures/pbr/gravel_road_nor_gl.webp, assets/textures/pbr/gravel_road_nor_gl-512.webp | road shoulders, aprons | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravel_road/gravel_road_nor_gl_1k.jpg |
-| texture | metal_plate | arm | 1k | assets/textures/pbr/metal_plate_arm.webp, assets/textures/pbr/metal_plate_arm-512.webp | machinery | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_arm_1k.jpg |
-| texture | metal_plate | diff | 1k | assets/textures/pbr/metal_plate_diff.webp, assets/textures/pbr/metal_plate_diff-512.webp | machinery | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg |
-| texture | metal_plate | nor_gl | 1k | assets/textures/pbr/metal_plate_nor_gl.webp, assets/textures/pbr/metal_plate_nor_gl-512.webp | machinery | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_nor_gl_1k.jpg |
-| texture | painted_concrete | arm | 1k | assets/textures/pbr/painted_concrete_arm.webp, assets/textures/pbr/painted_concrete_arm-512.webp | interior walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_concrete/painted_concrete_arm_1k.jpg |
-| texture | painted_concrete | diff | 1k | assets/textures/pbr/painted_concrete_diff.webp, assets/textures/pbr/painted_concrete_diff-512.webp | interior walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_concrete/painted_concrete_diff_1k.jpg |
-| texture | painted_concrete | nor_gl | 1k | assets/textures/pbr/painted_concrete_nor_gl.webp, assets/textures/pbr/painted_concrete_nor_gl-512.webp | interior walls | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_concrete/painted_concrete_nor_gl_1k.jpg |
-| texture | park_dirt | arm | 1k | assets/textures/pbr/park_dirt_arm.webp, assets/textures/pbr/park_dirt_arm-512.webp | farm yard soil | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/park_dirt/park_dirt_arm_1k.jpg |
-| texture | park_dirt | diff | 1k | assets/textures/pbr/park_dirt_diff.webp, assets/textures/pbr/park_dirt_diff-512.webp | farm yard soil | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/park_dirt/park_dirt_diff_1k.jpg |
-| texture | park_dirt | diff | 2k | assets/textures/pbr/park_dirt_diff-2k.webp | farm yard soil | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/park_dirt/park_dirt_diff_2k.jpg |
-| texture | park_dirt | nor_gl | 1k | assets/textures/pbr/park_dirt_nor_gl.webp, assets/textures/pbr/park_dirt_nor_gl-512.webp | farm yard soil | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/park_dirt/park_dirt_nor_gl_1k.jpg |
-| texture | rusty_metal_02 | arm | 1k | assets/textures/pbr/rusty_metal_02_arm.webp, assets/textures/pbr/rusty_metal_02_arm-512.webp | chassis, old fittings | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_arm_1k.jpg |
-| texture | rusty_metal_02 | diff | 1k | assets/textures/pbr/rusty_metal_02_diff.webp, assets/textures/pbr/rusty_metal_02_diff-512.webp | chassis, old fittings | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_diff_1k.jpg |
-| texture | rusty_metal_02 | nor_gl | 1k | assets/textures/pbr/rusty_metal_02_nor_gl.webp, assets/textures/pbr/rusty_metal_02_nor_gl-512.webp | chassis, old fittings | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg |
-| texture | stony_dirt_path | arm | 1k | assets/textures/pbr/stony_dirt_path_arm.webp, assets/textures/pbr/stony_dirt_path_arm-512.webp | field tracks | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stony_dirt_path/stony_dirt_path_arm_1k.jpg |
-| texture | stony_dirt_path | diff | 1k | assets/textures/pbr/stony_dirt_path_diff.webp, assets/textures/pbr/stony_dirt_path_diff-512.webp | field tracks | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stony_dirt_path/stony_dirt_path_diff_1k.jpg |
-| texture | stony_dirt_path | nor_gl | 1k | assets/textures/pbr/stony_dirt_path_nor_gl.webp, assets/textures/pbr/stony_dirt_path_nor_gl-512.webp | field tracks | https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stony_dirt_path/stony_dirt_path_nor_gl_1k.jpg |
+## Shriftlar — `assets/fonts/`
 
-Models under assets/models/ and textures named hen-*, chick-*, dressed-*, feather-*, skin-*, meat-* are original project assets generated by scripts/ (see assets/models/manifest.json).
+**Archivo** (Omnibus-Type) va **Instrument Serif** (Rodrigo Fuenzalida,
+Jordan Egstad) — SIL Open Font License 1.1 (https://openfontlicense.org).
+Google Fonts'dan yuklab olingan; `@font-face` qoidalari `assets/fonts.css` da.
+Hozirgi sahifa faqat Archivo'ni ishlatadi.
 
-## Fonts
+## 3D model — `assets/models/chicken-parts.glb`
 
-Instrument Serif (Rodrigo Fuenzalida, Jordan Egstad) and Archivo (Omnibus-Type) are self-hosted in `assets/fonts/` under the SIL Open Font License 1.1 (https://openfontlicense.org). Files were downloaded from Google Fonts; `assets/fonts.css` carries the @font-face rules.
+Buyurtmachi bergan `~/Desktop/chicken.glb` (92 MB, 2.74 mln uchburchak,
+Tripo AI mesh, qo'lda kesilgan) dan `scripts/prep-chicken-parts.mjs`
+tayyorlaydi: 174 365 uchburchak, 4.18 MB, WebP teksturalar
+(`KHR_mesh_quantization`), hammasi fayl ichiga joylashtirilgan.
 
-## Code
+Yetti tugun: `torso · wingL · wingR · legL · legR · neck · tail`.
+Batafsil shartnoma va tuzoqlar — `HANDOFF.md`.
 
-three.js r128 (MIT, `assets/vendor/THREE-LICENSE.txt`) with its GLTFLoader, RGBELoader, FXAAShader and BufferGeometryUtils examples.
+## Fotosuratlar — `assets/photos/`
 
-## 3D model — studio hen
+Manba, muallif, litsenziya va tahrir tafsilotlari alohida faylda:
+`assets/photos/CREDITS.md`.
 
-"Chicken" by **pooiloui2** — https://sketchfab.com/3d-models/chicken-98830a78e8c54354a7fbe5ca8346fbf9 — **CC BY 4.0** (attribution required; shown on the page in the loader and next to the studio scene). Prepared for the web in the sibling `chicken2` project (`scripts/build-chicken.mjs`: spec/gloss → metal/rough, albedo-derived normal map, quantized, WebP textures) and copied here as `assets/models/hen-photoreal.glb` (1.4 MB, 57,027 triangles, no skeleton). Used for the studio hero hen only; the flock, chicks, cuts and workers remain project-generated.
+---
 
-## 3D model — whole raw chicken
-
-`assets/models/raw-chicken.glb` is prepared by `scripts/prep-raw-chicken.mjs` from
-`~/Downloads/whole-raw-chicken-3d-model/source/raw chicken 3d model.glb` (Tripo AI-generated GLB, `THREE.GLTFExporter r182`,
-1.37 M triangles, three 4K JPEG maps: colour, ORM, normal; the `source/` + `textures/gltf_embedded_*` layout is Sketchfab's
-download format). Prepared file: 61,513 triangles, 1.15 MB, WebP maps (colour 2K, ORM/normal 1K), KHR_mesh_quantization.
-
-**Author and licence are not recorded**: the downloaded folder contains no licence file and carries no download-origin metadata.
-Confirm the licence on the source page before publishing; if it is CC BY, add the attribution to the loader credit and `#credit`
-in index.html next to the studio hen. Used for the “Butun tovuq” pack in the studio product ring (chapter 3) and the raw station
-of the unused beat 10; the procedural carcass stays in the scene as the fallback if the GLB fails to load.
-
-`assets/models/raw-chicken-cuts.glb` is derived from the same model by `scripts/split-raw-chicken.mjs` (plane-region split
-into breastL/R, thighL/R, drumL/R, wingL/R, rest with exact planar caps and an inner flesh shell on `rest`; output in the
-site frame at length 1.0). Same author/licence caveat as above. Used for the disassembly scene of chapter 3.
+Eskirgan: bu loyihada ilgari Poly Haven HDRI/PBR teksturalari va
+Sketchfab modeli ishlatilar edi. Ularning hammasi 2026-09-12 qayta
+qurishda olib tashlandi — ro'yxati git tarixida (`3b09ac1` dan oldin).

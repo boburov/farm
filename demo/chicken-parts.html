@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ChickenParts moduli — test</title>
+<style>
+  html,body{margin:0;height:100%;background:#0d1512;color:#e8ede9;font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+  canvas{display:block}
+  #panel{position:fixed;left:0;right:0;bottom:0;padding:16px 20px;background:rgba(13,21,18,.86);
+         backdrop-filter:blur(8px);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  #panel label{min-width:130px}
+  #spread{flex:1;min-width:200px}
+  #val{font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+  button{background:#174c32;color:#fff;border:0;border-radius:6px;padding:8px 14px;cursor:pointer;font:inherit}
+  #status{position:fixed;top:14px;left:18px;font-size:12px;opacity:.75}
+</style>
+</head>
+<body>
+<div id="status">yuklanmoqda…</div>
+<div id="panel">
+  <label for="spread">Sochilish (setSpread)</label>
+  <input id="spread" type="range" min="0" max="1" step="0.005" value="0">
+  <span id="val">0.00</span>
+  <button id="play">Avtomatik</button>
+</div>
+
+<script src="../assets/vendor/three.min.js"></script>
+<script src="../assets/vendor/GLTFLoader.js"></script>
+<script src="../assets/poultry-runtime.js"></script>
+<script src="../assets/chicken-parts.js"></script>
+<script>
+(function(){
+  var T=THREE, status=document.getElementById('status');
+  var renderer=new T.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.outputEncoding=T.sRGBEncoding;
+  renderer.toneMapping=T.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.1;
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
+  document.body.appendChild(renderer.domElement);
+
+  var scene=new T.Scene(); scene.background=new T.Color(0x0d1512);
+  var camera=new T.PerspectiveCamera(38,innerWidth/innerHeight,.1,200);
+
+  scene.add(new T.HemisphereLight(0xcfe3d6,0x1a241f,.85));
+  var key=new T.DirectionalLight(0xffffff,2.1);
+  key.position.set(6,11,7); key.castShadow=true;
+  key.shadow.mapSize.set(2048,2048);
+  key.shadow.camera.left=-12; key.shadow.camera.right=12;
+  key.shadow.camera.top=12; key.shadow.camera.bottom=-12;
+  scene.add(key);
+  var fill=new T.DirectionalLight(0xbcd4c4,.6); fill.position.set(-7,5,-6); scene.add(fill);
+
+  var floor=new T.Mesh(new T.CircleGeometry(16,64),
+    new T.MeshStandardMaterial({color:0x16201b,roughness:.95,metalness:0}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+
+  /* markaziy kursi — torso shu yerda qoladi */
+  var plinth=new T.Mesh(new T.CylinderGeometry(1.5,1.62,.28,48),
+    new T.MeshStandardMaterial({color:0x293b2e,roughness:.8,metalness:0}));
+  plinth.position.y=.14; plinth.receiveShadow=true; scene.add(plinth);
+
+  var angle=.83, radius=17, height=8.4;
+  function placeCamera(){
+    camera.position.set(Math.sin(angle)*radius,height,Math.cos(angle)*radius);
+    camera.lookAt(0,.9,0);
+  }
+  placeCamera();
+
+  addEventListener('resize',function(){
+    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight); render();
+  });
+
+  var slider=document.getElementById('spread'),
+      val=document.getElementById('val'),
+      playBtn=document.getElementById('play'),
+      playing=false, t0=0;
+
+  function render(){ renderer.render(scene,camera); }
+  function apply(p){
+    ChickenParts.setSpread(p);
+    val.textContent=p.toFixed(2);
+    render();
+  }
+  slider.addEventListener('input',function(){ playing=false; apply(parseFloat(slider.value)); });
+  playBtn.addEventListener('click',function(){ playing=!playing; t0=performance.now(); });
+
+  /* sichqoncha bilan aylantirish */
+  var dragging=false,lastX=0;
+  renderer.domElement.addEventListener('pointerdown',function(e){dragging=true;lastX=e.clientX;});
+  addEventListener('pointerup',function(){dragging=false;});
+  addEventListener('pointermove',function(e){
+    if(!dragging) return;
+    angle-=(e.clientX-lastX)*.006; lastX=e.clientX; placeCamera(); render();
+  });
+
+  function loop(now){
+    requestAnimationFrame(loop);
+    if(!playing) return;
+    var p=(Math.sin((now-t0)/2600*Math.PI*2-Math.PI/2)+1)/2;
+    slider.value=p; apply(p);
+  }
+  requestAnimationFrame(loop);
+
+  ChickenParts.load().then(function(){
+    ChickenParts.mount(scene,{length:2.3,position:[0,.4,0]});
+    status.textContent='OK — 7 bo\'lak: '+Object.keys(ChickenParts.parts).join(', ');
+    apply(0);
+  }).catch(function(e){
+    status.textContent='XATO: '+e.message;
+    console.error(e);
+  });
+})();
+</script>
+</body>
+</html>
