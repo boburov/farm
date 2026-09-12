@@ -199,5 +199,110 @@
       {icon:'blade',  label:'So‘yish'},
       {icon:'truck',  label:'Bozorga yetkazish'}
     ]
+  },
+
+  /* ====================================================== 2025–2026 ====== */
+  /* Manba — docs/Tovuqchilik_rivojlanish_tarixi.docx, 7-8-xatboshi:
+   *   "2025-yil bir aylanmadagi tovuq soni 800 ming tovuq, 300 ta ishchi.
+   *    Tovuqni bo'laklarga bo'lib sotish boshlandi. Yillik aylanma 240 mlrd.
+   *    Ishlab chiqarish hajmi 12 000 tonna, 8 mlrd summa soliq imtiyoz
+   *    (2024-2025-yil)."
+   *   "2026-yil bir aylanmadagi tovuq soni 1.5 mln dona. 400 dan oshiq ishchi.
+   *    Vengriya Aviagen kompaniyasidan 75 ming bosh ona tovuq olib kelingan.
+   *    Yillik aylanma 450 mlrd so'm. Ishlab chiqarish hajmi 22 500 tonna.
+   *    31.4 mlrd summa soliq imtiyoz."
+   * Hammasi docs/Yaratilgan_qiymat_Sokin_savdo.xlsx "Лист2" H va I ustunlari
+   * bilan mos (800 000 / 1 500 000 bosh, 12 000 / 22 500 t, 240 / 450 mlrd,
+   * soliq imtiyozi 8 / 31.4 mlrd).
+   *
+   * `growth` — hisoblangan: (2026 - 2025) / 2025 x 100.
+   *   tovuq   800 ming → 1.5 mln = +88%
+   *   aylanma     240 → 450      = +88%
+   *   hajm     12 000 → 22 500   = +88%
+   *   soliq         8 → 31.4     = +293%
+   *   narx     20 000 o'zgarmagan = 0%
+   * Ishchi soni qatorida foiz YO'Q: hujjatda "400 dan oshiq" deyilgan, ya'ni
+   * bu aniq raqam emas, quyi chegara — undan foiz chiqarish noto'g'ri bo'lardi.
+   *
+   * DIQQAT: buyurtmachi bergan referens rasmda O'zbekiston Prezidentiga
+   * tegishli iqtibos bor. U na .docx, na .xlsx da uchraydi — haqiqiy shaxsga
+   * tasdiqlanmagan gap yozib qo'yish mumkin emas, shuning uchun sahifaga
+   * kiritilmadi. Manbasi bo'lsa (rasmiy nutq, sana) — qo'shiladi.
+   */
+  {
+    id:'2025-2026',
+    layout:'compare',
+    brand:'Sokin Savdo',
+    title:'Klaster yanada kengaydi',
+    subtitle:'Sifatli nasl + qo‘shimcha qiymat = yanada katta imkoniyatlar',
+
+    photo:'assets/photos/2025.jpg',
+    photoAlt:'Ona tovuq xo‘jaligi, bo‘laklarga bo‘lib ishlash sexi va qadoqlash',
+
+    columns:[
+      {
+        year:'2025-yil', tone:'dark',
+        rows:[
+          /* `abs` — asl kattalik (dona). Ekranda "800 ming" ko'rinadi, lekin
+             o'sish foizini tekshirish shu maydondan hisoblanadi: ikki yilda
+             birlik har xil (ming / mln), xom raqamni solishtirish noto'g'ri. */
+          {icon:'hen',     value:800,   unit:'ming dona', abs:800000,
+           label:'Bir aylanmadagi tovuq soni'},
+          {icon:'workers', value:300,   unit:'ta',        label:'Ishchi soni'},
+          {icon:'chart',   value:240,   unit:'mlrd so‘m', label:'Yillik aylanma'},
+          {icon:'meat',    value:12000, unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)'},
+          {icon:'tax',     value:8,     unit:'mlrd so‘m', label:'Soliq imtiyozi (2024–2025)'},
+          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'},
+          {icon:'cuts',    value:null,  label:'Tovuqni bo‘laklarga bo‘lib sotish boshlandi'}
+        ]
+      },
+      {
+        year:'2026-yil', tone:'green',
+        growthHead:'2025-ga nisbatan o‘sish',
+        rows:[
+          {icon:'hen',     value:1.5,   unit:'mln dona',  abs:1500000,
+           label:'Bir aylanmadagi tovuq soni', growth:'+88%'},
+          {icon:'workers', value:400,   suffix:'+', unit:'ta',
+           label:'Ishchi soni (hujjatda «400 dan oshiq»)'},
+          {icon:'chart',   value:450,   unit:'mlrd so‘m', label:'Yillik aylanma',
+           growth:'+88%'},
+          {icon:'meat',    value:22500, unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)',
+           growth:'+88%'},
+          {icon:'tax',     value:31.4,  unit:'mlrd so‘m', label:'Soliq imtiyozi',
+           growth:'+293%'},
+          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi',
+           growth:'0%'},
+          {icon:'hen',     value:75,    unit:'ming bosh',
+           label:'Vengriya Aviagen kompaniyasidan ona tovuq'}
+        ]
+      }
+    ],
+
+    /* Manba — docs/Yaratilgan_qiymat_Sokin_savdo.xlsx, "Yaratilgan qiymat
+       2025-2026" varag'i, C6:C14 ("Maxsulotdagi ulush"). Foizga o'girilgan.
+       Varaqdagi jami 100.4% — buyurtmachi faylidagi yaxlitlash, shuning uchun
+       sahifada jami ko'rsatilmaydi. */
+    centre:{
+      title:'Tovuq go‘shti bo‘laklari va mahsulotdagi ulushi',
+      items:[
+        {label:'Akorachka',  value:13.8},
+        {label:'File',       value:35.6},
+        {label:'Qanot',      value:8},
+        {label:'Golen',      value:7},
+        {label:'Bedro',      value:12},
+        {label:'Drakon',     value:12},
+        {label:'Teri',       value:3},
+        {label:'Karkaz',     value:5},
+        {label:'Qanot uchi', value:4}
+      ]
+    },
+
+    chain:[
+      {icon:'hen',    label:'Ona tovuq xo‘jaligi'},
+      {icon:'gear',   label:'Yem ishlab chiqarish'},
+      {icon:'barn',   label:'Tovuq boqish'},
+      {icon:'blade',  label:'So‘yish va qayta ishlash'},
+      {icon:'cuts',   label:'Bo‘laklarga bo‘lib sotish'}
+    ]
   }];
 })();

@@ -153,6 +153,9 @@
       var num=el('span',null,'0');
       num.dataset.to=String(r.value);
       v.appendChild(num);
+      /* "400 dan oshiq" — aniq raqam emas, quyi chegara. Shuning uchun
+         qiymat yoniga "+" qo'yiladi va bunday qatorda foiz ko'rsatilmaydi. */
+      if(r.suffix) v.appendChild(el('span','row-suffix',r.suffix));
       if(r.unit) v.appendChild(el('span','row-unit',r.unit));
     }else{
       /* Hujjatda raqam yo'q — o'ylab topilmaydi, chiziqcha qo'yiladi.
@@ -167,6 +170,23 @@
        aks holda grid ustuni siljib ketadi */
     if(hasGrowthCol) li.appendChild(el('span','row-growth',r.growth||''));
     return li;
+  }
+
+  /* Ustunlar orasidagi bo'sh joyga qo'yiladigan blok (masalan tovuq
+     bo'laklarining mahsulotdagi ulushi). Ixtiyoriy. */
+  function centreNode(c){
+    var box=el('aside','centre reveal');
+    if(c.title) box.appendChild(el('h2','centre-title',c.title));
+    var ul=el('ul','cuts');
+    c.items.forEach(function(it){
+      var li=el('li','cut');
+      li.appendChild(el('span','cut-share',it.value+'%'));
+      li.appendChild(el('span','cut-name',it.label));
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    if(c.note) box.appendChild(el('p','centre-note',c.note));
+    return box;
   }
 
   function columnNode(c){
@@ -260,7 +280,10 @@
     page.appendChild(backdropNode(y));
 
     var wrap=el('div','compare');
-    (y.columns||[]).forEach(function(c){ wrap.appendChild(columnNode(c)); });
+    var cols=y.columns||[];
+    if(cols[0]) wrap.appendChild(columnNode(cols[0]));
+    if(y.centre) wrap.appendChild(centreNode(y.centre));
+    cols.slice(1).forEach(function(c){ wrap.appendChild(columnNode(c)); });
     page.appendChild(wrap);
 
     page.appendChild(chainNode(y.chain));

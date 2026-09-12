@@ -40,6 +40,16 @@ tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
 - **Kadr:** yem silosi va don uyumi, tovuqxonalar, so‘yish sexi va yuk mashinasi —
   2022–2023 hikoyasiga (klaster boshlandi, ichki yem ishlab chiqarish) mos.
 
+## 2025.jpg
+
+- **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
+  (`Gemini_Generated_Image_u6pctiu6pctiu6pc.jpg`, 2528x1684).
+- **Tahrir:** kesilmagan — faqat eni 2400 px ga keltirilib, JPEG q82 ga
+  siqilgan → 2400x1599 (1.50:1), 487 KB.
+  Kadr kollaj: har bir katak zanjirning bir bo'g'ini (nasl · yem · boqish ·
+  so'yish · parchalash · qadoqlash), shuning uchun butun saqlandi.
+- Kadrda yozuv, logotip yoki avtomobil raqami yo'q.
+
 ## Qanday almashtiriladi
 
 `assets/years.js` dagi yil obyektida `photo` maydoni. Fayl yo'q bo'lsa yoki

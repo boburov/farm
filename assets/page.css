@@ -413,6 +413,78 @@ html,body{
   font-variant-numeric:tabular-nums;
 }
 
+/* ------------------------------------------------- markaziy blok (bo'laklar) */
+
+/* Ustunlar orasidagi bo'sh joy — fon surati ko'rinadigan joy. Bu yerga
+   ixtiyoriy jadval qo'yiladi (tovuq bo'laklari va ulushi). Pastga
+   tekislanadi, shunda sarlavha va surat markazi ochiq qoladi. */
+.centre{
+  flex:0 1 clamp(240px,30vw,620px);
+  align-self:flex-end;
+  min-width:0;
+  /* pastda suzib turgan nuqtalar qatoriga tegmasligi uchun joy qoldiriladi */
+  margin-bottom:clamp(34px,4.8vh,62px);
+  padding:clamp(8px,1.2vh,20px) clamp(10px,1.1vw,24px) clamp(10px,1.4vh,24px);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(14px) saturate(1.15);
+  border:1px solid var(--line);
+}
+.centre-title{
+  margin:0 0 clamp(6px,1vh,16px);
+  text-align:center;
+  font-size:clamp(9px,.92vw,19px);
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--forest);
+  padding-bottom:clamp(4px,.6vh,10px);
+  border-bottom:1px solid var(--line-gold-soft);
+}
+.cuts{
+  list-style:none;margin:0;padding:0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(4px,.5vw,10px);
+}
+.cut{
+  display:flex;flex-direction:column;align-items:center;
+  gap:1px;
+  padding:clamp(4px,.6vh,11px) clamp(3px,.4vw,8px);
+  border-radius:calc(var(--radius) * .55);
+  background:rgba(228,242,234,.7);
+  border:1px solid var(--line-soft);
+}
+.cut-share{
+  font-size:clamp(12px,1.25vw,27px);
+  font-weight:800;
+  letter-spacing:-.02em;
+  color:var(--forest);
+  font-variant-numeric:tabular-nums;
+}
+.cut-name{
+  font-size:clamp(8px,.72vw,15px);
+  font-weight:600;
+  line-height:1.15;
+  text-align:center;
+  color:var(--muted);
+}
+.centre-note{
+  margin:clamp(5px,.8vh,12px) 0 0;
+  text-align:center;
+  font-size:clamp(8px,.72vw,15px);
+  font-weight:600;
+  color:var(--muted);
+}
+
+/* "400 dan oshiq" — aniq raqam emas, quyi chegara belgisi */
+.row-suffix{
+  font-size:.62em;
+  font-weight:800;
+  color:var(--forest-light);
+  margin-left:-.24em;   /* .row-value gap'ini qaytarib, raqamga yopishtiradi */
+}
+
 /* ---------------------------------------------------------------- zanjir */
 
 /* Pastki qator och panel ustida turadi, chetlari sahifa chekkasigacha yetadi. */
@@ -552,6 +624,11 @@ html,body{
   .backdrop-scene:nth-child(n+2){display:none}
   .deck-title{font-size:22px;max-width:none}
   .compare{flex-direction:column}
+  .centre{flex:0 0 auto;align-self:stretch;margin-bottom:0}
+  .cuts{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cut-share{font-size:19px}
+  .cut-name{font-size:12px}
+  .centre-title{font-size:12px}
   .col,.col--green{flex:0 0 auto}
   /* Desktopda qatorlar mavjud balandlikni teng bo'lishadi (flex:1 1 0).
      Mobilda balandlik erkin — aks holda asos 0 bo'lib, qatorlar ustma-ust tushadi. */

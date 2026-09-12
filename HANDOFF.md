@@ -1,6 +1,7 @@
 # Sokin Savdo — topshiriq hujjati
 
-**Holat:** 2010, 2020–2021 va 2022–2023 sahifalari tayyor. QA 63/63 o'tadi.
+**Holat:** 2010, 2020–2021, 2022–2023 va 2025–2026 sahifalari tayyor.
+QA 80/80 o'tadi.
 
 Sahifalar orasida uch xil yo'l bilan yurish mumkin, uchalasi bir holatni
 boshqaradi:
@@ -9,7 +10,7 @@ boshqaradi:
 |---|---|
 | Klaviatura | `←` `→` · `Home` `End` |
 | Sichqoncha | pastdagi nuqtalar |
-| Manzil | `http://127.0.0.1:5173/#2022-2023` |
+| Manzil | `http://127.0.0.1:5173/#2025-2026` |
 
 Hash tufayli sahifani to'g'ridan-to'g'ri ochish, yangilash va brauzerning
 orqaga/oldinga tugmalari ishlaydi; havolani yuborsa ham o'sha sahifa ochiladi.
@@ -30,6 +31,7 @@ Yillar bo'yicha infografika slaydlari. Hozir ikkitasi:
 | `2010` | `single` | Bitta yil: tepada ikki statistika kartasi, suratda uch zona |
 | `2020-2021` | `compare` | Ikki yil yonma-yon + o'sish ustuni |
 | `2022-2023` | `compare` | Subsidiya va ichki yem — klaster boshlanishi |
+| `2025-2026` | `compare` | Klaster kengaydi + markazda bo'laklar ulushi |
 
 Sahifa turi `assets/years.js` dagi `layout` maydoni bilan tanlanadi;
 `assets/page.js` da har turga alohida render funksiyasi bor
@@ -170,6 +172,28 @@ Hozir bitta shunday joy bor: **2022-yil ishchi soni**. Buyurtmachi bergan
 referens rasmda "150+ ta" yozilgan, lekin bu raqam na `.docx`, na `.xlsx`
 da uchraydi. Raqam topilsa — `assets/years.js` da manbasi bilan qo'yiladi.
 
+### Markaziy blok (`centre`)
+
+`compare` sahifada ustunlar orasida bo'sh joy qoladi. Unga ixtiyoriy jadval
+qo'yish mumkin — `centre:{title, items:[{label,value}], note}`. Hozir bitta
+joyda ishlatiladi: 2025–2026 sahifasida tovuq bo'laklarining mahsulotdagi
+ulushi (xlsx "Yaratilgan qiymat 2025-2026", C6:C14).
+Varaqdagi jami 100.4% — buyurtmachi faylidagi yaxlitlash, shuning uchun
+sahifada jami ko'rsatilmaydi.
+
+### Turli birlikdagi qatorlar (`abs`)
+
+Ekranda "800 ming" va "1.5 mln" turishi mumkin — birliklari har xil.
+Bunday qatorga `abs` (asl kattalik) qo'shiladi va o'sish foizi shundan
+tekshiriladi. `abs` bo'lmasa QA `value` ni oladi.
+Buni QA o'zi topgan: `abs` siz 800 → 1.5 solishtirilib, −100% chiqib qolgandi.
+
+### Quyi chegara (`suffix`)
+
+Hujjatda "400 dan oshiq ishchi" deyilgan — aniq raqam emas. Shunday qator
+`suffix:'+'` oladi (ekranda "400+ ta") va **foiz ko'rsatmaydi**: quyi
+chegaradan aniq foiz chiqarish noto'g'ri bo'lardi.
+
 ### O'sish foizlari (`compare`)
 
 `growth` maydoni — **o'ylab topilgan raqam emas**, ikki yilning o'z
@@ -179,8 +203,18 @@ solishtiradi. Ya'ni foizni qo'lda "tuzatib" qo'yib bo'lmaydi — yo raqamlar,
 yo foiz o'zgaradi. Qo'shimcha: ikkala yilda ham raqam bo'lmagan qatorda foiz
 turib qolsa, QA shuni ham xato deb belgilaydi.
 
-Boshqa yillar uchun tayyor ma'lumot `docs/` ichida: 2025, 2026,
-2026–2027 va istiqboldagi loyihalar.
+Boshqa yillar uchun tayyor ma'lumot `docs/` ichida: 2026–2027 (Marel
+majmuasi) va istiqboldagi loyihalar.
+
+### Referenslardan ataylab olinmagan narsalar
+
+| Nima | Qayerda | Nega |
+|---|---|---|
+| "150+ ta ishchi" (2022) | 2022–2023 referensi | Ikkala hujjatda ham yo'q |
+| Prezident iqtibosi | 2025–2026 referensi | Hujjatlarda yo'q; haqiqiy shaxsga tasdiqlanmagan gap yozilmaydi |
+| Aviagen logotipi | 2025–2026 referensi | Uchinchi tomon brendi — faqat docx'dagi matn ishlatildi |
+
+Manbasi topilsa (rasmiy nutq va sana, hujjatdagi raqam) — qo'shiladi.
 **2024-yil ikkala hujjatda ham yo'q** — buyurtmachidan so'rash kerak.
 
 ---

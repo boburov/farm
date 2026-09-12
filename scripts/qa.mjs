@@ -41,7 +41,19 @@ const ALLOWED = {
      50 / 36 / 0 — o'sish foizi, shu ikki ustundan hisoblangan; 1 — "1 kg".
      2022 uchun ishchi soni hujjatda YO'Q — ekranda "—" chiqadi. */
   '2022-2023': ['2022', '2023', '2500', '220', '66', '3300', '3.7', '20000',
-                '1250', '300', '200', '90', '4500', '6.9', '8', '50', '36', '0', '1']
+                '1250', '300', '200', '90', '4500', '6.9', '8', '50', '36', '0', '1'],
+
+  /* docx 7-8-xatboshi (xlsx "Лист2" H/I bilan mos):
+       2025 — 800 ming bosh · 300 ishchi · 240 mlrd · 12 000 t
+              · 8 mlrd soliq imtiyozi (2024-2025) · 20 000 so'm/kg
+       2026 — 1.5 mln bosh · 400 dan oshiq ishchi · Aviagen'dan 75 ming bosh
+              ona tovuq · 450 mlrd · 22 500 t · 31.4 mlrd · 20 000 so'm/kg
+     88 / 293 / 0 — hisoblangan o'sish; 1 — "1 kg"; 2024 — soliq imtiyozi davri.
+     Markazdagi bo'laklar ulushi — xlsx "Yaratilgan qiymat 2025-2026" C6:C14:
+       13.8 · 35.6 · 8 · 7 · 12 · 12 · 3 · 5 · 4 */
+  '2025-2026': ['2025', '2026', '800', '300', '240', '12000', '8', '20000', '2024',
+                '1.5', '400', '75', '450', '22500', '31.4', '88', '293', '0', '1',
+                '13.8', '35.6', '7', '12', '3', '5', '4']
 };
 
 const SIZES = [[1920, 1080], [1600, 900], [1440, 900], [1280, 720], [1024, 768], [390, 844]];
@@ -207,7 +219,11 @@ for (const [i, info] of deck.entries()) {
       const [a, b] = y.columns;
       const checked = [];
       const bad = b.rows.map((r, k) => {
-        const from = a.rows[k].value, to = r.value;
+        /* `abs` bo'lsa o'shandan hisoblanadi: ekrandagi birliklar har xil
+           bo'lishi mumkin ("800 ming" va "1.5 mln"), foiz esa asl
+           kattaliklardan chiqishi shart. */
+        const from = a.rows[k].abs ?? a.rows[k].value;
+        const to = r.abs ?? r.value;
         /* Foiz faqat ikkala yilda ham raqam bo'lganda ko'rsatiladi.
            Bittasi yo'q bo'lsa — foiz ham bo'lmasligi shart. */
         if (from == null || to == null) {
