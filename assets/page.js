@@ -513,6 +513,91 @@
     var ch2=chainNode(y.chain); if(ch2) page.appendChild(ch2);
   }
 
+  /* Istiqboldagi loyihalar: beshta karta bir qatorda, pastda jami. */
+  function renderPlans(y,page){
+    var head=el('header','plans-head');
+
+    var left=el('div','plans-title-block');
+    if(y.brand) left.appendChild(el('p','brandline reveal',y.brand));
+    left.appendChild(el('h1','plans-title reveal',y.title));
+    if(y.subtitle) left.appendChild(el('p','subtitle reveal',y.subtitle));
+    head.appendChild(left);
+
+    if(y.taglines&&y.taglines.length){
+      var tl=el('ul','taglines reveal');
+      y.taglines.forEach(function(t){ tl.appendChild(el('li',null,t)); });
+      head.appendChild(tl);
+    }
+    page.appendChild(head);
+
+    var list=el('ol','plan-cards');
+    y.items.forEach(function(it){
+      var li=el('li','plan reveal');
+
+      var top=el('div','plan-top');
+      top.appendChild(icon(it.icon,'plan-icon'));
+      top.appendChild(el('h2','plan-name',it.title));
+      li.appendChild(top);
+
+      /* Foto bo'lmasa karta buzilmaydi — o'rni yashil maydon bo'lib qoladi. */
+      var shot=el('div','plan-shot');
+      if(it.photo){
+        var img=new Image();
+        img.alt=it.title;
+        img.decoding='async';
+        img.addEventListener('load',function(){ shot.classList.add('has-photo'); });
+        img.addEventListener('error',function(){ img.remove(); });
+        img.src=it.photo;
+        shot.appendChild(img);
+      }
+      li.appendChild(shot);
+
+      var meta=el('div','plan-meta');
+      meta.appendChild(el('span','plan-when',it.when));
+      var v=el('span','plan-value');
+      var n=el('span',null,'0'); n.dataset.to=String(it.value);
+      v.appendChild(n);
+      if(it.unit) v.appendChild(el('span','plan-unit',it.unit));
+      meta.appendChild(v);
+      li.appendChild(meta);
+
+      if(it.bullets&&it.bullets.length){
+        var ul=el('ul','plan-bullets');
+        it.bullets.forEach(function(b){ ul.appendChild(el('li',null,b)); });
+        li.appendChild(ul);
+      }
+      list.appendChild(li);
+    });
+    page.appendChild(list);
+
+    if(y.total){
+      var bar=el('section','plans-total reveal');
+      bar.appendChild(el('p','plans-total-label',y.total.label));
+      var cells=el('ul','total-cells');
+      y.total.cells.forEach(function(c){
+        var li=el('li');
+        li.appendChild(icon(c.icon,'total-icon'));
+        var b=el('span','total-body');
+        var tv=el('span','total-value');
+        var tn=el('span',null,'0'); tn.dataset.to=String(c.value);
+        tv.appendChild(tn);
+        if(c.unit) tv.appendChild(el('span','total-unit',c.unit));
+        b.appendChild(tv);
+        b.appendChild(el('span','total-label',c.label));
+        li.appendChild(b);
+        cells.appendChild(li);
+      });
+      bar.appendChild(cells);
+      if(y.total.note){
+        var nt=el('p','plans-total-note');
+        nt.appendChild(icon('chart','total-icon'));
+        nt.appendChild(el('span',null,y.total.note));
+        bar.appendChild(nt);
+      }
+      page.appendChild(bar);
+    }
+  }
+
   function render(y){
     var page=document.getElementById('page');
     disposeScene();              /* oldingi sahifadagi 3D to'xtatiladi */
@@ -523,10 +608,12 @@
 
     if(y.layout==='compare') renderCompare(y,page);
     else if(y.layout==='project') renderProject(y,page);
+    else if(y.layout==='plans') renderPlans(y,page);
     else renderSingle(y,page);
 
-    document.title=(y.layout==='single'?y.title:y.id.replace('-','–')+'-yillar')+
-                   ' — Sokin Savdo';
+    document.title=(y.layout==='single'||y.layout==='plans'
+                      ? y.title
+                      : y.id.replace('-','–')+'-yillar')+' — Sokin Savdo';
 
     /* navbatma-navbat ochilish */
     var order=Array.prototype.slice.call(page.querySelectorAll('.reveal'));

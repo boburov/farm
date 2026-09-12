@@ -62,7 +62,15 @@ const ALLOWED = {
      buyurtmachidan so'ralishi kerak; hozircha docx raqami ko'rsatilyapti.
      Yo'nalishlar tartib raqami (1-4) CSS hisoblagichi bilan chiziladi,
      DOM matniga tushmaydi. */
-  '2026-2027': ['2026', '2027', '35', '20', '180', '24', '60', '1.5']
+  '2026-2027': ['2026', '2027', '35', '20', '180', '24', '60', '1.5'],
+
+  /* docx oxirgi blok, "Istiqboldagi loyihalar":
+       Andijon yem zavodi 2027 4-chorak 10 mln $ · Kalbasa 1-chorak 2.5 ·
+       Ona tovuq 2-chorak 7 · 12 viloyatda 500 do'kon 4-chorak 7.5 ·
+       Parranda va naslli chorva 4-chorak 9 · jami 36 mln $, 1 780 ish o'rni.
+     Kartalar tartib raqami (1-5) CSS hisoblagichi bilan — DOM matniga tushmaydi. */
+  'istiqbol': ['2027', '4', '1', '2', '10', '2.5', '7', '7.5', '9', '12', '500',
+               '36', '1780']
 };
 
 const SIZES = [[1920, 1080], [1600, 900], [1440, 900], [1280, 720], [1024, 768], [390, 844]];
@@ -159,8 +167,11 @@ for (const [i, info] of deck.entries()) {
   }
 
   /* 3. fon butun ekranni qoplaydi (manfiy z-index xatosiga qarshi qo'riqchi).
-        Loyiha sahifasida fon yo'q — u gorizontal polosa ishlatadi. */
-  if (info.layout !== 'project') {
+        Har sahifada fon qatlami bo'lavermaydi: `project` gorizontal polosa,
+        `plans` esa och gradient ishlatadi. Shuning uchun tekshiruv layout
+        nomiga emas, elementning o'ziga bog'lanadi — yangi tur qo'shilsa QA
+        o'zi moslashadi. */
+  if (await page.$('.backdrop')) {
     const st = await page.evaluate(() => {
       const host = document.querySelector('.backdrop');
       const img = host.querySelector('.backdrop-photo');
@@ -206,6 +217,25 @@ for (const [i, info] of deck.entries()) {
     ar === 'skipped' || ar.every(d => d < 2)
       ? pass(`arrows-on-zone-edges@${tag}`, ar === 'skipped' ? 'foto yo\'q' : 'chetlanish < 2px')
       : fail(`arrows-on-zone-edges@${tag}`, JSON.stringify(ar));
+  } else if (info.layout === 'plans') {
+    const c = await page.evaluate(id => {
+      const y = window.YEARS.find(v => v.id === id);
+      return {
+        cards: document.querySelectorAll('.plan').length,
+        totals: document.querySelectorAll('.total-cells li').length,
+        want: { cards: y.items.length, totals: y.total.cells.length },
+        /* Jami hujjatda alohida berilgan — kartalar yig'indisi bilan mos
+           kelishi shart. Mos kelmasa biror raqam noto'g'ri. */
+        sum: +y.items.reduce((a, b) => a + b.value, 0).toFixed(2),
+        stated: y.total.cells[0].value
+      };
+    }, tag);
+    c.cards === c.want.cards && c.totals === c.want.totals
+      ? pass(`layout-shape@${tag}`, `${c.cards} loyiha · ${c.totals} jami katak`)
+      : fail(`layout-shape@${tag}`, JSON.stringify(c));
+    c.sum === c.stated
+      ? pass(`plans-total-adds-up@${tag}`, `${c.sum} = ${c.stated} mln $`)
+      : fail(`plans-total-adds-up@${tag}`, `kartalar yig'indisi ${c.sum}, hujjatda ${c.stated}`);
   } else if (info.layout === 'project') {
     const c = await page.evaluate(id => {
       const y = window.YEARS.find(v => v.id === id);

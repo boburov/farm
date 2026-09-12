@@ -49,7 +49,8 @@ html,body{
 
 /* Pastdagi zanjir qatori oynaga (viewport) mixlanadi — `--chain-h` esa
    uning balandligini sahifada band qilib turadi (assets/page.js o'lchaydi). */
-.page[data-layout="project"]{
+.page[data-layout="project"],
+.page[data-layout="plans"]{
   /* pastda zanjir yo'q — suzuvchi nuqtalar uchun joy qoldiriladi */
   padding-bottom:clamp(34px,4.6vh,60px);
 }
@@ -713,6 +714,189 @@ html,body{
   font-weight:600;color:var(--muted);
 }
 
+/* ==================================== istiqboldagi loyihalar (plans) === */
+
+.plans-head{
+  flex:0 0 auto;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:clamp(10px,1.5vw,32px);
+  flex-wrap:wrap;
+}
+.plans-title-block{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(2px,.4vh,8px)}
+.plans-title{
+  margin:0;
+  font-size:clamp(20px,2.9vw,62px);
+  font-weight:800;line-height:1.04;letter-spacing:-.032em;
+  text-transform:uppercase;
+  color:var(--forest);
+}
+.plans-title-block .subtitle{text-align:left;max-width:none}
+.taglines{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-wrap:wrap;
+  gap:clamp(6px,.8vw,18px);
+}
+.taglines li{
+  padding:clamp(3px,.5vh,9px) clamp(8px,.9vw,20px);
+  border-radius:999px;
+  border:1px solid var(--line-gold-soft);
+  background:rgba(255,255,255,.8);
+  font-size:clamp(8.5px,.8vw,17px);
+  font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--forest);
+}
+
+.plan-cards{
+  flex:1 1 auto;min-height:0;
+  list-style:none;margin:0;padding:0;
+  counter-reset:plan;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:clamp(6px,.8vw,18px);
+}
+.plan{
+  counter-increment:plan;
+  position:relative;
+  display:flex;flex-direction:column;min-height:0;
+  gap:clamp(5px,.7vh,12px);
+  padding:clamp(8px,1.1vh,20px) clamp(8px,.9vw,20px) clamp(9px,1.2vh,22px);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.93);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--line);
+}
+/* tartib raqami CSS hisoblagichi bilan — DOM matniga tushmaydi */
+.plan::before{
+  content:counter(plan);
+  position:absolute;top:calc(var(--frame) * -1);left:clamp(8px,.9vw,20px);
+  min-width:clamp(17px,1.6vw,32px);
+  padding:1px clamp(3px,.3vw,7px);
+  border-radius:999px;
+  background:var(--forest);color:#fff;
+  font-size:clamp(8px,.72vw,16px);
+  font-weight:800;text-align:center;
+}
+
+.plan-top{display:flex;align-items:flex-start;gap:clamp(6px,.6vw,14px);padding-top:clamp(4px,.5vh,10px)}
+.plan-icon{
+  flex:0 0 auto;
+  width:clamp(18px,1.9vw,40px);height:clamp(18px,1.9vw,40px);
+  color:var(--forest);
+}
+.plan-icon svg{width:100%;height:100%;display:block}
+.plan-name{
+  margin:0;
+  font-size:clamp(9.5px,.95vw,20px);
+  font-weight:700;line-height:1.18;letter-spacing:-.012em;
+  color:var(--ink);
+}
+
+/* Foto o'rni. Surat kelmasa yashil maydon bo'lib qoladi — karta buzilmaydi. */
+.plan-shot{
+  position:relative;
+  flex:1 1 auto;min-height:clamp(60px,10vh,150px);
+  border-radius:calc(var(--radius) * .65);
+  overflow:hidden;
+  border:1px solid var(--line-soft);
+  background:
+    radial-gradient(78% 80% at 50% 42%,rgba(255,255,255,.86) 0%,rgba(220,236,228,.9) 60%,
+                    rgba(196,222,207,.92) 100%);
+}
+.plan-shot img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;
+  opacity:0;transition:opacity .6s var(--ease-out);
+}
+.plan-shot.has-photo img{opacity:1}
+
+.plan-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:clamp(4px,.5vw,12px);
+  padding-top:clamp(4px,.6vh,11px);
+  border-top:1px solid var(--line-gold-soft);
+}
+.plan-when{
+  font-size:clamp(8px,.72vw,15px);
+  font-weight:600;line-height:1.14;color:var(--muted);
+}
+.plan-value{
+  display:flex;align-items:baseline;gap:.2em;
+  font-size:clamp(13px,1.35vw,29px);
+  font-weight:800;letter-spacing:-.028em;color:var(--forest);
+  font-variant-numeric:tabular-nums;
+}
+.plan-unit{letter-spacing:normal;font-size:.5em;font-weight:700;color:var(--ink)}
+
+.plan-bullets{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-direction:column;gap:2px;
+}
+.plan-bullets li{
+  position:relative;padding-left:1.1em;
+  font-size:clamp(8px,.7vw,15px);
+  font-weight:600;line-height:1.2;color:var(--muted);
+}
+.plan-bullets li::before{
+  content:"";position:absolute;left:0;top:.42em;
+  width:.42em;height:.42em;border-radius:50%;
+  background:var(--forest-light);
+}
+
+/* jami */
+.plans-total{
+  flex:0 0 auto;
+  display:flex;align-items:center;
+  gap:clamp(10px,1.6vw,36px);
+  flex-wrap:wrap;
+  padding:clamp(8px,1.2vh,22px) clamp(14px,1.6vw,36px);
+  border-radius:var(--radius);
+  background:var(--forest);
+  border:1px solid var(--line-gold);
+  color:#fff;
+}
+.plans-total-label{
+  margin:0;
+  font-size:clamp(9px,.86vw,18px);
+  font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.86);
+}
+.total-cells{
+  list-style:none;margin:0;padding:0;
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:clamp(12px,2vw,48px);
+}
+.total-cells li{display:flex;align-items:center;gap:clamp(7px,.9vw,20px)}
+.total-icon{
+  flex:0 0 auto;
+  width:clamp(22px,2.4vw,50px);height:clamp(22px,2.4vw,50px);
+  color:#fff;
+}
+.total-icon svg{width:100%;height:100%;display:block}
+.total-body{display:flex;flex-direction:column;gap:0}
+.total-value{
+  display:flex;align-items:baseline;gap:.2em;
+  font-size:clamp(18px,2.3vw,50px);
+  font-weight:800;line-height:1.04;letter-spacing:-.032em;
+  font-variant-numeric:tabular-nums;
+}
+.total-unit{letter-spacing:normal;font-size:.46em;font-weight:800}
+.total-label{
+  font-size:clamp(8.5px,.78vw,16px);
+  font-weight:600;color:rgba(255,255,255,.82);
+}
+.plans-total-note{
+  margin:0 0 0 auto;
+  display:flex;align-items:center;gap:clamp(6px,.7vw,16px);
+  padding-left:clamp(10px,1.4vw,32px);
+  border-left:1px solid var(--line-gold-soft);
+  font-size:clamp(10px,1.05vw,22px);
+  font-weight:800;letter-spacing:.04em;
+  color:#bfe6ce;
+}
+.plans-total-note .total-icon{
+  width:clamp(18px,1.8vw,38px);height:clamp(18px,1.8vw,38px);
+  color:#7fd3a1;
+}
+
 /* ---------------------------------------------------------------- zanjir */
 
 /* Pastki qator och panel ustida turadi, chetlari sahifa chekkasigacha yetadi. */
@@ -851,6 +1035,16 @@ html,body{
   .backdrop-scenes{grid-template-columns:1fr}
   .backdrop-scene:nth-child(n+2){display:none}
   .deck-title{font-size:22px;max-width:none}
+  .plans-head{flex-direction:column;align-items:stretch;gap:10px}
+  .plans-title{font-size:24px}
+  .plan-cards{grid-template-columns:1fr;gap:10px}
+  .plan-shot{min-height:130px}
+  .plan-name{font-size:15px}
+  .plan-when{font-size:12px}
+  .plan-value{font-size:20px}
+  .plans-total{flex-direction:column;align-items:flex-start;gap:10px}
+  .plans-total-note{margin:0;padding-left:0;border-left:0;font-size:14px}
+  .total-value{font-size:28px}
   .proj-head{grid-template-columns:1fr;gap:12px}
   .proj-year,.partners,.invest{justify-self:stretch}
   .partners{justify-content:flex-start;text-align:left}

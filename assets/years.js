@@ -373,5 +373,57 @@
          note:'Chiqindini qayta ishlab, yemga qo‘shimcha mahsulot'}
       ]
     }
+  },
+
+  /* ================================================ istiqboldagi loyihalar === */
+  /* Manba — docs/Tovuqchilik_rivojlanish_tarixi.docx, oxirgi blok:
+   *   "Istiqboldagi loyihalar
+   *    Andijon viloyatida yem ozuqa zavodi ishlab chiqarish — 2027-yil
+   *      4-chorak, 10 mln doll
+   *    Kalbasa maxsulotlari — 2027-yil 1-chorak, 2.5 mln doll
+   *    Ona tovuq loyihasi — 2027-yil 2-chorak, 7 mln doll
+   *    12 ta viloyatda 500 ta savdo do'konlari qurish — 2027-yil 4-chorak,
+   *      7.5 mln doll
+   *    Parranda va naslli chorva — 2027-yil 4-chorak, 9 mln doll
+   *    Jami 36 mln doll loyiha, 1 780 ta ish o'rni yaratiladi."
+   *
+   * Jami tekshirildi: 10 + 2.5 + 7 + 7.5 + 9 = 36 — hujjatdagi jami bilan mos.
+   * QA buni har safar qayta hisoblaydi (`plans-total-adds-up`).
+   *
+   * DIQQAT: buyurtmachi bergan referens rasmda har kartaning ostida 4-5 tadan
+   * izoh bandi bor ("Yem ishlab chiqarish quvvati", "Mahalliy xom ashyodan
+   * foydalanish" va h.k.). Ular hujjatda YO'Q — loyihalar mazmuni haqidagi
+   * taxminlar. Shuning uchun kiritilmadi. Matn berilsa, `bullets` maydoniga
+   * qo'shiladi.
+   */
+  {
+    id:'istiqbol',
+    layout:'plans',
+    brand:'Sokin Savdo',
+    title:'Istiqboldagi loyihalar',
+    subtitle:'2027-yilgacha — yanada katta imkoniyatlar',
+    taglines:['Sifatli mahsulot','Kuchli iqtisodiyot','Barqaror kelajak'],
+
+    items:[
+      {icon:'gear',   title:'Andijon viloyatida yem ozuqa zavodi ishlab chiqarish',
+       when:'2027-yil 4-chorak', value:10,  unit:'mln $', photo:'assets/photos/plans-1.jpg'},
+      {icon:'meat',   title:'Kalbasa maxsulotlari',
+       when:'2027-yil 1-chorak', value:2.5, unit:'mln $', photo:'assets/photos/plans-2.jpg'},
+      {icon:'hen',    title:'Ona tovuq loyihasi',
+       when:'2027-yil 2-chorak', value:7,   unit:'mln $', photo:'assets/photos/plans-3.jpg'},
+      {icon:'market', title:'12 ta viloyatda 500 ta savdo do‘konlari qurish',
+       when:'2027-yil 4-chorak', value:7.5, unit:'mln $', photo:'assets/photos/plans-4.jpg'},
+      {icon:'barn',   title:'Parranda va naslli chorva',
+       when:'2027-yil 4-chorak', value:9,   unit:'mln $', photo:'assets/photos/plans-5.jpg'}
+    ],
+
+    total:{
+      label:'Jami loyihalar',
+      cells:[
+        {icon:'money',   value:36,   unit:'mln $', label:'investitsiya'},
+        {icon:'workers', value:1780, unit:'ta',    label:'ish o‘rni yaratiladi'}
+      ],
+      note:'Barqaror rivojlanish sari'
+    }
   }];
 })();

@@ -1,7 +1,8 @@
 # Sokin Savdo — topshiriq hujjati
 
-**Holat:** 2010, 2020–2021, 2022–2023, 2025–2026 va 2026–2027 sahifalari
-tayyor. QA 97/97 o'tadi.
+**Holat:** 2010, 2020–2021, 2022–2023, 2025–2026, 2026–2027 va istiqboldagi
+loyihalar sahifalari
+tayyor. QA 112/112 o'tadi.
 
 Sahifalar orasida uch xil yo'l bilan yurish mumkin, uchalasi bir holatni
 boshqaradi:
@@ -10,7 +11,7 @@ boshqaradi:
 |---|---|
 | Klaviatura | `←` `→` · `Home` `End` |
 | Sichqoncha | pastdagi nuqtalar |
-| Manzil | `http://127.0.0.1:5173/#2026-2027` |
+| Manzil | `http://127.0.0.1:5173/#istiqbol` |
 
 Hash tufayli sahifani to'g'ridan-to'g'ri ochish, yangilash va brauzerning
 orqaga/oldinga tugmalari ishlaydi; havolani yuborsa ham o'sha sahifa ochiladi.
@@ -33,6 +34,7 @@ Yillar bo'yicha infografika slaydlari. Hozir ikkitasi:
 | `2022-2023` | `compare` | Subsidiya va ichki yem — klaster boshlanishi |
 | `2025-2026` | `compare` | Klaster kengaydi + markazda bo'laklar ulushi |
 | `2026-2027` | `project` | Marel majmuasi: foto polosa + ko'rsatkichlar + yo'nalishlar |
+| `istiqbol` | `plans` | 2027-gacha 5 ta loyiha + jami |
 
 Sahifa turi `assets/years.js` dagi `layout` maydoni bilan tanlanadi;
 `assets/page.js` da har turga alohida render funksiyasi bor
@@ -247,9 +249,24 @@ solishtiradi. Ya'ni foizni qo'lda "tuzatib" qo'yib bo'lmaydi — yo raqamlar,
 yo foiz o'zgaradi. Qo'shimcha: ikkala yilda ham raqam bo'lmagan qatorda foiz
 turib qolsa, QA shuni ham xato deb belgilaydi.
 
-Qolgan material: `docs/` ichidagi **istiqboldagi loyihalar** ro'yxati
-(Andijon yem zavodi, kalbasa, ona tovuq, 500 do'kon, naslli chorva —
-jami 36 mln $, 1 780 ish o'rni).
+Hujjatlardagi barcha material sahifalarga chiqdi.
+
+### `plans` sahifasi
+
+Beshta loyiha kartasi bir qatorda, pastda jami. Kartalar tartib raqami CSS
+hisoblagichi bilan (DOM matniga tushmaydi).
+
+Jami hujjatda **alohida** berilgan (36 mln $), kartalar summasi ham 36 ga
+teng. QA buni har safar qayta hisoblaydi — `plans-total-adds-up`. Biror
+raqam o'zgarsa yoki loyiha qo'shilsa, mos kelmaslik darhol ushlanadi.
+
+**Foto o'rinlari bo'sh:** `assets/photos/plans-1.jpg` … `plans-5.jpg`.
+Fayl qo'yilishi bilan avtomat ko'rinadi; yo'q bo'lsa yashil maydon qoladi.
+
+**Kiritilmagan:** referens rasmdagi karta izohlari ("Yem ishlab chiqarish
+quvvati", "Importga qaramlikni kamaytirish" va h.k.) hujjatda yo'q —
+loyihalar mazmuni haqidagi taxminlar. Matn berilsa `bullets` maydoniga
+qo'shiladi.
 
 ### Hujjatlar orasidagi ziddiyat
 
@@ -265,6 +282,7 @@ buyurtmachidan so'rash kerak.
 | "150+ ta ishchi" (2022) | 2022–2023 referensi | Ikkala hujjatda ham yo'q |
 | Prezident iqtibosi | 2025–2026 referensi | Hujjatlarda yo'q; haqiqiy shaxsga tasdiqlanmagan gap yozilmaydi |
 | Aviagen logotipi | 2025–2026 referensi | Uchinchi tomon brendi — faqat docx'dagi matn ishlatildi |
+| Karta izohlari (5×4 band) | istiqbol referensi | Hujjatda yo'q — loyiha mazmuni haqidagi taxminlar |
 
 Manbasi topilsa (rasmiy nutq va sana, hujjatdagi raqam) — qo'shiladi.
 **2024-yil ikkala hujjatda ham yo'q** — buyurtmachidan so'rash kerak.
