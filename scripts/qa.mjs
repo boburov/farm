@@ -91,6 +91,13 @@ const NUMBERS = () => {
 
 const settle = async (p, ms = 3200) => {
   await p.waitForSelector('.page.ready', { timeout: 15000 });
+  /* 3D bor sahifada avval sahna tayyor bo'lishini kutamiz: QA dasturiy
+     renderer (swiftshader) da ishlaydi va GLB yuklanishi asosiy oqimni band
+     qiladi — aks holda hisoblagichlar rAF'i vaqtida ishga tushmay qoladi. */
+  if (await p.$('.model')) {
+    await p.waitForSelector('.model.is-ready', { timeout: 60000 }).catch(() => {});
+    ms += 2500;
+  }
   await p.waitForTimeout(ms);          /* hisoblagichlar tugashini kutamiz */
 };
 
@@ -281,6 +288,41 @@ for (const [i, info] of deck.entries()) {
       ? fail(`growth-matches-arithmetic@${tag}`, JSON.stringify(derived.bad))
       : pass(`growth-matches-arithmetic@${tag}`,
              `${derived.n} ta foiz ikki raqamdan chiqadi`);
+
+    /* Markazdagi 3D: modul o'rnatilganmi, yetti bo'lak bormi, aylanyaptimi. */
+    if (await page.$('.model')) {
+      const m3 = await page.evaluate(async () => {
+        const host = document.querySelector('.model');
+        const cv = host.querySelector('canvas');
+        const parts = window.ChickenParts && ChickenParts.parts
+          ? Object.keys(ChickenParts.parts) : [];
+        /* ikki kadr orasida kamera burchagi o'zgarishi — aylanish isboti */
+        const cam = () => {
+          const r = host.getBoundingClientRect();
+          return r.width;  /* o'lcham; burchakni quyida alohida o'lchaymiz */
+        };
+        const T = window.THREE;
+        return {
+          ready: host.classList.contains('is-ready'),
+          canvas: !!cv && cv.width > 0 && cv.height > 0,
+          parts: parts.length,
+          spread: ChickenParts.root ? ChickenParts.root.userData.flight : null,
+          basesHidden: ChickenParts.ring ? !ChickenParts.ring.visible : null,
+          w: cam(), hasThree: !!T
+        };
+      });
+      m3.ready && m3.canvas && m3.parts === 7 && m3.spread === 1 && m3.basesHidden
+        ? pass(`model-3d@${tag}`, '7 bo\'lak, to\'liq sochilgan, asoslar yashirin')
+        : fail(`model-3d@${tag}`, JSON.stringify(m3));
+
+      /* aylanish: ikki o'lchov orasida piksel o'zgarishi bo'lishi shart */
+      const a = await page.locator('.model canvas').screenshot();
+      await page.waitForTimeout(900);
+      const b = await page.locator('.model canvas').screenshot();
+      Buffer.compare(a, b) !== 0
+        ? pass(`model-3d-rotates@${tag}`)
+        : fail(`model-3d-rotates@${tag}`, 'kadr o\'zgarmadi');
+    }
   }
 }
 

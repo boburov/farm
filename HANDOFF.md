@@ -1,7 +1,7 @@
 # Sokin Savdo — topshiriq hujjati
 
 **Holat:** 2010, 2020–2021, 2022–2023, 2025–2026 va 2026–2027 sahifalari
-tayyor. QA 95/95 o'tadi.
+tayyor. QA 97/97 o'tadi.
 
 Sahifalar orasida uch xil yo'l bilan yurish mumkin, uchalasi bir holatni
 boshqaradi:
@@ -189,12 +189,41 @@ beriladi — logotip ishlatilmaydi.
 
 ### Markaziy blok (`centre`)
 
-`compare` sahifada ustunlar orasida bo'sh joy qoladi. Unga ixtiyoriy jadval
-qo'yish mumkin — `centre:{title, items:[{label,value}], note}`. Hozir bitta
-joyda ishlatiladi: 2025–2026 sahifasida tovuq bo'laklarining mahsulotdagi
-ulushi (xlsx "Yaratilgan qiymat 2025-2026", C6:C14).
-Varaqdagi jami 100.4% — buyurtmachi faylidagi yaxlitlash, shuning uchun
-sahifada jami ko'rsatilmaydi.
+`compare` sahifada ustunlar orasida bo'sh joy qoladi. Unga ixtiyoriy blok
+qo'yiladi — `centre:{title, model, items:[{label,value}], note}`.
+Hozir bitta joyda ishlatiladi: 2025–2026 sahifasida **3D tovuq** va uning
+ostida bo'laklarning mahsulotdagi ulushi (xlsx "Yaratilgan qiymat 2025-2026",
+C6:C14). Varaqdagi jami 100.4% — buyurtmachi faylidagi yaxlitlash, shuning
+uchun sahifada jami ko'rsatilmaydi.
+
+#### 3D tovuq (`centre.model`)
+
+`assets/chicken-parts.js` moduli shu yerda ishlatiladi: tovuq bo'laklarga
+ajralib, sekin aylanib turadi.
+
+```js
+model:{length:1, ringRadius:1.25, radius:4.8, height:2.5, look:.28, spin:true}
+```
+
+- `three.js`, `GLTFLoader`, `poultry-runtime.js` va `chicken-parts.js`
+  **faqat shu sahifada**, `assets/page.js: loadModelScripts()` orqali
+  yuklanadi — boshqa sahifalar 4 MB GLB ni behuda ko'tarmaydi.
+- Sahifa almashganda `disposeScene()` rAF va renderer'ni to'xtatadi.
+- Yuklanmasa blok yig'ilib qoladi (`height:0`) — sahifa buzilmaydi.
+- Halqadagi to'q yashil asoslar o'chirilgan (`ChickenParts.showBases(false)`),
+  bo'laklar yumshoq yashil maydonda "suzib" turadi: xom go'sht och rangli,
+  oq panelda yo'qolib ketardi.
+- `prefers-reduced-motion` da aylanish ham, sochilish animatsiyasi ham
+  o'chadi — bo'laklar darhol yoyilgan holatda turadi.
+
+**QA tuzog'i:** QA dasturiy renderer (swiftshader) da ishlaydi va GLB
+yuklanishi asosiy oqimni band qiladi. Shu sababli `settle()` bu sahifada
+avval `.model.is-ready` ni kutadi — aks holda hisoblagichlar rAF'i vaqtida
+ishga tushmay, `counters-land` yiqilardi.
+
+**QA tuzog'i 2:** GLTFLoader GLB ichidagi teksturalardan `blob:` manzil
+yasaydi. U tarmoqqa chiqmaydi, shuning uchun `no-external-requests`
+tekshiruvi `blob:` va `data:` ni tashqi so'rov deb hisoblamaydi.
 
 ### Turli birlikdagi qatorlar (`abs`)
 

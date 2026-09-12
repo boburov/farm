@@ -220,22 +220,37 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
     renderer.outputEncoding=T.sRGBEncoding;
     renderer.toneMapping=T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure=1.12;
+    renderer.toneMappingExposure=.98;
     host.appendChild(renderer.domElement);
 
     var scene=new T.Scene();
     var camera=new T.PerspectiveCamera(34,1,.1,120);
 
-    scene.add(new T.HemisphereLight(0xffffff,0xd7e6dd,1.05));
-    var key=new T.DirectionalLight(0xffffff,1.7); key.position.set(5,9,6); scene.add(key);
-    var fill=new T.DirectionalLight(0xcfe2d6,.6);
-    fill.position.set(-7,4,-5); scene.add(fill);
+    /* envMap yo'q — yorug'lik ataylab yumshoq, aks holda go'sht oqarib ketadi */
+    scene.add(new T.HemisphereLight(0xf2f8f4,0xb9cfc2,.62));
+    var key=new T.DirectionalLight(0xffffff,.95); key.position.set(4,8,6); scene.add(key);
+    var fill=new T.DirectionalLight(0xcfe2d6,.38);
+    fill.position.set(-6,3,-5); scene.add(fill);
+    var rim=new T.DirectionalLight(0xffffff,.3);
+    rim.position.set(0,4,-8); scene.add(rim);
 
     /* asoslarsiz: kichik oq panelda to'q yashil kursilar ortiqcha */
     ChickenParts.showBases(false);
-    ChickenParts.mount(scene,{length:cfg.length||1.2,position:[0,0,0]});
+    ChickenParts.mount(scene,{
+      length:cfg.length||1,
+      ringRadius:cfg.ringRadius||1.25,  /* kichik kadrda bo'laklar yaqinroq tursin */
+      position:[0,0,0]
+    });
 
-    var radius=cfg.radius||10.4, height=cfg.height||3.2, look=cfg.look||.4;
+    /* Go'sht tabiiy ravishda och — oq panelda yo'qolmasligi uchun materiallar
+       biroz to'qlashtiriladi (envMap yo'q, aks-nur ham yo'q). */
+    ChickenParts.root.traverse(function(o){
+      if(!o.isMesh||!o.material||!o.material.color) return;
+      o.material.color.multiplyScalar(.93);
+      if(o.material.roughness!==undefined) o.material.roughness=Math.min(o.material.roughness,.58);
+    });
+
+    var radius=cfg.radius||4.8, height=cfg.height||2.5, look=cfg.look||.28;
     function resize(){
       var w=host.clientWidth, h=host.clientHeight;
       if(!w||!h) return;
