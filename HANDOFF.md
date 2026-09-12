@@ -286,13 +286,13 @@ Jami hujjatda **alohida** berilgan (36 mln $), kartalar summasi ham 36 ga
 teng. QA buni har safar qayta hisoblaydi — `plans-total-adds-up`. Biror
 raqam o'zgarsa yoki loyiha qo'shilsa, mos kelmaslik darhol ushlanadi.
 
-**Foto o'rinlari bo'sh:** `assets/photos/plans-1.jpg` … `plans-5.jpg`.
-Fayl qo'yilishi bilan avtomat ko'rinadi; yo'q bo'lsa yashil maydon qoladi.
+**Fotolar joyida:** `assets/photos/plans-1.jpg` … `plans-5.jpg` — har biri
+karta nisbatiga (4:5) kesilgan. `plans-1` da begona brend kesib tashlangan,
+sabab `assets/photos/CREDITS.md` da.
 
 **Kiritilmagan:** referens rasmdagi karta izohlari ("Yem ishlab chiqarish
 quvvati", "Importga qaramlikni kamaytirish" va h.k.) hujjatda yo'q —
-loyihalar mazmuni haqidagi taxminlar. Matn berilsa `bullets` maydoniga
-qo'shiladi.
+loyihalar mazmuni haqidagi taxminlar. Matn berilsa qo'shiladi.
 
 ### Hujjatlar orasidagi ziddiyat
 
