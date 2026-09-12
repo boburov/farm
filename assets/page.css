@@ -29,7 +29,7 @@
 html,body{
   margin:0;height:100%;
   overflow:hidden;
-  background:var(--page);
+  background:linear-gradient(180deg,#f2f7f4 0%,#e6efe9 62%,#dcebe2 100%);
   color:var(--ink);
   font-family:var(--display);
   -webkit-font-smoothing:antialiased;
@@ -42,7 +42,6 @@ html,body{
   display:flex;flex-direction:column;
   gap:var(--gutter);
   padding:var(--gutter) var(--gutter) 0;
-  background:linear-gradient(180deg,#f2f7f4 0%,#e6efe9 62%,#dcebe2 100%);
 }
 
 /* ----------------------------------------------------------- yuqori qator */
@@ -121,70 +120,68 @@ html,body{
   box-shadow:0 18px 40px -24px rgba(15,61,34,.85);
 }
 
-/* --------------------------------------------------------------- panellar */
+/* ------------------------------------------------------------------- fon */
 
-/* Panellar bandi: balandligi cheklangan, shunda har panel deyarli kvadrat
-   bo'lib qoladi va sahna kadrga to'g'ri sig'adi. Ortiqcha bo'sh joy
-   margin-block:auto bilan tepa va past orasida teng taqsimlanadi. */
-.panels{
-  flex:0 1 auto;min-height:0;
-  margin-block:auto;
-  height:clamp(210px,67vh,760px);
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:clamp(6px,.7vw,14px);
-  position:relative;
-}
-
-.panel{
-  position:relative;
-  min-width:0;min-height:0;
-  border-radius:var(--radius);
+/* Butun ekran foni. Surat yuklanmasa orqasidagi uchta vektor sahna
+   ko'rinib qoladi — sahifa hech qachon bo'sh chiqmaydi. */
+.backdrop{
+  position:fixed;inset:0;
+  z-index:-1;
   overflow:hidden;
-  background:var(--page-soft);
-  box-shadow:0 1px 2px rgba(15,61,34,.07),0 18px 40px -30px rgba(15,61,34,.6);
+  background:var(--page);
 }
-.panel .scene{
+.backdrop-scenes{
+  position:absolute;inset:0;
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+}
+.backdrop-scene{position:relative;overflow:hidden}
+.backdrop-scene .scene{
   position:absolute;inset:0;
   width:100%;height:100%;
   object-fit:cover;display:block;
 }
-
-/* Butun bandni qoplaydigan keng surat: uch zona (ishlab chiqaruvchi ·
-   yuklash · bozor) panellar bilan mos tushadi. Yuklanmasa vektor
-   sahnalar ko'rinib qoladi. */
-.strip-photo{
+.backdrop-photo{
   position:absolute;inset:0;
   width:100%;height:100%;
   object-fit:cover;
-  object-position:center 58%;
+  object-position:center 56%;
   display:block;
-  border-radius:var(--radius);
   opacity:0;
-  transition:opacity .8s var(--ease-out);
-  z-index:1;
-  box-shadow:0 1px 2px rgba(15,61,34,.07),0 18px 40px -30px rgba(15,61,34,.6);
+  transition:opacity .9s var(--ease-out);
 }
-.panels.has-photo .strip-photo{opacity:1}
-.panels.has-photo .panel{box-shadow:none}
+.backdrop.has-photo .backdrop-photo{opacity:1}
 
-/* panellar orasidagi yashil strelka */
+/* Yengil parda — tepadagi kartalar va pastdagi zanjir fonda yo'qolmasin */
+.backdrop::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(238,244,240,.72) 0%,rgba(238,244,240,.12) 18%,
+                    rgba(238,244,240,0) 34%,rgba(238,244,240,0) 72%,
+                    rgba(238,244,240,.55) 100%);
+}
+
+/* ------------------------------------------------------------- strelkalar */
+
+/* Fon suratidagi zonalar orasidagi jingalak strelkalar. Bu qatlam ayni
+   paytda sahifaning egiluvchan o'rtasi ham — tepa va past shu bilan ajraladi. */
+.arrows{
+  flex:1 1 auto;min-height:0;
+  position:relative;
+}
 .panel-arrow{
   position:absolute;top:50%;
   transform:translate(-50%,-50%);
-  width:clamp(34px,3.6vw,68px);
-  height:clamp(34px,3.6vw,68px);
+  width:clamp(40px,4.4vw,84px);
+  height:clamp(40px,4.4vw,84px);
   display:grid;place-items:center;
   color:#fff;
   background:var(--forest-light);
   border-radius:50%;
-  box-shadow:0 8px 22px -10px rgba(15,61,34,.8);
+  box-shadow:0 10px 28px -10px rgba(15,61,34,.85);
   pointer-events:none;
   z-index:2;
 }
 .panel-arrow svg{width:58%;height:58%}
-.panel-arrow--1{left:33.333%}
-.panel-arrow--2{left:66.666%}
 
 /* ---------------------------------------------------------------- zanjir */
 
@@ -254,13 +251,12 @@ html,body{
   .stat-label{font-size:15px}
   .stat-value{font-size:38px}
   .stat-note{font-size:13px}
-  /* Mobilda keng surat o'z nisbatida, to'liq eni bo'ylab ko'rsatiladi —
-     absolyut qoplama tor ekranda kadrni qattiq qirqib yuborardi. */
-  .panels{display:block;height:auto;margin-block:0}
-  .panel{height:min(30vh,230px);margin-bottom:10px;border-radius:var(--radius)}
-  .panels.has-photo .panel{display:none}
-  .panels.has-photo .strip-photo{position:static;height:auto;width:100%}
+  /* Mobilda fon qotib turadi, kontent ustidan sirg'aladi. Strelkalar
+     kerak emas — qirqilgan kadrda zona chegarasi ko'rinmaydi. */
+  .arrows{min-height:42vh}
   .panel-arrow{display:none}
+  .backdrop-scenes{grid-template-columns:1fr}
+  .backdrop-scene:nth-child(n+2){display:none}
   .chain{flex-direction:column}
   .chain li{font-size:15px;padding:12px 14px}
   .chain-icon{width:28px;height:28px}

@@ -41,7 +41,11 @@
             '<path d="M7.7 5.5l8.6 4.2"/>',
 
     /* --- zanjir (pastki qator) --- */
-    arrow:  '<path d="M4 12h14"/><path d="M13.4 6.8 18.6 12l-5.2 5.2"/>'
+    arrow:  '<path d="M4 12h14"/><path d="M13.4 6.8 18.6 12l-5.2 5.2"/>',
+
+    /* --- rasm zonalari orasidagi jingalak (egri) strelka --- */
+    curl:   '<path d="M2.8 17.6c1.4-4.2 4.3-7.2 8.1-8.4 2.6-.8 5.3-.7 7.9.3"/>'+
+            '<path d="M14.2 4.4 19.4 9l-4.1 4.6"/>'
   };
   window.ICONS=function(name){
     var d=P[name]; if(!d) return '';

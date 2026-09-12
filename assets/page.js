@@ -46,25 +46,72 @@
 
   /* --------------------------------------------------------------- panellar */
 
-  /* Har panel — bitta vektor sahna. Yil uchun keng foto berilgan bo'lsa,
-     u butun bandni qoplab ustiga chiqadi (quyida stripPhoto). */
-  function panelNode(p){
-    var d=el('div','panel reveal');
-    d.innerHTML=window.SCENES?SCENES(p.scene):'';
+  /* Butun ekran foni: keng surat. Yuklanmasa orqasidagi uchta vektor sahna
+     ko'rinib qoladi, shuning uchun sahifa hech qachon bo'sh chiqmaydi. */
+  function backdropNode(y){
+    var d=el('div','backdrop');
+
+    var scenes=el('div','backdrop-scenes');
+    (y.panels||[]).forEach(function(p){
+      var s=el('div','backdrop-scene');
+      s.innerHTML=window.SCENES?SCENES(p.scene):'';
+      scenes.appendChild(s);
+    });
+    d.appendChild(scenes);
+
+    if(y.photo){
+      var img=new Image();
+      img.className='backdrop-photo';
+      img.alt=y.photoAlt||'';
+      img.decoding='async';
+      img.addEventListener('load',function(){
+        d.classList.add('has-photo');
+        placeArrows();
+      });
+      img.addEventListener('error',function(){ img.remove(); });
+      img.src=y.photo;
+      d.appendChild(img);
+    }
     return d;
   }
 
-  /* Butun bandni qoplaydigan keng surat. Yuklanmasa vektor sahnalar qoladi. */
-  function stripPhoto(y,host){
-    if(!y.photo) return;
-    var img=new Image();
-    img.className='strip-photo';
-    img.alt=y.photoAlt||'';
-    img.decoding='async';
-    img.addEventListener('load',function(){ host.classList.add('has-photo'); });
-    img.addEventListener('error',function(){ img.remove(); });
-    img.src=y.photo;
-    host.appendChild(img);
+  /* Strelkalarni suratdagi zona chegaralariga qo'yadi.
+     Fon `cover` bilan chizilgani uchun surat ekrandan kengroq yoki balandroq
+     bo'lib qirqiladi — shu sababli chegara ulushi (0..1) piksel holatiga
+     shu yerda, haqiqiy o'lchamlar bo'yicha qayta hisoblanadi. */
+  var arrowState=null;
+  function placeArrows(){
+    if(!arrowState) return;
+    var img=document.querySelector('.backdrop-photo'),
+        host=document.querySelector('.arrows');
+    if(!host) return;
+    var W=innerWidth, H=innerHeight,
+        nw=(img&&img.naturalWidth)||0, nh=(img&&img.naturalHeight)||0;
+    arrowState.nodes.forEach(function(node,i){
+      var f=arrowState.at[i], left;
+      if(nw&&nh){
+        var scale=Math.max(W/nw,H/nh), rw=nw*scale;
+        left=(W-rw)/2 + f*rw;               /* surat ichidagi aniq nuqta */
+      }else{
+        left=f*W;                            /* zaxira: vektor sahnalar */
+      }
+      node.style.left=left+'px';
+    });
+  }
+  addEventListener('resize',placeArrows);
+
+  function arrowsNode(y){
+    var host=el('div','arrows'),
+        at=y.arrowsAt||[1/3,2/3],
+        nodes=[];
+    at.forEach(function(f,i){
+      var a=el('div','panel-arrow reveal');
+      a.innerHTML=window.ICONS?ICONS('curl'):'';
+      host.appendChild(a);
+      nodes.push(a);
+    });
+    arrowState={at:at,nodes:nodes};
+    return host;
   }
 
   /* --------------------------------------------------------------- zanjir */
@@ -123,16 +170,9 @@
     right.forEach(function(s){ top.appendChild(statNode(s)); });
     page.appendChild(top);
 
-    /* panellar, ustidagi keng foto va ular orasidagi strelkalar */
-    var panels=el('div','panels');
-    y.panels.forEach(function(p){ panels.appendChild(panelNode(p)); });
-    stripPhoto(y,panels);
-    for(var i=1;i<y.panels.length;i++){
-      var a=el('div','panel-arrow panel-arrow--'+i+' reveal');
-      a.innerHTML=window.ICONS?ICONS('arrow'):'';
-      panels.appendChild(a);
-    }
-    page.appendChild(panels);
+    /* butun ekran foni + zonalar orasidagi jingalak strelkalar */
+    page.appendChild(backdropNode(y));
+    page.appendChild(arrowsNode(y));
 
     page.appendChild(chainNode(y.chain));
     page.appendChild(el('div','footer-bar'));

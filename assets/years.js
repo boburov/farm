@@ -33,6 +33,10 @@
     photo:'assets/photos/2010.jpg',
     photoAlt:'Ishlab chiqaruvchidan olingan tovuq go‘shti yuk mashinasiga '+
              'ortilib, bozorga yetkazilmoqda',
+    /* Suratdagi zonalar chegarasi — surat kengligining ulushi sifatida.
+       Strelkalar aynan shu nuqtalarga qo'yiladi, ekran nisbati o'zgarsa ham
+       (fon `cover` bilan qirqiladi) joyida qoladi — assets/page.js: placeArrows. */
+    arrowsAt:[0.335, 0.645],
     panels:[
       {scene:'producer'},
       {scene:'transport'},
