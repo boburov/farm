@@ -1,5 +1,7 @@
-/* Chapter controller. World, renderer, authored BEATS and FIGS remain shared.
-   All clocks advance from visible, unblocked animation frames; never from scrolling. */
+/* Bo'limlar boshqaruvi. Dunyo, renderer va BEATS index.html da qoladi.
+   Ekrandagi BARCHA matn va raqam assets/story.js dan keladi — bu faylda
+   birorta biznes raqami yozilmagan va hisoblanmaydi.
+   Soatlar faqat ko'rinadigan, bloklanmagan kadrlardan yuradi.            */
 (function(){
   'use strict';
   var P=window.FarmPresentation={}, state=presentation={
@@ -7,147 +9,288 @@
     remainingTime:0,sequenceElapsed:0,sequenceComplete:false,holdElapsed:0,
     panel:null,queuedChapter:null,completed:new Set(),transition:null
   };
+  var S=window.STORY;
   var shell=document.getElementById('overlay'), frameEl=document.getElementById('scene-frame'),
-    veil=document.getElementById('scene-veil'), details=document.getElementById('details'),
-    detailBody=document.getElementById('details-body'), shade=document.getElementById('panel-shade'),
-    beatNav=document.getElementById('beat-nav'), autoTimer=document.getElementById('auto-countdown'),
-    slideCopy=document.getElementById('slide-copy'), dataCopy=document.getElementById('data-copy'), dataLayer=document.getElementById('data-layer'),
+    veil=document.getElementById('scene-veil'), shade=document.getElementById('panel-shade'),
+    beatNav=document.getElementById('beat-nav'), caption=document.getElementById('scene-caption'),
+    slideCopy=document.getElementById('slide-copy'), dataCopy=document.getElementById('data-copy'),
+    dataLayer=document.getElementById('data-layer'), heroEl=document.getElementById('hero'),
+    photoEl=document.getElementById('photo'), photoImg=document.getElementById('photo-img'),
+    photoCap=document.getElementById('photo-caption'), photoBtn=document.getElementById('photo-open'),
     infoToggle=document.getElementById('info-toggle'), layers=[sceneLayer,dataLayer];
-  var metricValues={}, metricTweens=[], panelFocus=null, beatSlot=-1, infoExpanded=false;
+  var metricValues={}, metricTweens=[], panelFocus=null, beatSlot=-1, infoExpanded=false, renderedKey=null;
   var iconPaths={
     left:'<path d="m14 5-7 7 7 7"/>',right:'<path d="m10 5 7 7-7 7"/>',
-    play:'<path d="m8 5 11 7-11 7Z"/>',pause:'<path d="M8 5v14M16 5v14"/>',
     replay:'<path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/>',
     plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
     arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>'
   };
   function icon(n){return '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">'+iconPaths[n]+'</svg>';}
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function delta(a,b,lower){
-    if(!a)return '';
-    var change=(b-a)/Math.abs(a)*100, good=lower?change<=0:change>=0;
-    return '<span class="metric-change'+(good?'':' negative')+'">'+(change>0?'+':change<0?'−':'')+uzNumber(Math.abs(change),1)+'%</span> · boshlang‘ich holatga nisbatan';
+
+  /* ---------------------------------------------------------- content --
+     Bir sahna = bir klik = bir fikr. Sahna ma'lumoti STORY dan olinadi;
+     bu yerda hech narsa hisoblanmaydi.                                   */
+  function isHero(i){ return !!(CH[i]&&CH[i].hero); }
+  function slotOf(){ var c=CH[cur]; if(!c) return 0; var i=c.beats.indexOf(curBeat); return i<0?0:i; }
+  function sceneAt(ci,slot){
+    if(ci<=0||isHero(ci)) return null;
+    var ch=S.chapters[ci-1]; if(!ch) return null;
+    return ch.scenes[clamp(slot,0,ch.scenes.length-1)];
   }
-  function metric(id,label,value,unit,context,opts){return Object.assign({id:id,label:label,value:value,unit:unit,context:context,digits:0},opts||{});}
-  var moneyUnit='mln so‘m', costUnit='so‘m/kg';
-  function content(ci){
-    var a=ECON.read(0),b=ECON.read(1),c=ECON.read(2),d=ECON.read(3),cut=calcData();
-    var all=[
-      {category:'Jarayonlar o‘zimizda',title:'2010-yil 3 nafar Hodim Bilan ',lead:'So‘yish o‘z qo‘limizda: vositachi yo‘q, tannarx pastroq.',
-       intro:`"biznesni boshlash" bosqichidan "kapitalni ko'paytirish" va yirik sanoat bosqichiga o'tdik. O‘zimiz so‘yib, o‘zimiz sotdik.`,
-       metrics:[metric('cost','Yangi tannarx',b.cost,costUnit,delta(a.cost,b.cost,true),{featured:true}),metric('prof','Foyda',b.prof,moneyUnit,delta(a.prof,b.prof),{digits:2,featured:true}),metric('sales','Sotuv hajmi',b.sales,'kg','2-bosqich · o‘z so‘yish'),metric('jobs','Bandlik',b.jobs,'ish o‘rni','Avval: '+uzNumber(a.jobs)+' ish o‘rni')],
-       compare:[a.cost,b.cost],path:['Ferma','So‘yish','Qadoqlash','Savdo'],
-       conclusion:'Qisqaroq va mustahkam zanjir. Ko‘proq nazorat.'},
-      {category:'Integratsiyalashgan klaster',title:'Butun zanjir. Bitta tizim.',lead:'Yem, ferma, qayta ishlash, sovuq zanjir va bozor — bitta tizimda.',
-       intro:'Don ichkariga kiradi, tayyor mahsulot tashqariga chiqadi. Har bir bosqich keyingisiga bog‘lanadi.',
-       metrics:[metric('sales','Klaster sotuv hajmi',c.sales,'kg',delta(a.sales,c.sales)),metric('cost','Klaster tannarxi',c.cost,costUnit,delta(a.cost,c.cost,true),{featured:true}),metric('prof','Foyda',c.prof,moneyUnit,'3-bosqich · klaster',{digits:2}),metric('jobs','Bandlik',c.jobs,'ish o‘rni','3-bosqich · klaster')],
-       conclusion:'Yemdan bozorgacha — yagona qiymat zanjiri.'},
-      {category:'Mahsulot va odamlar',title:'Bir tovuq. Ko‘proq qiymat.',lead:'Har bir bo‘lak alohida mahsulot, har bir bosqich yangi ish o‘rni.',
-       intro:'Har bir bo‘lak alohida mahsulotga aylanadi. Ishlab chiqarish kengaygani sari yangi kasblar va ish o‘rinlari paydo bo‘ladi.',
-       metrics:[metric('bird-price','Bir tovuq sotish narxi',cut.price,'so‘m/tovuq','Bir tovuq hisobida'),metric('jobs','Bandlik',d.jobs,'ish o‘rni',(d.jobs>=a.jobs?'+':'')+uzNumber(d.jobs-a.jobs)+' yangi ish o‘rni',{featured:true}),metric('added','Qo‘shilgan qiymat',num('cutValue',26),'%','Kiritilgan ko‘rsatkich',{digits:1,prefix:'+',featured:true,inlineUnit:true}),metric('bird-cost','Bir tovuq tannarxi',cut.cost,'so‘m/tovuq','Bir tovuq hisobida')],
-       conclusion:'Ko‘p mahsulot. Ko‘proq ish o‘rni. Odamlar uchun maqbul narx.'},
-      {category:'Yakuniy iqtisodiy natija',title:'Qiymatga aylangan tizim.',lead:'Tannarx kamaydi; tushum, foyda va bandlik o‘sdi.',
-       intro:'Boshlang‘ich fermadan qo‘shimcha qiymat yaratadigan klastergacha: tannarx kamaydi, biznes va bandlik o‘sdi.',
-       metrics:[metric('prof','Yakuniy foyda',d.prof,moneyUnit,delta(a.prof,d.prof),{digits:2,featured:true}),metric('rev','Yakuniy tushum',d.rev,moneyUnit,delta(a.rev,d.rev),{digits:2}),metric('cost','Yakuniy tannarx',d.cost,costUnit,delta(a.cost,d.cost,true)),metric('jobs','Bandlik',d.jobs,'ish o‘rni','Avval: '+uzNumber(a.jobs)+' ish o‘rni',{featured:true})],
-       secondary:'Soliq: <b>'+uzNumber(d.tax,2)+' mln so‘m</b><span>Sotuv: <b>'+uzNumber(d.sales)+' kg</b></span>',
-       compare:[a.cost,d.cost],conclusion:'Tannarxni kamaytirishdan — qiymat yaratishgacha.',replay:true}
-    ];
-    var c=all[ci]; c.category=pad2(ci+1)+' / '+c.category; return c;
+  function currentScene(){ return sceneAt(cur,slotOf()); }
+
+  /* raqam matni: yil kabi "static" qiymatlar guruhlanmaydi (2010, 2 010 emas) */
+  function figureText(f,v){ return f.static?String(v):uzNumber(Math.round(v),0); }
+
+  function figuresHTML(list){
+    if(!list||!list.length) return '';
+    return '<div class="metrics">'+list.map(function(f,i){
+      var id=f.id||('f'+i), isNum=typeof f.value==='number';
+      var prior=metricValues[id], from=(!isNum||prior===undefined)?f.value:prior;
+      if(isNum) metricValues[id]=f.value;
+      if(isNum&&!f.static&&!REDUCED&&from!==f.value)
+        metricTweens.push({el:'fig-'+id,f:f,from:from,to:f.value,t:0});
+      var shown=isNum?figureText(f,REDUCED?f.value:from):esc(f.value);
+      return '<div class="metric'+(f.featured?' featured':'')+'" style="--metric-i:'+i+'">'+
+        '<div class="metric-label">'+esc(f.label)+'</div>'+
+        '<div class="metric-value-wrap"><div class="metric-value" id="fig-'+id+'">'+shown+'</div>'+
+        (f.unit?'<span class="metric-unit">'+esc(f.unit)+'</span>':'')+'</div></div>';
+    }).join('')+'</div>';
   }
-  function valueText(m,v){return (v>=0?m.prefix||'':'')+uzNumber(v,m.digits)+(m.inlineUnit?m.unit:'');}
-  function metricHTML(m,i){
-    var prior=metricValues[m.id], from=prior===undefined?m.value:prior;
-    metricValues[m.id]=m.value;
-    if(!REDUCED&&from!==m.value)metricTweens.push({id:m.id,from:from,to:m.value,t:0,m:m});
-    return '<div class="metric'+(m.featured?' featured':'')+'" style="--metric-i:'+i+'"><div class="metric-label">'+m.label+'</div><div class="metric-value-wrap"><div class="metric-value'+(m.value<0?' negative':'')+'" id="metric-'+m.id+'">'+valueText(m,REDUCED?m.value:from)+'</div>'+(m.inlineUnit?'':'<span class="metric-unit">'+m.unit+'</span>')+'</div><div class="metric-context">'+m.context+'</div></div>';
+
+  function chipsHTML(list){
+    if(!list||!list.length) return '';
+    return '<div class="fact-chips">'+list.map(function(c,i){
+      return '<span class="fact-chip" style="--chip-i:'+i+'">'+esc(c)+'</span>';
+    }).join('')+'</div>';
   }
-  function comparison(v){
-    var max=Math.max.apply(null,v.concat([1]));
-    return '<div class="comparison" aria-label="Tannarx: avval va hozir">'+v.map(function(n,i){return '<div class="compare-row"><span>'+(i?'Hozir':'Avval')+'</span><span class="compare-track"><i style="width:'+Math.max(0,n/max*100)+'%"></i></span><b>'+uzNumber(n)+' <span>so‘m/kg</span></b></div>';}).join('')+'</div>';
+
+  /* Sabab -> natija. Har sahnada bitta, matn — STORY dan. */
+  function causeHTML(sc){
+    if(!sc.cause||!sc.effect) return '';
+    return '<div class="cause-effect"><span class="ce-part"><i>'+esc(S.ui.causeLabel)+'</i>'+esc(sc.cause)+
+      '</span><span class="ce-arrow" aria-hidden="true"></span><span class="ce-part ce-out"><i>'+
+      esc(S.ui.effectLabel)+'</i>'+esc(sc.effect)+'</span></div>';
   }
-  function visualsHTML(c){
-    var h='';
-    if(c.secondary)h+='<div class="metrics-secondary">'+c.secondary+'</div>';
-    if(c.compare)h+=comparison(c.compare);
-    if(c.path)h+='<div class="value-path" aria-label="Qiymat zanjiri">'+c.path.map(function(x,i){return (i?'<span aria-hidden="true">→</span>':'')+'<span class="path-node'+(c.external&&i>0&&i<c.path.length-1?' external':'')+'">'+x+'</span>';}).join('')+'</div>';
+
+  /* Vertikal integratsiya ko'rsatkichi: to'ldirilgan bo'g'in = o'z tizimimizda.
+     Raqam yozilmaydi — faqat vizual holat.                                */
+  function chainHTML(sc){
+    var own={}; (sc.own||[]).forEach(function(i){ own[i]=1; });
+    var h='<div class="chain-strip"><div class="chain-head"><span>'+esc(S.ui.chainTitle)+
+      '</span><span class="chain-key"><i class="on"></i>'+esc(S.ui.chainOwn)+'</span></div><ol>';
+    S.chain.forEach(function(name,i){
+      var cls=(own[i]?'on':'off')+(sc.focus===i?' focus':'');
+      h+='<li class="'+cls+'" style="--link-i:'+i+'"><span class="bar"></span><span class="nm">'+esc(name)+'</span></li>';
+    });
+    return h+'</ol></div>';
+  }
+
+  /* Diagramma faqat manbadagi raqamlar bilan chiziladi. */
+  function chartHTML(ch){
+    if(!ch||!ch.rows||!ch.rows.length) return '';
+    var max=Math.max.apply(null,ch.rows.map(function(r){return r.value;}).concat([1]));
+    var h='<div class="mini-chart"><div class="chart-title">'+esc(ch.title)+'</div>';
+    ch.rows.forEach(function(r,i){
+      h+='<div class="chart-row'+(r.accent?' accent':'')+'" style="--row-i:'+i+'">'+
+        '<span class="cr-label">'+esc(r.label)+'</span>'+
+        '<span class="cr-track"><i style="width:'+Math.max(0.6,r.value/max*100)+'%"></i></span>'+
+        '<b class="cr-value">'+uzNumber(r.value,0)+(r.unit?' <span>'+esc(r.unit)+'</span>':'')+'</b></div>';
+    });
+    return h+'</div>';
+  }
+
+  /* Yo'l xaritasi. Sana berilmagan nuqtada "—" turadi, raqam o'ylab topilmaydi. */
+  var ROAD_LABEL={done:'Bajarildi',live:'Ishga tushgan',now:'Hozir',building:'Qurilmoqda',planned:'Rejada'};
+  function roadmapHTML(list){
+    if(!list||!list.length) return '';
+    var h='<div class="roadmap"><ol>';
+    list.forEach(function(pt,i){
+      var known=!!pt.year;
+      h+='<li class="rm '+pt.state+(known?'':' unknown')+'" style="--rm-i:'+i+'">'+
+        '<span class="rm-dot" aria-hidden="true"></span>'+
+        '<span class="rm-title">'+esc(pt.title)+'</span>'+
+        '<span class="rm-year">'+(known?esc(pt.year):esc(S.ui.empty))+'</span>'+
+        '<span class="rm-state">'+esc(ROAD_LABEL[pt.state]||'')+'</span></li>';
+    });
+    return h+'</ol></div>';
+  }
+
+  /* Reja kartalari. Qiymat tasdiqlanmagan bo'lsa karta xira va "—". */
+  function plansHTML(pl){
+    if(!pl) return '';
+    var h='<div class="plans">';
+    pl.cards.forEach(function(c,i){
+      var has=c.value!==null&&c.value!==undefined&&c.value!=='';
+      h+='<div class="plan'+(has?'':' empty')+'" style="--plan-i:'+i+'"><div class="plan-label">'+esc(c.label)+
+        '</div><div class="plan-value">'+(has?esc(c.value):esc(S.ui.empty))+
+        (has&&c.unit?' <span>'+esc(c.unit)+'</span>':'')+'</div></div>';
+    });
+    h+='</div><div class="plan-deadline"><span>Muddat</span><b>'+
+      (pl.deadline?esc(pl.deadline):esc(S.ui.empty))+'</b></div>';
     return h;
   }
-  P.renderSummary=function(){
-    var c=content(cur); metricTweens=[];
-    slideCopy.innerHTML='<div class="slide-category eyebrow">'+c.category+'</div><h1 id="slide-title">'+c.title+'</h1><p class="slide-intro">'+c.intro+'</p>';
-    var h='<p class="data-lead"><b>'+c.conclusion+'</b> <span>'+c.lead+'</span></p><div class="metrics">'+c.metrics.map(metricHTML).join('')+'</div>';
-    dataCopy.innerHTML=h;
+
+  function photoFor(sc){
+    if(!sc||!sc.photo||!S.photos||!S.photos.length) return null;
+    for(var i=0;i<S.photos.length;i++) if(S.photos[i].key===sc.photo) return S.photos[i];
+    return null;
+  }
+
+  /* ------------------------------------------------------------- hero -- */
+  function fillHero(){
+    var h=S.hero;
+    document.getElementById('hero-eyebrow').textContent=h.eyebrow;
+    document.getElementById('hero-title').innerHTML=h.title;
+    document.getElementById('hero-line').innerHTML=h.line;
+    document.getElementById('hero-lead').innerHTML='<b>'+h.lead+'</b> <span>'+h.leadMuted+'</span>';
+    document.getElementById('hero-chips').innerHTML=h.chips.map(function(c){
+      return '<span class="fact-chip">'+esc(c)+'</span>';
+    }).join('');
+    document.getElementById('hero-count').innerHTML='00 <span>/ '+pad2(CH.length-1)+'</span>';
+    document.getElementById('load-state').textContent=S.ui.loading;
+  }
+  fillHero();
+
+  P.renderSummary=function(force){
+    var key=cur+':'+slotOf();
+    if(!force&&key===renderedKey)return;   /* bir sahna — bir render, aks holda
+                                              sanoq boshlang'ich qiymatni yo'qotadi */
+    renderedKey=key;
+    metricTweens=[];
+    var hero=isHero(cur);
+    document.body.classList.toggle('on-hero',hero);
+    heroEl.hidden=!hero; heroEl.inert=!hero;
+    caption.hidden=hero;
+    if(hero){ slideCopy.innerHTML=''; dataCopy.innerHTML=''; photoBtn.hidden=true; return; }
+    var sc=currentScene(); if(!sc) return;
+    slideCopy.innerHTML=
+      '<div class="slide-period">'+esc(sc.period)+'</div>'+
+      '<div class="slide-category eyebrow">'+esc(sc.eyebrow)+'</div>'+
+      '<h1 id="slide-title">'+sc.title+'</h1>'+
+      '<p class="slide-intro">'+esc(sc.intro)+'</p>';
+    dataCopy.innerHTML=
+      '<p class="data-lead"><b>'+esc(sc.conclusion)+'</b> <span>'+esc(sc.lead)+'</span></p>'+
+      causeHTML(sc)+figuresHTML(sc.figures)+chartHTML(sc.chart)+
+      chipsHTML(sc.chips)+roadmapHTML(sc.roadmap)+plansHTML(sc.plans)+
+      (sc.brandMark?'<div class="data-mark">'+esc(S.brand)+'<span>.</span></div>':'')+
+      chainHTML(sc);
+    var ph=photoFor(sc);
+    photoBtn.hidden=!ph;
+    photoBtn.dataset.key=ph?ph.key:'';
     layers.forEach(function(l){l.scrollTop=0;l.classList.toggle('expanded',infoExpanded);});
   };
+
   function setExpanded(v){
     infoExpanded=v;layers.forEach(function(l){l.classList.toggle('expanded',v);});document.body.classList.toggle('info-expanded',v);
-    infoToggle.innerHTML=icon(v?'minus':'plus');infoToggle.setAttribute('aria-expanded',String(v));infoToggle.setAttribute('aria-label',v?'Ma’lumotni yig‘ish':'Barcha asosiy raqamlarni ko‘rsatish');P.layout();invalidateScene();
+    infoToggle.innerHTML=icon(v?'minus':'plus');infoToggle.setAttribute('aria-expanded',String(v));
+    infoToggle.setAttribute('aria-label',v?'Ma’lumotni yig‘ish':'Barcha ma’lumotni ko‘rsatish');P.layout();invalidateScene();
   }
-  infoToggle.hidden=false;infoToggle.innerHTML=icon('plus');infoToggle.addEventListener('click',function(){setExpanded(!infoExpanded);});
-  document.getElementById('details-open').addEventListener('click',function(){P.openPanel('details');});
+  infoToggle.hidden=false;infoToggle.innerHTML=icon('plus');
+  infoToggle.addEventListener('click',function(){setExpanded(!infoExpanded);});
+
   function renderBeatNav(){
     beatSlot=-1;beatNav.innerHTML='';
+    if(isHero(cur))return;
     CH[cur].beats.forEach(function(id,i){
-      var b=document.createElement('button');b.textContent=pad2(i+1);b.title=BEATS[id].t;b.setAttribute('aria-label',BEATS[id].t+' sahnasini ko‘rish');
+      var b=document.createElement('button');b.textContent=pad2(i+1);b.title=BEATS[id].t;
+      b.setAttribute('aria-label',BEATS[id].t+' sahnasini ko‘rish');
       b.addEventListener('click',function(){P.selectBeat(i);});beatNav.appendChild(b);
     });
   }
   P.onBeat=function(id){
-    state.currentBeat=id;var slot=CH[cur]&&CH[cur].beats.indexOf(id);
-    document.getElementById('beat-title').textContent=BEATS[id].t;
-    document.getElementById('beat-index').textContent=pad2(slot+1)+' / '+pad2(CH[cur].beats.length);
+    state.currentBeat=id;var slot=CH[cur]?CH[cur].beats.indexOf(id):-1;
+    document.getElementById('beat-title').textContent=BEATS[id]?BEATS[id].t:'';
+    document.getElementById('beat-index').textContent=pad2(slot+1)+' / '+pad2(CH[cur]?CH[cur].beats.length:1);
     Array.from(beatNav.children).forEach(function(b,i){b.setAttribute('aria-current',String(i===slot));});
+    /* har sahna o'z matnini oladi: bo'lim ichida ham matn almashadi */
+    if(started)P.renderSummary();
     hideTip();
   };
   P.updateHUD=function(){
     if(cur<0)return;
-    state.currentChapter=cur;elNum.textContent=pad2(cur+1);elTitle.textContent=CH[cur].t;
-    document.getElementById('chapter-count').innerHTML=pad2(cur+1)+' <span>/ '+pad2(CH.length)+'</span>';
-    var last=cur===CH.length-1, nextBtn=document.getElementById('next');
-    document.getElementById('prev').disabled=cur===0||EX.on;
+    state.currentChapter=cur;
+    document.getElementById('ch-num').textContent=pad2(cur);
+    document.getElementById('ch-title').textContent=CH[cur].t;
+    document.getElementById('chapter-count').innerHTML=pad2(cur)+' <span>/ '+pad2(CH.length-1)+'</span>';
+    var lastSlot=isHero(cur)||state.slot>=CH[cur].beats.length-1;
+    var last=cur===CH.length-1&&lastSlot, nextBtn=document.getElementById('next');
+    document.getElementById('prev').disabled=(cur===0&&(isHero(cur)||state.slot===0))||EX.on;
     nextBtn.disabled=EX.on;nextBtn.classList.toggle('replay',last);
-    nextBtn.innerHTML=last?icon('replay')+'<span class="button-label">Qayta ko‘rish</span>':'<span class="button-label">Keyingi bo‘lim</span>'+icon('arrow');
-    nextBtn.setAttribute('aria-label',last?'Taqdimotni qayta boshlash':'Keyingi bo‘lim');
+    nextBtn.innerHTML=last?icon('replay')+'<span class="button-label">'+S.ui.replay+'</span>'
+                          :'<span class="button-label">'+S.ui.next+'</span>'+icon('arrow');
+    nextBtn.setAttribute('aria-label',last?'Boshiga qaytish':S.ui.next);
     P.updateProgress();P.updateStatus();
   };
   P.updateProgress=function(){
     if(cur<0)return;
-    elDone.style.width=((cur+1)/CH.length*100)+'%';progEl.setAttribute('aria-valuenow',String(cur+1));progEl.setAttribute('aria-valuetext',pad2(cur+1)+' / '+pad2(CH.length)+' · '+CH[cur].t);
-    var remaining=Math.max(0,CH[cur].dur-state.sequenceElapsed+CH[cur].hold-state.holdElapsed);
-    state.remainingTime=state.isPlaying&&cur<CH.length-1?remaining:0;
-    autoTimer.hidden=!state.isPlaying||cur===CH.length-1;
-    document.body.classList.toggle('auto-on',!autoTimer.hidden);
-    if(!autoTimer.hidden){
-      var sec=Math.ceil(remaining);
-      elClock.textContent='Keyingi bo‘lim: '+pad2(Math.floor(sec/60))+':'+pad2(sec%60);
-      document.getElementById('timer-fill').style.width=(remaining/(CH[cur].dur+CH[cur].hold)*100)+'%';
-    }
+    elDone.style.width=((cur+1)/CH.length*100)+'%';
+    progEl.setAttribute('aria-valuemax',String(CH.length));
+    progEl.setAttribute('aria-valuenow',String(cur+1));
+    progEl.setAttribute('aria-valuetext',pad2(cur)+' / '+pad2(CH.length-1)+' · '+CH[cur].t);
+    state.remainingTime=0;
   };
   P.updateStatus=function(){
-    var suspended=document.hidden||state.panel||EX.on;
-    var text=EX.on?'Klasterni o‘rganish':state.isPlaying?(suspended?'Avtoijro · vaqtincha pauza':'Avtoijro davom etmoqda'):state.isPaused?'Taqdimot pauzada':state.sequenceComplete?'Sizning sur’atingizda':'Sahna namoyish etilmoqda';
-    var status=document.getElementById('presentation-status');status.innerHTML='<i></i>'+text;
-    var label=state.isPlaying?'Pauza':state.isPaused?'Davom etish':'Avtoijro';
-    var playIcon=state.isPlaying?'pause':'play';
-    if(cur===CH.length-1&&state.sequenceComplete){label='Qayta ko‘rish';playIcon='replay';}
-    elPlay.innerHTML=icon(playIcon)+'<span class="button-label">'+label+'</span>';
-    elPlay.setAttribute('aria-label',state.isPlaying?'Avtomatik taqdimotni pauza qilish':label==='Qayta ko‘rish'?'Taqdimotni qayta boshlash':'Avtomatik taqdimotni boshlash');
-    elPlay.setAttribute('aria-pressed',String(state.isPlaying));elPlay.disabled=EX.on;
-    P.updateProgress();
+    var status=document.getElementById('presentation-status');
+    if(status) status.innerHTML='<i></i>Sizning sur’atingizda';
   };
-  P.setPlaying=function(v){
-    if(!started)return;
-    if(v&&EX.on)return;
-    state.isPlaying=!!v&&cur<CH.length-1;playing=state.isPlaying;
-    state.isPaused=!v;lastNow=performance.now();P.updateStatus();invalidateScene();
-  };
-  function announce(){document.getElementById('chapter-announcement').textContent=pad2(cur+1)+' / '+pad2(CH.length)+'. '+CH[cur].t+'. '+content(cur).title;}
+  P.setPlaying=function(v){ /* avtoijro yo'q: operator har bo'limni o'zi ochadi */ };
+  function announce(){
+    var sc=currentScene();
+    document.getElementById('chapter-announcement').textContent=
+      pad2(cur)+' / '+pad2(CH.length-1)+'. '+CH[cur].t+(sc?'. '+sc.intro:'');
+  }
+  /* ------------------------------------------------------------ sahna --
+     Bir bo'lim ketma-ket sahnalardan iborat. Har sahna o'z animatsiyasini
+     o'ynaydi va SHU YERDA TO'XTAB TURADI — keyingisi faqat klik bilan
+     ochiladi (nutq ritmi operator qo'lida).                              */
+  function slotStart(ci,slot){ return CH[ci].times.slice(0,slot).reduce(function(a,b){return a+b;},0); }
+  function slotLimitOf(ci,slot){
+    var c=CH[ci], last=slot>=c.beats.length-1;
+    return last?c.dur:Math.max(0,slotStart(ci,slot)+c.times[slot]-0.001);
+  }
+  function slotFromProg(ci,p){
+    var c=CH[ci], tp=p*c.dur, acc=0;
+    for(var i=0;i<c.beats.length;i++){
+      if(tp<acc+c.times[i]||i===c.beats.length-1) return i;
+      acc+=c.times[i];
+    }
+    return 0;
+  }
+  function armSlot(ci,slot,atEnd){
+    var c=CH[ci], lim=slotLimitOf(ci,slot);
+    state.slot=slot; state.slotLimit=lim;
+    var t=(atEnd||REDUCED)?lim:slotStart(ci,slot);
+    state.sequenceElapsed=t; prog=c.dur?t/c.dur:0;
+    state.slotDone=t>=lim-1e-6;
+    state.sequenceComplete=state.slotDone&&slot>=c.beats.length-1;
+    if(state.sequenceComplete)state.completed.add(ci);
+  }
+  function playSlot(slot){
+    if(isHero(cur))return;
+    armSlot(cur,clamp(slot,0,CH[cur].beats.length-1),false);
+    state.isPaused=false;lastNow=performance.now();
+    P.updateHUD();invalidateScene(1400);
+  }
+  P.slotInfo=function(){return {chapter:cur,slot:state.slot,slots:isHero(cur)?1:CH[cur].beats.length,
+    beat:curBeat,done:!!state.slotDone,hero:isHero(cur)};};
+  function holdSlot(slot){
+    if(isHero(cur))return;
+    armSlot(cur,clamp(slot,0,CH[cur].beats.length-1),true);
+    P.updateHUD();invalidateScene(1000);
+  }
+  function finishSlot(){
+    state.sequenceElapsed=state.slotLimit;prog=CH[cur].dur?state.slotLimit/CH[cur].dur:1;
+    state.slotDone=true;
+    if(state.slot>=CH[cur].beats.length-1){state.sequenceComplete=true;state.completed.add(cur);}
+    P.updateHUD();invalidateScene(900);
+  }
   function blocked(){return !!(state.panel||EX.on||document.hidden);}
   function stillOf(idx){return window.STILL&&STILL[idx]||null;}
   function poseAt(p){
     var b=beatAt(cur,p),sc=BEATS[b.idx];
     if(b.idx!==curBeat)enterBeat(b.idx,false);
-    /* a still pins camera and object progress independently of the slot's local progress */
     var st=stillOf(b.idx), camP=st?st.cam:b.local, upP=st?st.up:b.local;
     if(sc.up)sc.up(upP,elapsed);
     var target, camFn=st&&st.camFn||sc.camFn;
@@ -162,8 +305,12 @@
     cur=i;prog=clamp(opts.at||0,0,1);state.currentChapter=i;state.sequenceElapsed=prog*CH[i].dur;
     state.sequenceComplete=prog>=1;state.holdElapsed=0;state.isPaused=!!opts.static;
     if(REDUCED&&!opts.keepBeat){prog=1;state.sequenceElapsed=CH[i].dur;state.sequenceComplete=true;}
-    if(cur===CH.length-1){state.isPlaying=false;playing=false;}
+    var _slot=slotFromProg(i,prog);
+    state.slot=_slot;state.slotLimit=slotLimitOf(i,_slot);
+    state.slotDone=state.sequenceElapsed>=state.slotLimit-1e-6;
+    state.sequenceComplete=state.slotDone&&_slot>=CH[i].beats.length-1;
     if(infoExpanded)setExpanded(false);
+    document.body.dataset.chapter=String(i);
     renderBeatNav();var b=beatAt(cur,prog);enterBeat(b.idx,true);
     P.renderSummary();var pose=poseAt(prog);
     if(!REDUCED&&opts.animate&&!pose.still){
@@ -183,17 +330,13 @@
     if(!started||opts.instant||REDUCED){commit(i,opts);invalidateScene();return;}
     state.isTransitioning=true;state.queuedChapter=null;state.transition={time:0,i:i,opts:opts,committed:false};
     layers.forEach(function(l){l.classList.add('is-leaving');l.inert=true;});hideTip();clearAnchors();
-    document.getElementById('transition-number').textContent=pad2(i+1);
     invalidateScene(1700);
   };
   P.selectBeat=function(slot){
-    if(!started||state.isTransitioning||blocked())return;
-    var c=CH[cur],at=c.times.slice(0,slot).reduce(function(a,b){return a+b;},0);
-    if(REDUCED)at+=c.times[slot]*.97;
-    var wasAuto=state.isPlaying;
-    P.goTo(cur,{force:true,at:at/c.dur,keepBeat:true,static:REDUCED});
-    state.isPlaying=wasAuto;playing=wasAuto;
+    if(!started||state.isTransitioning||blocked()||isHero(cur))return;
+    holdSlot(slot);
   };
+  P.playSlot=playSlot; P.holdSlot=holdSlot;
   function transitionTick(dt){
     var tr=state.transition;if(!tr)return;
     tr.time+=dt;
@@ -210,103 +353,99 @@
       if(queued){P.goTo(queued.i,queued.opts);}
     }
   }
+  /* Taqdimot 00-bo'limda (hero) ochiladi; sanoq va yuklash ekrani yo'q. */
   P.start=function(replay){
     if(state.panel)P.closePanel();if(EX.on)P.explore(false);
-    started=false;playing=false;state.isPlaying=false;state.isPaused=false;state.completed.clear();state.transition=null;state.isTransitioning=false;state.queuedChapter=null;
-    layers.forEach(function(l){l.classList.remove('is-leaving','is-entering');l.inert=false;});veil.style.opacity='0';
-    loader.classList.add('gone');loader.inert=true;startBtn.disabled=true;
-    setTimeout(function(){loader.hidden=true;},520);
-    started=true;shell.inert=false;ECON.init();ECON.stage=-1;ECON.go(0,true);
+    started=false;state.isPaused=false;state.completed.clear();
+    state.transition=null;state.isTransitioning=false;state.queuedChapter=null;
+    layers.forEach(function(l){l.classList.remove('is-leaving','is-entering');l.inert=false;});
+    veil.style.opacity='0';
+    started=true;shell.inert=false;metricValues={};renderedKey=null;
     commit(0,{instant:true});
-    if(!REDUCED){layers.forEach(function(l){l.classList.add('is-entering');});requestAnimationFrame(function(){layers.forEach(function(l){l.classList.remove('is-entering');});});}
-    document.getElementById('next').focus({preventScroll:true});lastNow=performance.now();invalidateScene();
+    if(replay)document.getElementById('hero-cta').focus({preventScroll:true});
+    lastNow=performance.now();invalidateScene();
   };
   P.layout=function(){
     var r=frameEl.getBoundingClientRect();
     P.view={left:r.left,top:r.top,width:Math.max(1,r.width),height:Math.max(1,r.height),right:r.right,bottom:r.bottom};
     var style=document.documentElement.style;
-    style.setProperty('--view-left',r.left+'px');style.setProperty('--view-top',r.top+'px');style.setProperty('--view-right',(innerWidth-r.right)+'px');style.setProperty('--view-bottom',(innerHeight-r.bottom)+'px');
+    style.setProperty('--view-left',r.left+'px');style.setProperty('--view-top',r.top+'px');
+    style.setProperty('--view-right',(innerWidth-r.right)+'px');style.setProperty('--view-bottom',(innerHeight-r.bottom)+'px');
   };
-  P.renderDetails=function(){
-    document.getElementById('details-kicker').textContent=pad2(cur+1)+' / '+pad2(CH.length)+' · Batafsil';
-    document.getElementById('details-title').textContent=CH[cur].t;
-    var c=content(cur), h='<div class="details-visuals">'+visualsHTML(c)+'</div>';
-    if(cur===CH.length-1){
-      h+='<div class="table-wrap"><table><caption>Bosqichlar bo‘yicha namunaviy hisob</caption><thead><tr><th>Ko‘rsatkich</th><th>Boshlang‘ich</th><th>O‘z so‘yish</th><th>Klaster</th><th>Qo‘shimcha qiymat</th></tr></thead><tbody>';
-      var labels=['Tannarx, so‘m/kg','Sotuv, kg','Tushum, mln so‘m','Foyda, mln so‘m','Ish o‘rni','Soliq, mln so‘m'];
-      ECON.keys.forEach(function(k,i){h+='<tr><td>'+labels[i]+'</td>'+[0,1,2,3].map(function(st){return '<td>'+ECON.text(k,ECON.read(st)[k])+'</td>';}).join('')+'</tr>';});
-      h+='</tbody></table></div><p class="note">3D ustunlar sotuv, tushum, foyda, bandlik va soliqning boshlang‘ich holatga nisbatan o‘sishini ko‘rsatadi. Qiymatlar bir xil hisob davri uchun solishtiriladi.</p>';
-    }
-    CH[cur].beats.forEach(function(id,i){
-      h+='<details class="archive-beat"'+(id===curBeat?' open':'')+'><summary><span>'+pad2(i+1)+'</span>'+BEATS[id].t+'</summary>'+(BEATS[id].dom?BEATS[id].dom():'')+'</details>';
-    });
-    detailBody.innerHTML=h;
-    detailBody.querySelectorAll('[data-at]').forEach(function(el){el.classList.add('in','on');el.classList.remove('fade');if(el.dataset.fill){var f=el.querySelector('.fill');if(f)f.style.right=(100-Number(el.dataset.fill))+'%';}});
-    detailBody.querySelectorAll('.ci').forEach(function(el){el.setAttribute('aria-label',el.dataset.k==='liveWeight'?'Tirik vazn, kilogramm':'So‘yilgandan keyingi chiqim, foiz');});
-  };
+
+  /* --------------------------------------------------- foto (overlay) -- */
   P.openPanel=function(which){
-    if(!started||state.isTransitioning)return;
-    if(state.panel){P.closePanel(false);}else panelFocus=document.activeElement;
-    state.panel=which;hideTip();
-    if(which==='editor')buildEditor();else P.renderDetails();
-    var panel=which==='editor'?editor:details;
-    shell.inert=true;exPanel.inert=true;shade.hidden=false;
-    panel.classList.add('open');panel.inert=false;panel.setAttribute('aria-hidden','false');
-    panel.querySelector('button').focus({preventScroll:true});P.updateStatus();
+    if(!started||state.isTransitioning||which!=='photo')return;
+    var sc=currentScene(), ph=photoFor(sc); if(!ph)return;
+    panelFocus=document.activeElement;
+    state.panel='photo';hideTip();
+    photoImg.src='assets/photos/'+ph.file; photoImg.alt=ph.caption||'';
+    photoCap.textContent=ph.caption||'';
+    shell.inert=true;shade.hidden=false;
+    photoEl.hidden=false;photoEl.inert=false;photoEl.setAttribute('aria-hidden','false');
+    requestAnimationFrame(function(){photoEl.classList.add('open');});
+    document.getElementById('photo-close').focus({preventScroll:true});
   };
   P.closePanel=function(restore){
     if(!state.panel)return;
-    [editor,details].forEach(function(p){p.classList.remove('open');p.inert=true;p.setAttribute('aria-hidden','true');});
-    state.panel=null;shell.inert=!started;exPanel.inert=false;shade.hidden=true;lastNow=performance.now();
+    photoEl.classList.remove('open');photoEl.inert=true;photoEl.setAttribute('aria-hidden','true');
+    photoEl.hidden=true;photoImg.removeAttribute('src');
+    state.panel=null;shell.inert=!started;shade.hidden=true;lastNow=performance.now();
     if(restore!==false&&panelFocus&&panelFocus.isConnected)panelFocus.focus({preventScroll:true});
-    P.updateStatus();invalidateScene();
+    invalidateScene();
   };
-  P.refreshFigures=function(){
-    if(cur<0)return;
-    P.renderSummary();if(state.panel==='details')P.renderDetails();
-    /* Refresh text on existing anchors without replaying scene entry effects. */
-    if(curBeat===4){var keys=['shBreast','shThigh','shDrum','shWing','shRest'];ANCH.forEach(function(a,i){var v=a.el.querySelector('.v');if(v)v.textContent=f(keys[i]);});}
-  };
+  P.refreshFigures=function(){ if(cur>=0)P.renderSummary(true); };
+
   P.explore=function(v){
     v=!!v;if(v===EX.on||!started||state.isTransitioning||state.panel)return;
     hideTip();clearAnchors();
     if(v){
       var prev=BEATS[curBeat];if(prev&&prev.exit)prev.exit();
-      EX.saved={chapter:cur,progress:prog,sequenceElapsed:state.sequenceElapsed,holdElapsed:state.holdElapsed,complete:state.sequenceComplete,paused:state.isPaused,playing:state.isPlaying};
-      EX.on=true;stage(['farm','slaughter','cluster','flows','roads','roads2','trucks','dust','crew','grass']);prepBuilds(15);envSnap('day');setClip(false);compMat.uniforms.fade.value=0;
+      EX.saved={chapter:cur,progress:prog,sequenceElapsed:state.sequenceElapsed,holdElapsed:state.holdElapsed,complete:state.sequenceComplete,paused:state.isPaused};
+      EX.on=true;stage(['farm','slaughter','cluster','flows','roads','roads2','trucks','dust','crew','grass']);
+      prepBuilds(15);envSnap('day');setClip(false);compMat.uniforms.fade.value=0;
       EX.tgt.set(110,10,20);EX.wantTgt.copy(EX.tgt);EX.dist=EX.wantDist=420;EX.yaw=EX.wantYaw=-.7;EX.pitch=EX.wantPitch=.52;
-      exName.textContent='Klaster';exText.textContent='Torting — aylantiring. G‘ildirak yoki ikki barmoq bilan yaqinlashtiring. Binoni bosib, jarayon bilan tanishing.';
       Array.from(exChips.children).forEach(function(b){b.setAttribute('aria-pressed','false');});
     }else{
       EX.on=false;EX.drag=null;document.body.classList.remove('dragging');
       var saved=EX.saved;cur=saved.chapter;prog=saved.progress;
       enterBeat(beatAt(cur,prog).idx,true);
-      state.sequenceElapsed=saved.sequenceElapsed;state.holdElapsed=saved.holdElapsed;state.sequenceComplete=saved.complete;state.isPaused=saved.paused;state.isPlaying=saved.playing;playing=state.isPlaying;
+      state.sequenceElapsed=saved.sequenceElapsed;state.holdElapsed=saved.holdElapsed;
+      state.sequenceComplete=saved.complete;state.isPaused=saved.paused;
     }
-    exPanel.classList.toggle('on',v);document.body.classList.toggle('exploring',v);exBtn.setAttribute('aria-pressed',String(v));
-    exBtn.innerHTML=v?'Taqdimotga qaytish '+icon('left'):'Klasterni kezish <span aria-hidden="true">↗</span>';
+    exPanel.classList.toggle('on',v);document.body.classList.toggle('exploring',v);
+    exBtn.setAttribute('aria-pressed',String(v));
     layers.forEach(function(l){l.inert=v;});beatNav.inert=v;
     lastNow=performance.now();P.layout();P.updateHUD();invalidateScene(1800);
   };
   function tickMetrics(dt){
-    metricTweens=metricTweens.filter(function(a){a.t=Math.min(1,a.t+dt/1.1);var el=document.getElementById('metric-'+a.id);if(el)el.textContent=valueText(a.m,lerp(a.from,a.to,easeOut(a.t)));return a.t<1;});
+    metricTweens=metricTweens.filter(function(a){
+      a.t=Math.min(1,a.t+dt/1.25);
+      var el=document.getElementById(a.el);
+      if(el)el.textContent=figureText(a.f,lerp(a.from,a.to,easeOut(a.t)));
+      return a.t<1;
+    });
   }
   P.frame=function(now){
     if(document.hidden)return;
     now=now||performance.now();var wallDt=Math.max(0,(now-lastNow)/1000),dt=Math.min(wallDt,.05);lastNow=now;
     var suspended=!!state.panel, active=started&&!suspended&&!EX.on&&!state.isTransitioning&&!state.isPaused;
-    var sequence=active&&!state.sequenceComplete;
-    var clockRuns=active&&state.isPlaying&&cur<CH.length-1;
+    var sequence=active&&!state.slotDone;
     var transitions=state.isTransitioning&&!suspended;
-    var live=sequence||clockRuns||transitions||!suspended&&(metricTweens.length||blend.on)||EX.on&&now<dirtyUntil;
+    var live=sequence||transitions||!suspended&&(metricTweens.length||blend.on)||EX.on&&now<dirtyUntil;
     if(!live&&now>dirtyUntil)return;
     if(transitions)transitionTick(wallDt);
     if(!started){if(step>=BUILD_STEPS.length){var bootPose=cur>=0?poseAt(prog):null;if(bootPose){lookNow.copy(bootPose.target);camera.lookAt(bootPose.target);envApply(bootPose.target,280);if(window.ENV)ENV.tick();}renderFrame(0);}if(!frameHandle)frameHandle=requestAnimationFrame(frame);return;}
     if(sequence){
-      state.sequenceElapsed=Math.min(CH[cur].dur,state.sequenceElapsed+wallDt);prog=state.sequenceElapsed/CH[cur].dur;
-      if(prog>=1){state.sequenceComplete=true;state.completed.add(cur);P.updateHUD();invalidateScene(600);}
-    }else if(clockRuns&&state.sequenceComplete){state.holdElapsed+=wallDt;if(state.holdElapsed>=CH[cur].hold)P.goTo(cur+1);}
-    /* the beat about to be posed (not curBeat): keeps the entry frame of a still frozen too */
+      var lim=state.slotLimit===undefined?CH[cur].dur:state.slotLimit;
+      state.sequenceElapsed=Math.min(lim,state.sequenceElapsed+wallDt);
+      prog=CH[cur].dur?state.sequenceElapsed/CH[cur].dur:0;
+      if(state.sequenceElapsed>=lim-1e-6){
+        state.slotDone=true;
+        if(state.slot>=CH[cur].beats.length-1){state.sequenceComplete=true;state.completed.add(cur);}
+        P.updateHUD();invalidateScene(600);
+      }
+    }
     var stillB=!EX.on&&cur>=0?stillOf(beatAt(cur,prog).idx):null;
     var animateWorld=!REDUCED&&!suspended&&!stillB&&(sequence||transitions||EX.on&&now<dirtyUntil);
     if(animateWorld)elapsed+=dt;
@@ -325,11 +464,10 @@
       lookNow.copy(target);camera.lookAt(target);
       envMix(sc.env,REDUCED?1:clamp(dt*1.6,0,1));envApply(target,sc.r||200);maybeBakeEnv(elapsed);
       var focus=sc.focusFn?camera.position.distanceTo(sc.focusFn(pose.camP,elapsed)):camera.position.distanceTo(target);
-      focusNow=(REDUCED||pose.still)?focus:damp(focusNow,focus,6.5,dt);compMat.uniforms.focus.value=focusNow;compMat.uniforms.range.value=Math.max(8,focusNow*1.4);
-      ECON.tick(REDUCED?2:dt);
+      focusNow=(REDUCED||pose.still)?focus:damp(focusNow,focus,6.5,dt);
+      compMat.uniforms.focus.value=focusNow;compMat.uniforms.range.value=Math.max(8,focusNow*1.4);
       if(animateWorld)worldTick(elapsed,dt,camera);
       else if(pose.still&&stillPrime&&started){
-        /* one settle tick with the still camera: crew LOD, flock packing, doors, hero pose, caster cull */
         stillPrime=false;camera.updateMatrixWorld();worldTick(elapsed,1/60,camera);
       }else{if(window.ENV)ENV.tick();}
       if(curBeat===4)updateAnchors(!state.isTransitioning&&!state.panel&&pose.upP>.42);else updateAnchors(false);
@@ -337,47 +475,91 @@
     }
     if(!frameHandle)frameHandle=requestAnimationFrame(frame);
   };
-  document.getElementById('prev').innerHTML=icon('left')+'<span class="button-label">Oldingi</span>';
+
+  /* ------------------------------------------------------- boshqaruv --- */
+  document.getElementById('prev').innerHTML=icon('left')+'<span class="button-label">'+S.ui.prev+'</span>';
   function navIndex(){return state.queuedChapter?state.queuedChapter.i:state.transition?state.transition.i:cur;}
-  document.getElementById('next').addEventListener('click',function(){if(navIndex()===CH.length-1)P.start(true);else P.goTo(navIndex()+1);});
-  document.getElementById('prev').addEventListener('click',function(){P.goTo(navIndex()-1);});
-  elPlay.addEventListener('click',function(){if(cur===CH.length-1&&state.sequenceComplete)P.start(true);else P.setPlaying(!state.isPlaying);});
-  document.getElementById('details-close').addEventListener('click',function(){P.closePanel();});
-  document.getElementById('details-edit').addEventListener('click',function(){P.openPanel('editor');});
+  /* Bir klik = bir fikr: avval joriy sahna animatsiyasi tugatiladi, keyin
+     keyingi sahna, bo'lim tugagach — keyingi bo'lim (veil bilan).        */
+  function next(){
+    /* bo'limlar orasidagi o'tish (1,45 s) davomida bosilgan klik e'tiborsiz
+       qoldiriladi — aks holda tasodifiy ikkinchi klik butun bo'limni
+       o'tkazib yuborardi. Jonli taqdimotda bu qabul qilinmaydi.        */
+    if(state.isTransitioning||state.panel)return;
+    if(!isHero(cur)){
+      if(!state.slotDone){finishSlot();return;}
+      if(state.slot<CH[cur].beats.length-1){playSlot(state.slot+1);return;}
+    }
+    if(cur===CH.length-1)P.start(true);else P.goTo(cur+1);
+  }
+  function prev(){
+    if(state.isTransitioning||state.panel)return;
+    if(!isHero(cur)&&state.slot>0){holdSlot(state.slot-1);return;}
+    if(cur>0)P.goTo(cur-1,{at:1});
+  }
+  document.getElementById('next').addEventListener('click',next);
+  document.getElementById('prev').addEventListener('click',prev);
+  document.getElementById('hero-cta').addEventListener('click',function(){P.goTo(1);});
+  document.getElementById('hero-link').addEventListener('click',function(){P.goTo(1);});
+  photoBtn.addEventListener('click',function(){P.openPanel('photo');});
+  document.getElementById('photo-close').addEventListener('click',function(){P.closePanel();});
+  photoEl.addEventListener('click',function(e){ if(e.target===photoEl||e.target===photoImg)P.closePanel(); });
   shade.addEventListener('click',function(){P.closePanel();});
-  [editor,details].forEach(function(panel){panel.addEventListener('keydown',function(e){
-    if(e.key!=='Tab')return;var list=Array.from(panel.querySelectorAll('button,input,summary,a[href],[tabindex="0"]')).filter(function(el){return !el.disabled&&el.getClientRects().length>0;});
-    var first=list[0],last=list[list.length-1];
-    if(e.shiftKey&&document.activeElement===first){last.focus();e.preventDefault();}else if(!e.shiftKey&&document.activeElement===last){first.focus();e.preventDefault();}
-  });});
+
+  function fullscreen(){
+    var d=document, el=d.documentElement;
+    try{
+      if(d.fullscreenElement||d.webkitFullscreenElement){ (d.exitFullscreen||d.webkitExitFullscreen).call(d); }
+      else{ var r=(el.requestFullscreen||el.webkitRequestFullscreen).call(el); if(r&&r.catch)r.catch(function(){}); }
+    }catch(e){}
+  }
+  document.getElementById('hero-full').addEventListener('click',fullscreen);
+  P.fullscreen=fullscreen;
+
+  /* Pult (PageUp/PageDown), o'q tugmalar, probel, F — to'liq ekran. */
   window.addEventListener('keydown',function(e){
     if(e.key==='Escape'){
-      if(state.panel)P.closePanel();else if(EX.on)P.explore(false);else if(infoExpanded){setExpanded(false);}
+      if(state.panel)P.closePanel();else if(EX.on)P.explore(false);else if(infoExpanded)setExpanded(false);
+      return;
+    }
+    if(state.panel){
+      if(e.key==='ArrowRight'||e.key==='PageDown'||e.key==='ArrowLeft'||e.key==='PageUp'){P.closePanel();e.preventDefault();}
       return;
     }
     if(!started||blocked()||e.altKey||e.ctrlKey||e.metaKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable)return;
-    var i=navIndex();
-    if(e.key==='ArrowRight')P.goTo(i+1);else if(e.key==='ArrowLeft')P.goTo(i-1);else if(e.key==='Home')P.goTo(0);else if(e.key==='End')P.goTo(CH.length-1);
-    else if(e.key===' '&&e.target.tagName!=='BUTTON')P.setPlaying(!state.isPlaying);else return;
+    var k=e.key;
+    if(k==='ArrowRight'||k==='PageDown')next();
+    else if(k==='ArrowLeft'||k==='PageUp')prev();
+    else if(k==='Home')P.goTo(0);
+    else if(k==='End')P.goTo(CH.length-1);
+    else if(k===' '&&e.target.tagName!=='BUTTON')next();
+    else if(k==='f'||k==='F')fullscreen();
+    else return;
     e.preventDefault();
   });
+
+  /* Kanvasga klik — keyingi bo'lim (operator pultsiz ham o'tadi). */
   var swipe=null, swipePointers=new Set();
   canvas.addEventListener('pointerdown',function(e){
-    if(EX.on||!started||blocked()||e.pointerType==='mouse')return;
-    swipePointers.add(e.pointerId);swipe=swipePointers.size===1?{id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now()}:null;
-    try{canvas.setPointerCapture(e.pointerId);}catch(err){}
+    if(EX.on||!started||blocked())return;
+    swipePointers.add(e.pointerId);
+    swipe=swipePointers.size===1?{id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now()}:null;
+    if(e.pointerType!=='mouse'){try{canvas.setPointerCapture(e.pointerId);}catch(err){}}
   });
   canvas.addEventListener('pointerup',function(e){
     swipePointers.delete(e.pointerId);var s=swipe;swipe=null;
-    if(!s||s.id!==e.pointerId||EX.on)return;
+    if(!s||s.id!==e.pointerId||EX.on||!started||blocked()||isHero(cur))return;
     var dx=e.clientX-s.x,dy=e.clientY-s.y;
-    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5&&performance.now()-s.t<1400){P.goTo(navIndex()+(dx<0?1:-1));}
-    else partTip(e);
+    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5&&performance.now()-s.t<1400){P.goTo(navIndex()+(dx<0?1:-1));return;}
+    if(Math.abs(dx)<8&&Math.abs(dy)<8)next();
   });
   canvas.addEventListener('pointercancel',function(e){swipe=null;swipePointers.delete(e.pointerId);});
-  canvas.addEventListener('pointerleave',hideTip);
-  var motion=matchMedia('(prefers-reduced-motion: reduce)');motion.addEventListener('change',function(e){
-    REDUCED=e.matches;if(REDUCED){blend.on=false;metricTweens=[];if(started){state.sequenceElapsed=CH[cur].dur;state.sequenceComplete=true;prog=1;P.setPlaying(false);P.renderSummary();}}invalidateScene();
+
+  var motion=matchMedia('(prefers-reduced-motion: reduce)');
+  motion.addEventListener('change',function(e){
+    REDUCED=e.matches;
+    if(REDUCED){blend.on=false;metricTweens=[];if(started){state.sequenceElapsed=CH[cur].dur;state.sequenceComplete=true;prog=1;P.renderSummary(true);}}
+    invalidateScene();
   });
   new ResizeObserver(function(){P.layout();invalidateScene(700);}).observe(frameEl);
   P.layout();P.updateStatus();

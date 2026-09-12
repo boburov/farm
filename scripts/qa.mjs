@@ -16,7 +16,7 @@ const out = process.env.QA_OUT || 'qa/current';
 await mkdir(out, { recursive: true });
 
 const SIZES = (opt('--sizes', quick ? '1440x900,390x844' : '1440x900,1920x1080,390x844,430x932,844x390')).split(',').map(s => s.split('x').map(Number));
-let BEATS = opt('--beats', quick ? '3,8,15' : '3,6,8,4,11,14,15').split(',').map(Number); // beats outside CH are skipped after boot
+let BEATS = opt('--beats', quick ? '6,16,4' : '0,1,3,2,6,7,8,16,10,4,13,14,15').split(',').map(Number); // beats outside CH are skipped after boot
 const BUDGET = { 0: 900000, 1: 900000, 2: 900000, 3: 900000, 4: 300000, 6: 600000, 7: 600000, 8: 300000, 10: 600000, 11: 600000, 12: 600000, 14: 600000, 15: 600000 };
 const MAX_FRAME_MS = 120, MAX_CALLS = Number(process.env.QA_MAX_CALLS || 1500); // draw-call reduction is Pass 5 work
 
@@ -44,15 +44,21 @@ function wire(page, tag) {
 async function boot(page) {
   const start = Date.now();
   await page.goto(url);
-  await page.waitForSelector('#start.ready:not(.error)', { timeout: 180000 });
+  // the hero is chapter 00 and appears at once; the world is ready when started flips
+  await page.waitForFunction(() => window.started === true, null, { timeout: 240000 });
   const readyMs = Date.now() - start;
-  await page.click('#start');
-  await page.waitForFunction(() => started, null, { timeout: 15000 });
-  await page.evaluate(() => { setPlaying(false); window.__qa = { gap: 0, last: performance.now() }; (function loop(n) { window.__qa.gap = Math.max(window.__qa.gap, n - window.__qa.last); window.__qa.last = n; requestAnimationFrame(loop); })(performance.now()); });
+  await page.evaluate(() => FarmPresentation.goTo(1, { instant: true, force: true }));
+  await page.waitForTimeout(300);
+  await page.evaluate(() => { window.__qa = { gap: 0, last: performance.now() }; (function loop(n) { window.__qa.gap = Math.max(window.__qa.gap, n - window.__qa.last); window.__qa.last = n; requestAnimationFrame(loop); })(performance.now()); });
   return readyMs;
 }
 const innerHeightOf = () => 900;
-const seek = (page, id, at = .62) => page.evaluate(([id, at]) => { const ci = CH.findIndex(c => c.beats.includes(id)), c = CH[ci], n = c.beats.indexOf(id), before = c.beats.slice(0, n).reduce((a, b) => a + BEATS[b].dur, 0); goTo(ci, { force: true, at: (before + BEATS[id].dur * at) / c.dur, instant: true }); setPlaying(false); window.__qa.gap = 0; window.__qa.last = performance.now(); }, [id, at]);
+const seek = (page, id, at = .62) => page.evaluate(([id, at]) => {
+  const ci = CH.findIndex(c => c.beats.includes(id)), c = CH[ci], n = c.beats.indexOf(id);
+  const before = c.times.slice(0, n).reduce((a, b) => a + b, 0);
+  goTo(ci, { force: true, at: (before + c.times[n] * at) / c.dur, keepBeat: true, instant: true });
+  window.__qa.gap = 0; window.__qa.last = performance.now();
+}, [id, at]);
 const state = (page) => page.evaluate(() => ({ beat: curBeat, progress: +prog.toFixed(4), playing, still: !!(window.STILL && STILL[curBeat]), manual: !!(TRUCKS[0] && TRUCKS[0].veh.manual), speed: TRUCKS[0] ? +TRUCKS[0].veh.speed.toFixed(3) : null, near: camera.near, overflow: document.documentElement.scrollWidth > innerWidth, geometry: renderer.info.memory.geometries, textures: renderer.info.memory.textures, cam: camera.position.toArray().map(v => +v.toFixed(2)), fov: +camera.fov.toFixed(1), modelLoaded: !!PoultryAssets.ready, failures: PoultryAssets.failures, env: (window.ENV && ENV.status) ? ENV.status() : null, stats: window.CINEMA_STATS ? Object.assign({}, CINEMA_STATS) : null, maxGapMs: +window.__qa.gap.toFixed(1) }));
 
 // ---------- main sweep ----------
@@ -99,10 +105,10 @@ if (!flag('--no-timing')) {
   for (const id of BEATS) {
     await seek(page, id, .3); await page.waitForTimeout(900);
     const t = await page.evaluate(async () => {
-      setPlaying(true);
+      /* replay the current scene from its start so the sweep measures a moving frame */
+      FarmPresentation.playSlot(presentation.slot);
       const samples = []; let last = performance.now(), f0 = CINEMA_STATS.frames, cpu = [];
       await new Promise(res => { const tick = (n) => { samples.push(n - last); last = n; cpu.push(CINEMA_STATS.cpuMs); if (CINEMA_STATS.frames - f0 >= 60 || samples.length > 300) res(); else requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
-      setPlaying(false);
       const warm = samples.slice(3).sort((a, b) => a - b), pick = (p) => warm[Math.min(warm.length - 1, Math.floor(p * warm.length))] || 0;
       return { frames: CINEMA_STATS.frames - f0, p50: +pick(.5).toFixed(1), p95: +pick(.95).toFixed(1), max: +(warm.at(-1) || 0).toFixed(1), cpuP95: +(cpu.sort((a, b) => a - b)[Math.floor(cpu.length * .95)] || 0).toFixed(1), triangles: CINEMA_STATS.triangles, calls: CINEMA_STATS.calls, dpr: CINEMA_STATS.dpr, quality: CINEMA_STATS.quality };
     });
@@ -116,20 +122,41 @@ if (!flag('--no-timing')) {
 if (!flag('--no-interact') && !flag('--no-interactions')) {
   await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(400); // interactions assume the desktop layout
   const I = report.interactions;
-  // render-on-demand: paused scene must stop rendering
-  await seek(page, 3); await page.waitForTimeout(2200);
+  // render-on-demand: a finished scene must stop rendering
+  await seek(page, 3);
+  await page.evaluate(() => FarmPresentation.holdSlot(presentation.slot));
+  await page.waitForTimeout(2400);
   I.idleFrames = await page.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return CINEMA_STATS.frames - a; });
   if (I.idleFrames > 3) fail(`render loop still running while paused: ${I.idleFrames} frames in 1.5 s`);
   // chapter navigation replaces the scroll timeline; the document itself never scrolls
-  I.nav = await page.evaluate(async () => { setPlaying(true); await new Promise(r => setTimeout(r, 300)); goTo(2); await new Promise(r => setTimeout(r, 1900)); return { cur, playing, docH: document.documentElement.scrollHeight, scrollY: window.scrollY, remaining: +presentation.remainingTime.toFixed(1) }; });
+  I.nav = await page.evaluate(async () => { goTo(2); await new Promise(r => setTimeout(r, 1900)); return { cur, docH: document.documentElement.scrollHeight, scrollY: window.scrollY }; });
   if (I.nav.cur !== 2) fail(`goTo(2) landed on chapter ${I.nav.cur}`);
   if (I.nav.docH > innerHeightOf(page) + 1 || I.nav.scrollY) fail(`document still scrolls (height ${I.nav.docH})`);
-  if (!I.nav.playing || I.nav.remaining <= 0) fail('autoplay countdown not running after chapter change');
-  await page.evaluate(() => setPlaying(false));
-  // keyboard (the chapter rail was removed; goTo(2) above already covers programmatic navigation)
-  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(1900);
-  I.arrowRight = await page.evaluate(() => cur);
-  if (I.arrowRight !== 3) fail(`ArrowRight went to chapter ${I.arrowRight}`);
+  // one click = one scene: the sequence stops at the end of every scene
+  I.scenes = await page.evaluate(async () => {
+    goTo(3, { instant: true, force: true });
+    await new Promise(r => setTimeout(r, 1400));
+    const seen = [];
+    for (let i = 0; i < 14; i++) {
+      const st = FarmPresentation.slotInfo();
+      if (!st.done) { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); await new Promise(r => setTimeout(r, 260)); continue; }
+      if (!seen.includes(st.slot)) seen.push(st.slot);
+      if (st.slot === st.slots - 1) break;
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      await new Promise(r => setTimeout(r, 900));
+    }
+    return { seen, slots: CH[3].beats.length };
+  });
+  if (I.scenes.seen.length !== I.scenes.slots) fail(`chapter 3 exposed ${I.scenes.seen.length} of ${I.scenes.slots} scenes`);
+  // keyboard
+  const lastCh = await page.evaluate(() => CH.length - 1);
+  await page.keyboard.press('End'); await page.waitForTimeout(1900);
+  I.keyEnd = await page.evaluate(() => cur);
+  if (I.keyEnd !== lastCh) fail(`End went to chapter ${I.keyEnd}`);
+  await page.keyboard.press('Home'); await page.waitForTimeout(1900);
+  I.keyHome = await page.evaluate(() => cur);
+  if (I.keyHome !== 0) fail(`Home went to chapter ${I.keyHome}`);
+  await page.evaluate(() => goTo(3, { instant: true, force: true })); await page.waitForTimeout(900);
   // explore mode
   await page.evaluate(() => setExplore(true)); await page.waitForTimeout(900);
   I.exploreOn = await page.evaluate(() => EX.on && document.body.classList.contains('exploring'));
@@ -147,29 +174,6 @@ if (!flag('--no-interact') && !flag('--no-interactions')) {
   await page.keyboard.press('Escape'); await page.waitForTimeout(600);
   I.exploreOff = await page.evaluate(() => !EX.on);
   if (!I.exploreOff) fail('Escape did not leave explore mode');
-  // part tooltips at beat 4 (exploded cuts) — only while a chapter still shows beat 4
-  if (await page.evaluate(() => CH.some(c => c.beats.includes(4)))) {
-    await seek(page, 4, .8); await page.waitForTimeout(1500);
-    // hover a point that actually lies on the breast piece: probe a small grid around its projected centre with the page's own raycaster
-    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera), cx = (v.x * .5 + .5) * innerWidth, cy = (-v.y * .5 + .5) * innerHeight, r = new THREE.Raycaster();
-      for (const d of [0, 6, 12, 18, 24]) for (let i = 0; i < (d ? 8 : 1); i++) { const a = i * Math.PI / 4, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d; r.setFromCamera(new THREE.Vector2((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1), camera); let o = r.intersectObject(G.birdDressed, true)[0]?.object; while (o && o !== m) o = o.parent; if (o) return { x, y, d }; } return { x: cx, y: cy, d: -1 }; });
-    await page.mouse.move(pt.x, pt.y, { steps: 4 }); await page.waitForTimeout(400);
-    I.tooltip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 120) }));
-    if (!I.tooltip.on) fail('part tooltip did not appear over the breast fillet');
-    await page.screenshot({ path: `${out}/tooltip.png` });
-  } else { I.tooltip = 'skipped: beat 4 is not in the presentation'; console.log('SKIP tooltip: beat 4 is not in the presentation'); }
-  // figures editor
-  await page.evaluate(() => openEditor()); await page.waitForTimeout(400);
-  I.editorOpen = await page.evaluate(() => document.getElementById('editor').classList.contains('open'));
-  if (!I.editorOpen) fail('editor did not open');
-  const firstInput = page.locator('#editor input').first(); const original = await firstInput.inputValue();
-  await firstInput.fill(String(Number(original) ? Number(original) + 1 : original)); await page.click('#edit-save'); await page.waitForTimeout(500);
-  I.editorSaved = await page.evaluate(() => !!localStorage.getItem('chicken-figs'));
-  if (!I.editorSaved) fail('editor save did not persist to localStorage');
-  const stillOpen = await page.evaluate(() => document.getElementById('editor').classList.contains('open'));
-  if (stillOpen) { await page.evaluate(() => document.getElementById('edit-reset').scrollIntoView()); await page.click('#edit-reset', { force: true, timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300); await page.keyboard.press('Escape'); await page.waitForTimeout(300); }
-  I.editorClosed = await page.evaluate(() => !document.getElementById('editor').classList.contains('open'));
-  if (!I.editorClosed) fail('editor did not close');
   // resize sweep: at beat 4 the cut spread must stay inside the viewport; without beat 4 in the show,
   // sweep the product-ring scene (beat 8) and only check for horizontal overflow
   const hasCuts = await page.evaluate(() => CH.some(c => c.beats.includes(4)));
@@ -190,16 +194,16 @@ if (!quick || flag('--contexts')) {
   const p2 = await rm.newPage(); wire(p2, 'reduced');
   await boot(p2);
   await p2.waitForTimeout(2400); // let the boot-time sky crossfade settle before sampling the idle loop
-  report.interactions.reducedMotion = await p2.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return { REDUCED, playing, idleFrames: CINEMA_STATS.frames - a, beat: curBeat, progress: prog, complete: presentation.sequenceComplete, still: !!(window.STILL && STILL[curBeat]) }; });
+  await p2.evaluate(() => FarmPresentation.goTo(1, { force: true })); await p2.waitForTimeout(1800);
+  report.interactions.reducedMotion = await p2.evaluate(async () => { const a = CINEMA_STATS.frames; await new Promise(r => setTimeout(r, 1500)); return { REDUCED, idleFrames: CINEMA_STATS.frames - a, beat: curBeat, progress: +prog.toFixed(3), done: !!presentation.slotDone }; });
   if (report.interactions.reducedMotion.idleFrames > 3) fail('render loop kept running under reduced motion');
-  if (!(report.interactions.reducedMotion.beat === 3 && report.interactions.reducedMotion.progress === 1 && report.interactions.reducedMotion.complete)) fail(`reduced motion did not hold the completed building scene (beat ${report.interactions.reducedMotion.beat})`);
+  if (!report.interactions.reducedMotion.done) fail('reduced motion did not hold the finished scene');
   if (!report.interactions.reducedMotion.REDUCED) fail('prefers-reduced-motion not detected');
-  if (report.interactions.reducedMotion.playing) fail('autoplay started under reduced motion');
   await p2.screenshot({ path: `${out}/reduced-motion.png` }); await rm.close();
   const mob = await browser.newContext({ ...devices['iPhone 13'], viewport: { width: 390, height: 844 } });
   const p3 = await mob.newPage(); wire(p3, 'iphone');
   await boot(p3); await seek(p3, 4, .8); await p3.waitForTimeout(1500);
-  report.interactions.mobile = await p3.evaluate(() => ({ dpr: CINEMA_STATS.dpr, small: SMALL, overflow: document.documentElement.scrollWidth > innerWidth, tapTargets: Array.from(document.querySelectorAll('.ctrl button')).filter(b => b.offsetParent).every(b => { const r = b.getBoundingClientRect(); return r.height >= 40 && r.width >= 40; }) }));
+  report.interactions.mobile = await p3.evaluate(() => ({ dpr: CINEMA_STATS.dpr, small: SMALL, overflow: document.documentElement.scrollWidth > innerWidth, tapTargets: Array.from(document.querySelectorAll('.slide-actions button')).filter(b => b.offsetParent).every(b => { const r = b.getBoundingClientRect(); return r.height >= 40 && r.width >= 40; }) }));
   if (!report.interactions.mobile.tapTargets) fail('mobile controls smaller than 40 px');
   if (report.interactions.mobile.overflow) fail('mobile overflow');
   await p3.screenshot({ path: `${out}/iphone-beat-4.png` }); await mob.close();

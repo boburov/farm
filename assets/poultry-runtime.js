@@ -124,6 +124,24 @@
   };
   // Photoreal retail cuts: scripts/split-raw-chicken.mjs slices the same GLB by plane regions (exact caps, inner flesh
   // shell on the remainder) and writes it already in the site frame at length 1.0, so A.rawCuts(L) overlays A.raw(L).
+  function defloat(gltf){
+    /* three r128 raycasts against raw attribute values, so the quantized int16 positions must become floats
+       (same normalised range, the node keeps its quantization scale) */
+    gltf.scene.traverse(function(o){ if(!o.isMesh) return; var g=o.geometry,at=g.attributes.position; if(!at||!at.normalized) return;
+      var arr=at.array,k=arr instanceof Int16Array?1/32767:arr instanceof Int8Array?1/127:1,n=at.count,f=new Float32Array(n*3);
+      for(var i=0;i<n;i++){ f[i*3]=at.getX(i)*k; f[i*3+1]=at.getY(i)*k; f[i*3+2]=at.getZ(i)*k; }
+      g.setAttribute('position',new T.BufferAttribute(f,3)); g.computeBoundingBox(); g.computeBoundingSphere(); });
+  }
+  /* Buyurtmachi bergan, qismlarga ajratilgan tovuq (scripts/prep-chicken-parts.mjs):
+     torso · wingL · wingR · legL · legR · neck · tail, raw-chicken-cuts bilan bir xil
+     shartnoma — har tugunda extras {center,min,max}, uzunlik 1.0, pastki nuqta y=0. */
+  A.loadChickenParts=function(){return A.chickenPartsPromise||(A.chickenPartsPromise=new Promise(function(resolve,reject){
+    loader.load('assets/models/chicken-parts.glb',function(gltf){
+      defloat(gltf); A.chickenPartsModel=gltf.scene; resolve(gltf.scene);
+    },undefined,function(e){A.failures.push('chicken-parts');reject(new Error('chicken-parts: '+(e.message||'asset load failed')));});
+  }));};
+  A.chickenParts=function(length){ return buildParts(A.chickenPartsModel,'chicken-parts','chicken-parts',length); };
+
   A.loadRawCuts=function(){return A.rawCutsPromise||(A.rawCutsPromise=new Promise(function(resolve,reject){
     loader.load('assets/models/raw-chicken-cuts.glb',function(gltf){
       /* three r128 raycasts against raw attribute values, so the quantized int16 positions must become floats
@@ -136,9 +154,10 @@
   }));};
   /* Same interface as A.cuts(): root.userData.parts (breastL … rest), each a Group pivoted on its bbox centre with
      userData.home / homeQuaternion; the piece node keeps its own (quantization) transform inside an offset group. */
-  A.rawCuts=function(length){
-    var root=new T.Group(),parts={},o=A.rawCutsModel.clone(true),holder=o.getObjectByName('raw-chicken-cuts')||o;
-    root.name='photoreal-poultry-cuts'; root.scale.setScalar(length); root.userData.s=length;
+  A.rawCuts=function(length){ return buildParts(A.rawCutsModel,'raw-chicken-cuts','photoreal-poultry-cuts',length); };
+  function buildParts(model,holderName,rootName,length){
+    var root=new T.Group(),parts={},o=model.clone(true),holder=o.getObjectByName(holderName)||o;
+    root.name=rootName; root.scale.setScalar(length); root.userData.s=length;
     holder.children.slice().forEach(function(n){
       var m=new T.Group(),off=new T.Group(),c=n.userData.center||[0,0,0]; m.name=n.name;
       holder.remove(n); off.position.set(-c[0],-c[1],-c[2]); off.add(n); m.add(off); m.position.set(c[0],c[1],c[2]);
@@ -151,7 +170,7 @@
     root.userData.parts=parts;
     root.userData.explode=function(progress){ /* legacy interface: no-op, the flight is driven by index.html */ root.userData.explosion=progress; };
     return root;
-  };
+  }
   A.loadFood=function(){return A.foodPromise||(A.foodPromise=load('poultry-cuts').then(function(nodes){A.food=nodes;if(window.MAT)A.foodMaterials();}));};
   var TINTS=[0xffffff,0xb87c48,0x97928a,0x49423c];
   function merge(nodes,variant,groups){

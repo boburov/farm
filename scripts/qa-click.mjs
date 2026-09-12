@@ -1,15 +1,21 @@
-/** Click-presentation QA: boots the page, starts the presentation, walks every chapter with
- *  buttons/keys/swipes, exercises autoplay, panels, Explore, editor and reduced motion.
- *  Usage: node scripts/qa-click.mjs [--out=qa/click-current] [--no-mobile]
+/** "Sokin Savdo" — klik-taqdimot QA.
+ *
+ *  Tekshiradi: hero 00-bo'lim, klik oqimi (har sahna alohida to'xtaydi), pult
+ *  tugmalari (PageUp/PageDown), o'q tugmalar, Home/End, F to'liq ekran,
+ *  foto tugmasi (fayl yo'q -> tugma yo'q), qiymat zanjiri ko'rsatkichi,
+ *  yo'l xaritasi, reja kartalari va — eng muhimi — EKRANDA FAQAT MANBADAGI
+ *  RAQAMLAR borligini.
+ *
+ *  Ishlatish: QA_URL=http://127.0.0.1:5250 node scripts/qa-click.mjs --out=qa/click
  */
-import { chromium, devices } from 'playwright';
+import { chromium } from 'playwright';
 import { mkdir, writeFile, readdir, access } from 'node:fs/promises';
 import { homedir } from 'node:os';
 
 const args = process.argv.slice(2);
 const opt = (n, d) => { const a = args.find(x => x.startsWith(n + '=')); return a ? a.slice(n.length + 1) : d; };
-const url = process.env.QA_URL || 'http://127.0.0.1:5173';
-const out = opt('--out', 'qa/click-current');
+const url = process.env.QA_URL || 'http://127.0.0.1:5250';
+const out = opt('--out', 'qa/click');
 await mkdir(out, { recursive: true });
 
 let executablePath = chromium.executablePath();
@@ -19,299 +25,269 @@ try { await access(executablePath); } catch {
   executablePath = `${cache}/${dir}/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
 }
 const browser = await chromium.launch({ headless: true, executablePath, args: ['--use-angle=metal', '--ignore-gpu-blocklist'] });
-const R = { date: new Date().toISOString(), errors: [], missing: [], fails: [], checks: {} };
-const fail = (m) => { R.fails.push(m); console.log('FAIL', m); };
-const ok = (name, v, m) => { R.checks[name] = v; console.log(v ? 'ok  ' : 'FAIL', name, m === undefined ? '' : JSON.stringify(m)); if (!v) R.fails.push(name + (m === undefined ? '' : ' ' + JSON.stringify(m))); };
+
+const R = { date: new Date().toISOString(), url, errors: [], missing: [], fails: [], checks: {}, numbers: {} };
+const ok = (name, v, m) => {
+  R.checks[name] = !!v; console.log(v ? 'ok  ' : 'FAIL', name, m === undefined ? '' : JSON.stringify(m).slice(0, 220));
+  if (!v) R.fails.push(name + (m === undefined ? '' : ' ' + JSON.stringify(m).slice(0, 220)));
+};
 function wire(page, tag) {
   page.on('pageerror', e => { R.errors.push(`[${tag}] ${e.stack || e.message}`); console.log('ERROR', tag, e.message); });
-  page.on('console', m => { if (m.type() === 'error') { R.errors.push(`[${tag}] ${m.text()}`); console.log('CONSOLE', m.text().slice(0, 300)); } else if (m.type() === 'warning' && /GL_INVALID|Shader|THREE/.test(m.text())) console.log('WARN', m.text().slice(0, 200)); });
-  page.on('response', r => { if (r.status() >= 400 && !/favicon/.test(r.url())) { R.missing.push(r.url()); console.log('MISSING', r.status(), r.url()); } });
-  page.on('requestfailed', r => { if (!/favicon/.test(r.url())) { R.missing.push(r.url()); console.log('REQFAIL', r.url()); } });
+  page.on('console', m => { if (m.type() === 'error') { R.errors.push(`[${tag}] console: ${m.text()}`); console.log('CONSOLE', m.text().slice(0, 200)); } });
+  page.on('response', r => { if (r.status() >= 400 && !/favicon/.test(r.url())) { R.missing.push(r.status() + ' ' + r.url()); console.log('MISSING', r.status(), r.url()); } });
+  page.on('requestfailed', r => { if (!/favicon/.test(r.url())) { R.missing.push('FAIL ' + r.url()); console.log('REQFAIL', r.url()); } });
 }
-const S = (page) => page.evaluate(() => ({ cur, curBeat, prog: +prog.toFixed(3), started, playing, still: !!(window.STILL && STILL[curBeat]), manual: !!(TRUCKS[0] && TRUCKS[0].veh.manual), speed: TRUCKS[0] ? +TRUCKS[0].veh.speed.toFixed(3) : null, paused: presentation.isPaused, elapsedT: elapsed, cam: camera.position.toArray().map(v => +v.toFixed(3)), near: camera.near, shell: FAC.processing.userData.stages.shell.visible, flashAnims: document.getElementById('flash').getAnimations().length, tr: presentation.isTransitioning, panel: presentation.panel, ex: EX.on, remaining: +presentation.remainingTime.toFixed(1), complete: presentation.sequenceComplete, clock: document.getElementById('clock').textContent, autoHidden: document.getElementById('auto-countdown').hidden, status: document.getElementById('presentation-status').textContent.trim(), play: document.getElementById('play').textContent.trim(), title: document.getElementById('slide-title')?.textContent, count: document.getElementById('chapter-count').textContent.replace(/\s+/g, ' '), scrollY: window.scrollY, docH: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth, frames: CINEMA_STATS.frames }));
-const shot = (page, name) => page.screenshot({ path: `${out}/${name}.png` });
+const S = (page) => page.evaluate(() => FarmPresentation.slotInfo());
 const wait = (page, ms) => page.waitForTimeout(ms);
 
-async function boot(page, tag) {
-  const t0 = Date.now();
-  await page.goto(url);
-  await page.waitForSelector('#start.ready:not(.error)', { timeout: 180000 });
-  R[tag + 'ReadyMs'] = Date.now() - t0;
-  return R[tag + 'ReadyMs'];
-}
-
-// ---------------- desktop ----------------
-{
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
-  const page = await ctx.newPage(); wire(page, 'desktop');
-  console.log('READY', await boot(page, 'desktop'));
-  await shot(page, 'd0-loader');
-  let s = await S(page);
-  ok('no-scroll-track', s.docH <= 900 + 1 && s.scrollY === 0, { docH: s.docH });
-  await page.click('#start'); await wait(page, 350);
-  s = await S(page);
-  ok('start-lands-chapter-1-immediately', s.started && s.cur === 0 && s.curBeat === (await page.evaluate(() => CH[0].beats[0])), s);
-  ok('no-countdown-overlay', await page.evaluate(() => !document.getElementById('opening-countdown') && document.getElementById('loader').classList.contains('gone')), true);
-  await shot(page, 'd1-start');
-  await wait(page, 700);
-  ok('loader-hidden-after-fade', await page.evaluate(() => document.getElementById('loader').hidden), true);
-  s = await S(page);
-  ok('chapter-1-not-autoplay', !s.playing && s.autoHidden, { playing: s.playing, autoHidden: s.autoHidden });
-  await wait(page, 1500);
-  s = await S(page);
-  ok('sequence-holds-building', s.complete && s.prog === 1 && s.curBeat === 3, { complete: s.complete, prog: s.prog, curBeat: s.curBeat });
-  await shot(page, 'd2-ch1');
-  // next button through every chapter
-  const chapterShots = [];
-  const N = await page.evaluate(() => CH.length);
-  for (let i = 1; i < N; i++) {
-    await page.click('#next'); await wait(page, 500);
-    s = await S(page);
-    ok(`transition-locks-${i}`, s.tr === true, { tr: s.tr });
-    await wait(page, 1300);
-    s = await S(page);
-    ok(`next-to-${i + 1}`, s.cur === i && !s.tr, { cur: s.cur, tr: s.tr, count: s.count });
-    await wait(page, 2500);
-    await shot(page, `d3-ch${i + 1}-mid`);
-    chapterShots.push(await S(page));
+/* ---------- manbadagi raqamlar: boshqa hech qanday raqam ekranda bo'lmasin --
+   Ruxsat etilgan: nutqdagi faktlar + interfeys sanog'i (00..06, 01/06).      */
+// 25 = "25 ming" (manbadagi 25 000 so'z bilan), 1,5 = "1,5 mln" (1 500 000)
+const ALLOWED = new Set(['2010', '2026', '3', '25', '25000', '1500000', '1,5']);
+const UI_COUNTER = /^0?[0-9]$/;                    // 00..09 — bo'lim/sahna nomeri
+function scanNumbers(texts) {
+  const bad = [];
+  for (const t of texts) {
+    // "1 500 000" va "25 000" — ajratgich sifatida oddiy va tor probel
+    const norm = t.replace(/[   ]/g, ' ');
+    const found = norm.match(/\d[\d  ]*(?:,\d+)?/g) || [];
+    for (const raw of found) {
+      const token = raw.trim().replace(/ /g, '');
+      if (!token) continue;
+      if (ALLOWED.has(token)) continue;
+      if (UI_COUNTER.test(token)) continue;
+      bad.push({ token, in: t.slice(0, 90) });
+    }
   }
-  s = await S(page);
-  ok('next-becomes-replay-at-end', await page.evaluate(() => document.getElementById('next').classList.contains('replay') && /Qayta/.test(document.getElementById('next').textContent)));
-  // wait for the final chapter to complete → replay control
-  await wait(page, 12000);
-  s = await S(page);
-  ok('final-complete', s.complete && /Qayta/.test(s.play), { complete: s.complete, play: s.play });
-  await shot(page, 'd4-ch6-end');
-  // keyboard
-  await page.keyboard.press('Home'); await wait(page, 1900); s = await S(page); ok('key-home', s.cur === 0, s.cur);
-  await page.keyboard.press('End'); await wait(page, 1900); s = await S(page); ok('key-end', s.cur === N - 1, s.cur);
-  await page.keyboard.press('ArrowLeft'); await wait(page, 1900); s = await S(page); ok('key-left', s.cur === N - 2, s.cur);
-  await page.keyboard.press('ArrowRight'); await wait(page, 1900); s = await S(page); ok('key-right', s.cur === N - 1, s.cur);
-  // programmatic chapter change (the chapter rail, the cluster chain chips and the #data-links row were removed from the data card) + completed markers
-  await page.evaluate(() => goTo(1)); await wait(page, 1900); s = await S(page);
-  ok('goto-chapter', s.cur === 1, s.cur);
-  const marks = await page.evaluate(() => ({ first: presentation.completed.has(0), last: presentation.completed.has(CH.length - 1), rail: !!document.getElementById('rail'), chain: document.querySelectorAll('.cluster-chain,[data-chain]').length, links: (function(l){ return l.hidden && !l.offsetParent; })(document.getElementById('data-links')) }));
-  ok('completed-marks', marks.first && marks.last, marks);
-  ok('card-extras-removed', !marks.rail && marks.chain === 0 && marks.links, marks);
-  // rapid clicks: queue the latest request
-  await page.keyboard.press('Home'); await wait(page, 1900);
-  await page.click('#next'); await wait(page, 80); await page.click('#next'); await wait(page, 80); await page.click('#next');
-  await wait(page, 4200); s = await S(page);
-  ok('rapid-clicks-queue', s.cur === Math.min(3, N - 1) && !s.tr, { cur: s.cur, tr: s.tr });
-  // beat navigation: third beat of the current chapter
-  const thirdBeat = await page.evaluate(() => CH[cur].beats[2]);
-  await page.locator('#beat-nav button').nth(2).click(); await wait(page, 1900); s = await S(page);
-  ok('beat-nav', s.curBeat === thirdBeat, { curBeat: s.curBeat, want: thirdBeat });
-  await shot(page, 'd5-ch4-beat3');
-  // beat 15 is a still: the slot keeps counting, but camera and world clock are pinned
-  ok('beat-nav-still-pinned', s.still && !s.paused, { still: s.still, paused: s.paused });
-  const st1 = s; await wait(page, 700); s = await S(page);
-  ok('still-sequence-advances', s.prog > st1.prog, { from: st1.prog, to: s.prog });
-  ok('still-camera-fixed', s.cam.join() === st1.cam.join(), { from: st1.cam, to: s.cam });
-  ok('still-world-frozen', s.elapsedT === st1.elapsedT, { from: st1.elapsedT, to: s.elapsedT });
-  // autoplay countdown
-  await page.keyboard.press('Home'); await wait(page, 1900);
-  await page.click('#play'); await wait(page, 400); s = await S(page);
-  ok('autoplay-visible', s.playing && !s.autoHidden && /Keyingi bo‘lim: \d\d:\d\d/.test(s.clock), { clock: s.clock, autoHidden: s.autoHidden });
-  const r1 = s.remaining; await wait(page, 1500); s = await S(page); const r2 = s.remaining;
-  ok('autoplay-counts-down', r2 < r1 - 1 && r2 > r1 - 2.2, { r1, r2 });
-  await shot(page, 'd6-autoplay');
-  // editor pauses the timer
-  await page.evaluate(() => openEditor()); await wait(page, 500); s = await S(page);
-  ok('editor-opens', s.panel === 'editor' && /pauza/i.test(s.status), { panel: s.panel, status: s.status });
-  const r3 = s.remaining; await wait(page, 1500); s = await S(page);
-  ok('editor-pauses-timer', Math.abs(s.remaining - r3) < .2, { r3, now: s.remaining });
-  await shot(page, 'd7-editor');
-  // edit a figure, save → metrics refresh
-  const firstInput = page.locator('#editor input').first(); const original = await firstInput.inputValue();
-  await firstInput.fill(String(Number(original) + 1)); await page.click('#edit-save'); await wait(page, 600); s = await S(page);
-  ok('editor-save-closes', s.panel === null && !!localStorage_ok(await page.evaluate(() => localStorage.getItem('chicken-figs'))), s.panel);
-  await page.evaluate(() => openEditor()); await wait(page, 300); await page.click('#edit-reset'); await wait(page, 300); await page.keyboard.press('Escape'); await wait(page, 400); s = await S(page);
-  ok('escape-closes-editor', s.panel === null && s.playing, { panel: s.panel, playing: s.playing });
-  // hidden tab pauses
-  const r4 = (await S(page)).remaining;
-  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { value: true, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
-  await wait(page, 1500);
-  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { value: false, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
-  await wait(page, 200); s = await S(page);
-  ok('hidden-tab-pauses-timer', Math.abs(s.remaining - r4) < .5, { r4, now: s.remaining });
-  // autoplay advances to chapter 2 by itself
-  const remaining = (await S(page)).remaining; await wait(page, remaining * 1000 + 2500); s = await S(page);
-  ok('autoplay-advances', s.cur === 1 && s.playing, { cur: s.cur, playing: s.playing });
-  // selecting another chapter resets the countdown
-  await page.evaluate(() => goTo(2)); await wait(page, 1900); s = await S(page);
-  const ch2Total = await page.evaluate(() => CH[2].dur + CH[2].hold);
-  ok('chapter-change-resets-timer', s.cur === 2 && s.remaining > ch2Total - 3, { remaining: s.remaining, total: ch2Total, playing: s.playing });
-  await page.click('#play'); await wait(page, 300); s = await S(page);
-  ok('pause-hides-countdown', !s.playing && s.autoHidden, { playing: s.playing, autoHidden: s.autoHidden });
-  // details panel
-  await page.evaluate(() => FarmPresentation.openPanel('details')); await wait(page, 700); s = await S(page);
-  ok('details-opens', s.panel === 'details', s.panel);
-  const detailCount = await page.evaluate(() => document.querySelectorAll('#details-body .archive-beat').length);
-  const beatCount = await page.evaluate(() => CH[cur].beats.length);
-  ok('details-lists-beats', detailCount === beatCount, detailCount);
-  await shot(page, 'd8-details');
-  await page.keyboard.press('Escape'); await wait(page, 400); s = await S(page); ok('escape-closes-details', s.panel === null);
-  // explore mode keeps the chapter
-  const before = await S(page);
-  await page.evaluate(() => setExplore(true)); await wait(page, 1000); s = await S(page);
-  ok('explore-on', s.ex && await page.evaluate(() => document.body.classList.contains('exploring')));
-  const yaw0 = await page.evaluate(() => EX.wantYaw);
-  await page.mouse.move(600, 450); await page.mouse.down(); await page.mouse.move(760, 470, { steps: 8 }); await page.mouse.up(); await wait(page, 300);
-  ok('explore-drag', Math.abs(await page.evaluate(() => EX.wantYaw) - yaw0) > .05);
-  const d0 = await page.evaluate(() => EX.wantDist); await page.mouse.wheel(0, -400); await wait(page, 300);
-  ok('explore-wheel', await page.evaluate(() => EX.wantDist) !== d0);
-  await page.locator('#explore-chips button').nth(3).click(); await wait(page, 900);
-  const chipWant = await page.evaluate(() => EX_STOPS[3][1]), chipGot = await page.evaluate(() => document.getElementById('explore-name').textContent);
-  ok('explore-chip', chipGot === chipWant, { want: chipWant, got: chipGot });
-  await shot(page, 'd9-explore');
-  await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
-  ok('explore-off-keeps-chapter', !s.ex && s.cur === before.cur && s.curBeat === before.curBeat, { cur: s.cur, was: before.cur });
-  // tooltip on the exploded cuts (only while a chapter still shows beat 4)
-  const cutsChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(4)));
-  if (cutsChapter >= 0) {
-    await page.evaluate((i) => goTo(i), cutsChapter); await wait(page, 1900);
-    await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(4))).click(); await wait(page, 1900 + 2600);
-    // hover a point that actually lies on the breast piece: probe a small grid around its projected centre with the page's own raycaster
-    const pt = await page.evaluate(() => { const m = G.birdDressed.userData.parts.breastL, v = m.getWorldPosition(new THREE.Vector3()).project(camera), cx = (v.x * .5 + .5) * innerWidth, cy = (-v.y * .5 + .5) * innerHeight, r = new THREE.Raycaster();
-      for (const d of [0, 6, 12, 18, 24]) for (let i = 0; i < (d ? 8 : 1); i++) { const a = i * Math.PI / 4, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d; r.setFromCamera(new THREE.Vector2((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1), camera); let o = r.intersectObject(G.birdDressed, true)[0]?.object; while (o && o !== m) o = o.parent; if (o) return { x, y, d }; } return { x: cx, y: cy, d: -1 }; });
-    await page.mouse.move(pt.x, pt.y, { steps: 4 }); await wait(page, 400);
-    const tip = await page.evaluate(() => ({ on: document.getElementById('part-tip').classList.contains('on'), text: document.getElementById('part-tip').textContent.replace(/\s+/g, ' ').slice(0, 80) }));
-    ok('part-tooltip', tip.on, tip);
-    await shot(page, 'd10-cuts-tooltip');
-  } else console.log('skip part-tooltip: beat 4 is not in the presentation');
-  // still beats 12 (parked lorry) and 10 (pre-staged hall interior), only while a chapter shows both
-  const stillChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(12) && c.beats.includes(10)));
-  if (stillChapter >= 0) {
-    await page.evaluate((i) => goTo(i), stillChapter); await wait(page, 1900);
-    await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(12))).click(); await wait(page, 1900); s = await S(page);
-    ok('truck-still-parked', s.curBeat === 12 && s.manual && s.speed === 0 && !s.paused, { curBeat: s.curBeat, manual: s.manual, speed: s.speed });
-    await shot(page, 'd13-truck-still');
-    await page.evaluate(() => setExplore(true)); await wait(page, 800); s = await S(page);
-    ok('explore-unparks-truck', s.ex && !s.manual, { ex: s.ex, manual: s.manual });
-    await page.keyboard.press('Escape'); await wait(page, 900); s = await S(page);
-    ok('explore-back-reparks', !s.ex && s.curBeat === 12 && s.manual, { ex: s.ex, curBeat: s.curBeat, manual: s.manual });
-    await page.locator('#beat-nav button').nth(await page.evaluate(() => CH[cur].beats.indexOf(10))).click(); await wait(page, 300);
-    const flashes = [];
-    for (const t of [300, 900, 1200]) { await wait(page, t); flashes.push((await S(page)).flashAnims); }
-    s = await S(page);
-    ok('interior-still-staged', s.curBeat === 10 && s.near === 0.06 && s.shell === false, { curBeat: s.curBeat, near: s.near, shell: s.shell });
-    ok('truck-unparked-on-exit', !s.manual, { manual: s.manual });
-    ok('interior-still-no-mid-beat-flash', flashes.every(f => f === 0), flashes);
-    await shot(page, 'd14-interior-still');
-  } else console.log('skip still-12/still-10 checks: beats 12 and 10 are not in the presentation');
-  // the product chapter: scene 1 (beat 8, 3 s) — the hen's feathers dissolve into the photoreal raw bird in the same place
-  // (0.45-2.55 s); scene 2 (beat 4, 7 s) — the ring bases rise, the bird's own pieces fly out and settle on them, four
-  // leader-line labels appear; the sequence completes and holds
-  const ringChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(8)));
-  await page.keyboard.press('Home'); await wait(page, 1900); // leave chapter 3 (and the pause) so the chapter change starts a fresh run
-  await page.evaluate((i) => goTo(i), ringChapter); await wait(page, 1900); s = await S(page);
-  ok('product-ring-opens-on-scene-1', s.cur === ringChapter && s.curBeat === 8 && !s.complete && !s.tr, { cur: s.cur, curBeat: s.curBeat, complete: s.complete });
-  const seekTo = (frac) => page.evaluate((frac) => { goTo(cur, { force: true, at: frac, instant: true }); setPlaying(false); }, frac);
-  await seekTo(.02); await wait(page, 500); // 0.2 s into scene 1: the hen stands, intact
-  const early = await page.evaluate(() => ({ beat: curBeat, henVisible: G.birdLive.visible, henOpacity: G.heroHenPhoto ? +G.heroHenPhoto.userData.mats[0].opacity.toFixed(2) : null, rawVisible: !!G.birdRaw && G.birdRaw.visible }));
-  ok('product-hen-stands-first', early.beat === 8 && early.henVisible && (early.henOpacity === null || early.henOpacity >= .99) && !early.rawVisible, early);
-  await seekTo(.29); await wait(page, 500); // 2.9 s: the feathers have dissolved into the raw bird, same place
-  const swap = await page.evaluate(() => ({ beat: curBeat, raw: !!G.birdRaw, rawVisible: !!G.birdRaw && G.birdRaw.visible, henVisible: G.birdLive.visible, opacity: G.birdRaw ? +G.birdRaw.userData.mats[0].opacity.toFixed(2) : null, transparent: G.birdRaw ? G.birdRaw.userData.mats[0].transparent : null }));
-  ok('product-hen-becomes-raw', swap.beat === 8 && (!swap.raw || (swap.rawVisible && !swap.henVisible && swap.opacity === 1 && swap.transparent === false)), swap);
-  await shot(page, 'd13a-product-raw-on-plinth');
-  await page.evaluate(() => FarmPresentation.selectBeat(1)); // the 02 dot, as a viewer would: scene 2 plays through (7 s) and the chapter completes
-  await wait(page, 1900 + 7000 + 800); s = await S(page);
-  const cuts = await page.evaluate(() => { const parts = G.birdDressed.userData.parts, base = (k) => { const m = parts[k]; if (!m || !m.userData.target) return null; return +m.position.distanceTo(m.userData.target).toFixed(3); }; return { beat: curBeat, flight: G.birdDressed.userData.flight, photoCuts: G.birdDressed === G.birdRawCuts, cutsVisible: G.birdDressed.visible, rawVisible: !!G.birdRaw && G.birdRaw.visible, landed: ['breastL', 'thighR', 'drumL', 'wingR'].map(base), basesUp: G.ring.children.every(h => h.visible && h.scale.x > .999), packsHidden: G.ring.children.every(h => h.children.every(c => c === h.userData.base || !c.visible)), anchors: document.querySelectorAll('.anchor.in').length, lines: document.querySelectorAll('#anchor-lines line.in').length }; });
-  ok('product-cuts-land-on-bases-with-labels', s.curBeat === 4 && cuts.cutsVisible && !cuts.rawVisible && cuts.flight === 1 && cuts.landed.every(d => d !== null && d < 1e-3) && cuts.basesUp && cuts.packsHidden && cuts.anchors === 4 && cuts.lines === 4, cuts);
-  ok('product-ring-holds', s.cur === ringChapter && s.curBeat === 4 && s.complete && !s.playing, { cur: s.cur, curBeat: s.curBeat, complete: s.complete, playing: s.playing });
-  await shot(page, 'd13-product-ring-hold');
-  // the cluster chapter (beat 6) is a single animated scene: the aerial rise completes with every building built, then holds
-  const clusterChapter = await page.evaluate(() => CH.findIndex(c => c.beats.includes(6)));
-  await page.evaluate((i) => goTo(i), clusterChapter); await wait(page, 1900 + 5200); s = await S(page);
-  const clusterState = await page.evaluate(() => ({ single: CH[cur].beats.length === 1, built: ['barn-54', 'barn-76', 'barn-98', 'barn-120', 'feedmill', 'processing', 'packaging', 'cold', 'warehouse', 'logistics', 'admin', 'lab'].every(k => { const o = FAC[k], st = o.userData.stages; return st ? st.detail.visible && st.detail.scale.x > .999 : o.visible && o.scale.y > .999; }), nav: document.getElementById('beat-index').textContent.trim() }));
-  ok('cluster-single-scene', s.cur === clusterChapter && s.curBeat === 6 && clusterState.single && s.complete && !s.playing && !s.tr, { cur: s.cur, curBeat: s.curBeat, ...clusterState, complete: s.complete });
-  ok('cluster-hold-fully-built', clusterState.built, clusterState);
-  await wait(page, 4500); s = await S(page);
-  ok('cluster-holds', s.cur === clusterChapter && s.curBeat === 6 && s.complete, { cur: s.cur, curBeat: s.curBeat });
-  await shot(page, 'd13b-cluster-hold');
-  // number formatting consistency
-  const nums = await page.evaluate(() => Array.from(document.querySelectorAll('.metric-value')).map(e => e.textContent));
-  ok('numbers-uz-format', nums.every(n => !/\d\.\d{3}/.test(n) && !/\d{4,}/.test(n)), nums);
-  // replay from the final chapter
-  await page.keyboard.press('End'); await wait(page, 1900 + 14500); s = await S(page);
-  ok('final-replay-button', /Qayta/.test(s.play), s.play);
-  await page.click('#next'); await wait(page, 500); s = await S(page);
-  ok('replay-lands-chapter-1', s.started && s.cur === 0 && s.curBeat === (await page.evaluate(() => CH[0].beats[0])), s.cur);
-  // idle: render loop must stop after the sequence finishes
-  await wait(page, 9500);
-  const f0 = (await S(page)).frames; await wait(page, 1500); const f1 = (await S(page)).frames;
-  ok('idle-stops-rendering', f1 - f0 <= 3, { frames: f1 - f0 });
-  // small desktop + short landscape layout
-  await page.setViewportSize({ width: 1100, height: 700 }); await wait(page, 900); await shot(page, 'd11-1100x700');
-  ok('no-overflow-1100', !(await S(page)).overflow);
-  await page.setViewportSize({ width: 844, height: 390 }); await wait(page, 900); await shot(page, 'd12-844x390');
-  ok('no-overflow-844x390', !(await S(page)).overflow);
-  await ctx.close();
+  return bad;
 }
-function localStorage_ok(v) { return !!v; }
+const visibleTexts = (page) => page.evaluate(() => {
+  const roots = ['#hero', '#slide-copy', '#data-copy', '#scene-caption', '.slide-actions'];
+  const out = [];
+  for (const sel of roots) {
+    const el = document.querySelector(sel);
+    if (!el || el.hidden || el.offsetParent === null) continue;
+    el.querySelectorAll('*').forEach(n => {
+      if (n.children.length === 0 && n.textContent.trim()) out.push(n.textContent.trim());
+    });
+  }
+  return out;
+});
 
-// ---------------- reduced motion ----------------
+const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+const page = await ctx.newPage(); wire(page, 'desktop');
+
+// ---------- boot: hero darhol ko'rinadi, 3D keyin tayyor bo'ladi ----------
+const t0 = Date.now();
+await page.goto(url);
+const heroEarly = await page.evaluate(() => {
+  const h = document.getElementById('hero');
+  return { present: !!h && !h.hidden, title: (document.getElementById('hero-title') || {}).textContent || '' };
+});
+ok('hero-visible-before-3d-ready', heroEarly.present, heroEarly);
+await page.screenshot({ path: `${out}/d0-hero-loading.png` });
+ok('no-loader-screen', await page.evaluate(() => !document.getElementById('loader')));
+ok('no-countdown', await page.evaluate(() => !document.getElementById('opening-countdown') && !document.getElementById('auto-countdown')));
+ok('no-figures-editor', await page.evaluate(() => !document.getElementById('editor') && !document.getElementById('details')));
+
+await page.waitForFunction(() => window.started === true, null, { timeout: 240000 });
+R.readyMs = Date.now() - t0;
+console.log('READY', R.readyMs, 'ms');
+await wait(page, 1200);
+await page.screenshot({ path: `${out}/d1-hero.png` });
+
+let s = await S(page);
+ok('starts-on-hero', s.hero === true && s.chapter === 0, s);
+ok('hero-cta-enabled', await page.evaluate(() => !document.getElementById('hero-cta').disabled));
+ok('hero-hides-canvas', await page.evaluate(() => document.body.classList.contains('on-hero')));
+ok('hero-title-from-story', await page.evaluate(() => document.getElementById('hero-title').textContent.includes('klasterigacha')));
+
+const N = await page.evaluate(() => CH.length);
+ok('six-chapters', N === 6, { N });
+const plan = await page.evaluate(() => CH.map(c => ({ t: c.t, beats: c.beats.length })));
+console.log('chapters', JSON.stringify(plan));
+
+// ---------- hero -> 01 veil ----------
+await page.click('#hero-cta'); await wait(page, 2200);
+s = await S(page);
+ok('cta-goes-to-chapter-1', s.chapter === 1 && !s.hero, s);
+ok('canvas-visible-after-hero', await page.evaluate(() => !document.body.classList.contains('on-hero')));
+
+// ---------- klik oqimi: har sahna alohida to'xtaydi ----------
+const seen = [];
+let guard = 0, badNums = [];
+while (guard++ < 60) {
+  s = await S(page);
+  if (!s.done) { await page.keyboard.press('ArrowRight'); await wait(page, 700); continue; }
+  await wait(page, 350);
+  const key = `${s.chapter}.${s.slot}`;
+  if (!seen.includes(key)) {
+    seen.push(key);
+    badNums = badNums.concat(scanNumbers(await visibleTexts(page)).map(b => ({ ...b, at: key })));
+    await page.screenshot({ path: `${out}/s-ch${s.chapter}-${s.slot + 1}.png` });
+  }
+  if (s.chapter === N - 1 && s.slot === s.slots - 1) break;
+  await page.keyboard.press('ArrowRight');
+  await wait(page, s.slot === s.slots - 1 ? 2400 : 1500);
+}
+const expected = ['1.0', '1.1', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '3.4', '3.5', '4.0', '5.0', '5.1'];
+ok('every-scene-reached-in-order', JSON.stringify(seen) === JSON.stringify(expected), { seen });
+ok('one-click-one-scene', seen.length === 13, { count: seen.length });
+
+// ---------- ekranda faqat manbadagi raqamlar ----------
+R.numbers.rejected = badNums;
+ok('no-fabricated-numbers', badNums.length === 0, badNums.slice(0, 6));
+const forbidden = await page.evaluate(() => {
+  const t = document.body.innerText;
+  return ['so‘m', "so'm", 'Tannarx', 'Foyda', 'Soliq', 'Raqamlar', 'Batafsil', 'SKU', 'mln', 'Bir tovuqdan']
+    .filter(w => t.includes(w));
+});
+ok('no-invented-economics-words', forbidden.length === 0, forbidden);
+
+// ---------- oxirgi sahna: takrorlash ----------
+ok('last-scene-is-replay', await page.evaluate(() => document.getElementById('next').classList.contains('replay')));
+await page.click('#next'); await wait(page, 1400);
+s = await S(page);
+ok('replay-returns-to-hero', s.hero === true && s.chapter === 0, s);
+
+// ---------- klaviatura va pult ----------
+await page.keyboard.press('PageDown'); await wait(page, 2200);
+s = await S(page); ok('pagedown-advances', s.chapter === 1, s);
+await page.keyboard.press('PageDown'); await wait(page, 900);
+await page.keyboard.press('PageDown'); await wait(page, 1500);
+s = await S(page); ok('pagedown-walks-scenes', s.chapter === 1 && s.slot === 1, s);
+await page.keyboard.press('PageUp'); await wait(page, 900);
+s = await S(page); ok('pageup-goes-back-a-scene', s.chapter === 1 && s.slot === 0 && s.done, s);
+await page.keyboard.press('End'); await wait(page, 2200);
+s = await S(page); ok('key-end', s.chapter === N - 1, s);
+await page.keyboard.press('Home'); await wait(page, 2000);
+s = await S(page); ok('key-home-returns-to-hero', s.hero === true, s);
+await page.keyboard.press('Space'); await wait(page, 2200);
+s = await S(page); ok('space-advances', s.chapter === 1, s);
+
+// ---------- F: to'liq ekran so'rovi ----------
+const fs = await page.evaluate(() => {
+  let called = false;
+  const orig = document.documentElement.requestFullscreen;
+  document.documentElement.requestFullscreen = function () { called = true; return Promise.resolve(); };
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', bubbles: true }));
+  document.documentElement.requestFullscreen = orig;
+  return called;
+});
+ok('f-requests-fullscreen', fs);
+
+// ---------- kanvasga klik keyingi sahnaga o'tadi ----------
+await page.evaluate(() => FarmPresentation.goTo(1, { instant: true, force: true }));
+await wait(page, 1200);
+const before = await S(page);
+await page.mouse.click(960, 300); await wait(page, 900);
+const after = await S(page);
+ok('canvas-click-advances', after.done || after.slot > before.slot, { before, after });
+
+// ---------- foto tugmasi: fayl ro'yxatda yo'q -> tugma yo'q ----------
+const photoState = await page.evaluate(() => ({
+  registered: (window.STORY.photos || []).length,
+  buttonVisible: !document.getElementById('photo-open').hidden
+}));
+ok('photo-button-hidden-without-file', photoState.registered === 0 ? !photoState.buttonVisible : true, photoState);
+
+// ---------- qiymat zanjiri ko'rsatkichi ----------
+const chain = await page.evaluate(() => {
+  const read = () => Array.from(document.querySelectorAll('.chain-strip li')).map(li => li.className);
+  const out = {};
+  FarmPresentation.goTo(1, { instant: true, force: true }); out.ch1 = read();
+  FarmPresentation.goTo(3, { instant: true, force: true }); out.ch3 = read();
+  return out;
+});
+ok('chain-strip-has-nine-links', chain.ch1.length === 9 && chain.ch3.length === 9, { n: chain.ch1.length });
+ok('chain-grows-with-integration',
+  chain.ch1.filter(c => c.includes('on')).length === 1 && chain.ch3.filter(c => c.includes('on')).length === 9,
+  { ch1: chain.ch1.filter(c => c.includes('on')).length, ch3: chain.ch3.filter(c => c.includes('on')).length });
+
+// ---------- yo'l xaritasi va reja kartalari ----------
+await page.evaluate(() => FarmPresentation.goTo(4, { instant: true, force: true })); await wait(page, 1200);
+const road = await page.evaluate(() => ({
+  points: document.querySelectorAll('.roadmap .rm').length,
+  now: document.querySelectorAll('.roadmap .rm.now').length,
+  unknown: document.querySelectorAll('.roadmap .rm.unknown').length,
+  dashes: Array.from(document.querySelectorAll('.roadmap .rm-year')).filter(e => e.textContent.trim() === '—').length
+}));
+ok('roadmap-eleven-points', road.points === 11, road);
+ok('roadmap-marks-now', road.now === 1, road);
+ok('roadmap-unknown-years-are-dashes', road.unknown === road.dashes && road.dashes > 0, road);
+
+await page.evaluate(() => { FarmPresentation.goTo(5, { instant: true, force: true }); });
+await wait(page, 900);
+await page.evaluate(() => FarmPresentation.holdSlot(1)); await wait(page, 1200);
+const plans = await page.evaluate(() => ({
+  cards: document.querySelectorAll('.plan').length,
+  empty: document.querySelectorAll('.plan.empty').length,
+  deadline: (document.querySelector('.plan-deadline b') || {}).textContent
+}));
+ok('plan-cards-four', plans.cards === 4, plans);
+ok('plan-cards-empty-until-confirmed', plans.empty === 4 && plans.deadline === '—', plans);
+await page.screenshot({ path: `${out}/d2-plans.png` });
+
+// ---------- hisoblagichlar faqat manbadagi raqamlarni sanaydi ----------
+const counters = await page.evaluate(async () => {
+  FarmPresentation.goTo(2, { instant: true, force: true });
+  await new Promise(r => setTimeout(r, 2200));   // oldingi sahnadan qaytib sanaydi
+  const a = (document.getElementById('fig-cap') || {}).textContent;
+  FarmPresentation.goTo(3, { instant: true, force: true });
+  await new Promise(r => setTimeout(r, 60));
+  const mid = (document.getElementById('fig-cap') || {}).textContent;
+  await new Promise(r => setTimeout(r, 1800));
+  const b = (document.getElementById('fig-cap') || {}).textContent;
+  return { a, mid, b };
+});
+const norm = (x) => (x || '').replace(/[    ]/g, '');
+ok('capacity-counter-animates-25000-to-1500000',
+  norm(counters.a) === '25000' && norm(counters.b) === '1500000' && norm(counters.mid) !== norm(counters.b), counters);
+
+// ---------- o'lchamlar ----------
+for (const [w, h, tag] of [[1440, 900, 'd3-1440x900'], [3840, 2160, 'd4-3840x2160'], [844, 390, 'd5-844x390'], [390, 844, 'd6-390x844']]) {
+  await page.setViewportSize({ width: w, height: h }); await wait(page, 900);
+  await page.evaluate(() => FarmPresentation.goTo(3, { instant: true, force: true })); await wait(page, 1400);
+  const of = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+  ok(`no-horizontal-overflow-${w}x${h}`, !of);
+  await page.screenshot({ path: `${out}/${tag}.png` });
+}
+await page.setViewportSize({ width: 1920, height: 1080 });
+await ctx.close();
+
+// ---------- reduced motion ----------
 {
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
-  const page = await ctx.newPage(); wire(page, 'reduced');
-  await boot(page, 'reduced'); await page.click('#start'); await wait(page, 3500);
-  let s = await S(page);
-  ok('reduced-static-chapter', s.started && s.complete && !s.playing, { complete: s.complete, playing: s.playing });
-  await page.click('#next'); await wait(page, 2200); s = await S(page);
-  ok('reduced-instant-nav', s.cur === 1 && !s.tr, { cur: s.cur, tr: s.tr });
-  const f0 = s.frames; await wait(page, 1500); s = await S(page);
-  ok('reduced-idle', s.frames - f0 <= 3, s.frames - f0);
-  await shot(page, 'r1-reduced');
-  await ctx.close();
+  const c = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+  const p2 = await c.newPage(); wire(p2, 'reduced');
+  await p2.goto(url);
+  await p2.waitForFunction(() => window.started === true, null, { timeout: 240000 });
+  await p2.waitForTimeout(1200);
+  await p2.evaluate(() => FarmPresentation.goTo(3, { force: true }));
+  await p2.waitForTimeout(1500);
+  const st = await p2.evaluate(() => FarmPresentation.slotInfo());
+  ok('reduced-motion-lands-and-holds', st.chapter === 3 && st.done === true, st);
+  await p2.screenshot({ path: `${out}/r1-reduced.png` });
+  await c.close();
 }
 
-// ---------------- mobile ----------------
-if (!args.includes('--no-mobile')) {
-  const ctx = await browser.newContext({ ...devices['iPhone 13'], viewport: { width: 390, height: 844 } });
-  const page = await ctx.newPage(); wire(page, 'iphone');
-  console.log('READY mobile', await boot(page, 'mobile'));
-  await shot(page, 'm0-loader');
-  await page.click('#start'); await wait(page, 3500);
-  let s = await S(page);
-  ok('mobile-start', s.started && s.cur === 0, s);
-  await wait(page, 1500); await shot(page, 'm1-ch1');
-  const targets = await page.evaluate(() => Array.from(document.querySelectorAll('.ctrl button,#beat-nav button,#info-toggle')).filter(b => b.offsetParent).map(b => { const r = b.getBoundingClientRect(); return [b.id || b.className || b.textContent.trim(), Math.round(r.width), Math.round(r.height)]; }));
-  ok('mobile-touch-targets', targets.every(t => t[1] >= 44 && t[2] >= 44), targets.filter(t => t[1] < 44 || t[2] < 44));
-  // swipe left on the canvas → next chapter
-  const frame = await page.locator('#scene-frame').boundingBox();
-  const cx = frame.x + frame.width / 2, cy = frame.y + frame.height / 2;
-  await page.touchscreen.tap(cx, cy).catch(() => {});
-  await page.evaluate(([x, y]) => { const c = document.getElementById('gl'); const o = { pointerId: 9, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: x, clientY: y }; c.dispatchEvent(new PointerEvent('pointerdown', o)); c.dispatchEvent(new PointerEvent('pointermove', { ...o, clientX: x - 120 })); c.dispatchEvent(new PointerEvent('pointerup', { ...o, clientX: x - 140 })); }, [cx, cy]);
-  await wait(page, 2000); s = await S(page);
-  ok('mobile-swipe-next', s.cur === 1, s.cur);
-  await page.evaluate(([x, y]) => { const c = document.getElementById('gl'); const o = { pointerId: 10, pointerType: 'touch', isPrimary: true, bubbles: true, clientX: x, clientY: y }; c.dispatchEvent(new PointerEvent('pointerdown', o)); c.dispatchEvent(new PointerEvent('pointerup', { ...o, clientX: x + 140 })); }, [cx, cy]);
-  await wait(page, 2000); s = await S(page);
-  ok('mobile-swipe-prev', s.cur === 0, s.cur);
-  await page.click('#next'); await wait(page, 2200); s = await S(page);
-  ok('mobile-next-pill', s.cur === 1, s.cur);
-  await shot(page, 'm2-ch4');
-  await page.click('#info-toggle'); await wait(page, 500);
-  ok('mobile-info-expands', await page.evaluate(() => document.getElementById('scene-layer').classList.contains('expanded')));
-  await shot(page, 'm3-ch4-expanded');
-  await page.keyboard.press('Escape'); await wait(page, 300);
-  await page.click('#play'); await wait(page, 600); s = await S(page);
-  ok('mobile-autoplay', s.playing && !s.autoHidden, { clock: s.clock });
-  await shot(page, 'm4-autoplay');
-  await page.click('#play'); await wait(page, 300);
-  await page.evaluate(() => setExplore(true)); await wait(page, 1200); s = await S(page);
-  ok('mobile-explore', s.ex);
-  await shot(page, 'm5-explore');
-  await page.evaluate(() => setExplore(false)); await wait(page, 900); s = await S(page);
-  ok('mobile-explore-back', !s.ex && s.cur === 1, { cur: s.cur });
-  await page.evaluate(() => goTo(CH.findIndex(c => c.beats.includes(8)))); await wait(page, 2200 + 3200);
-  await shot(page, 'm6-ch3-product-ring');
-  ok('mobile-no-overflow', !(await S(page)).overflow);
-  await ctx.close();
+// ---------- oflayn: hech qanday tashqi so'rov yo'q ----------
+{
+  const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const p3 = await c.newPage();
+  const external = [];
+  p3.on('request', r => { const u = r.url(); if (!u.startsWith(url) && !u.startsWith('data:') && !u.startsWith('blob:')) external.push(u); });
+  wire(p3, 'offline');
+  await p3.goto(url);
+  await p3.waitForFunction(() => window.started === true, null, { timeout: 240000 });
+  await p3.waitForTimeout(800);
+  ok('no-external-requests', external.length === 0, external.slice(0, 5));
+  await c.close();
 }
+
 await browser.close();
-if (R.errors.length) fail(`${R.errors.length} page/console errors`);
-if (R.missing.length) fail(`${R.missing.length} failed requests`);
 await writeFile(`${out}/click-report.json`, JSON.stringify(R, null, 2));
-console.log('\nRESULT', R.fails.length ? 'FAIL ' + R.fails.length : 'PASS', 'errors', R.errors.length, 'missing', R.missing.length);
-process.exit(R.fails.length ? 1 : 0);
+const passed = Object.values(R.checks).filter(Boolean).length, total = Object.keys(R.checks).length;
+const verdict = R.fails.length === 0 && R.errors.length === 0 && R.missing.length === 0 ? 'PASS' : 'FAIL';
+console.log(`\nRESULT ${verdict} — ${passed}/${total} checks, ${R.errors.length} errors, ${R.missing.length} missing, ${R.fails.length} failed`);
+if (R.fails.length) console.log('failed:', R.fails.join(' | '));
+process.exit(verdict === 'PASS' ? 0 : 1);

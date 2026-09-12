@@ -1,3 +1,239 @@
+# Buyurtmachi bergan bo'laklangan tovuq modeli (2026-09-12, keyingi topshiriq)
+
+## Manba fayl
+
+`~/Desktop/chicken.glb` — 92 MB, 2,74 mln uchburchak, uchta 4K JPEG, Tripo mesh
+qo'lda kesilgan. Ichidagi tugunlar:
+
+| Tugun | Nima | Uchburchak |
+|---|---|---|
+| `Chicken_Work` | tana + **ikki qanot** (bitta meshda, uch ajralgan orol) | 997 322 |
+| `Leg_L` / `Leg_R` | butun oyoq (son + boldir), kesim yuzasi bilan | 152 824 / 126 052 |
+| `Neck` | bo'yin, kesim yuzasi bilan | 60 307 |
+| `Tail` | dum, kesim yuzasi bilan | 32 784 |
+| `Chicken_Original` | butun tovuqning ikkinchi nusxasi | 1 366 964 |
+
+Diqqat: fayl ko'rinishidan **5 ta** tugun bo'lsa ham, `Chicken_Work` ichida uchta
+bog'lanmagan geometriya oroli bor — qanotlar alohida, faqat bitta meshga
+eksport qilingan. Shu bois yakuniy bo'lak soni **7 ta**.
+
+## Tayyorlash: `scripts/prep-chicken-parts.mjs`
+
+```
+node --max-old-space-size=8192 scripts/prep-chicken-parts.mjs
+```
+
+Bajaradigan ishlari:
+1. `Chicken_Original` va bo'sh `Node_0` tashlanadi (fayl hajmining yarmi).
+2. Tripo qo'shgan `COLOR_0` / `COLOR_1` atributlari tashlanadi — ular oq (1,1,1,1),
+   ma'lumot tashimaydi, lekin har tepaga 8 bayt qo'shadi.
+3. `Chicken_Work` bog'langan komponentlar bo'yicha uchga bo'linadi: eng kattasi
+   `torso`, qolgan ikkitasi x belgisiga qarab `wingL` / `wingR`.
+4. `Leg_L→legL`, `Leg_R→legR`, `Neck→neck`, `Tail→tail`.
+5. meshoptimizer bilan soddalashtirish (ratio 0.11, `lockBorder:true` — kesim
+   yuzasi bilan teri chegarasi mos qolishi uchun), teksturalar WebP (rang 2K,
+   ORM va normal 1K), kvantlash.
+6. Sayt koordinata tizimiga o'tkazish: barcha tepalar +0,2617 ga ko'tariladi,
+   shunda pastki nuqta y=0, uzunlik 1.0 — `raw-chicken-cuts.glb` bilan bir xil.
+7. Har tugunga `extras {center, min, max}` yoziladi — `assets/poultry-runtime.js`
+   `buildParts()` aynan shu shartnomani o'qiydi.
+
+Natija: `assets/models/chicken-parts.glb` — **174 365 uchburchak, 4,18 MB**,
+ildiz tugun `chicken-parts`, ichida yetti bo'lak.
+
+### Yo'l qo'yilgan xato va uni tuzatish
+
+Birinchi urinishda `torso`, `wingL`, `wingR` **qop-qora** renderlandi.
+Sababi: orollarni ajratganda atributlar `getElement()` orqali ko'chirilgan edi —
+u normalizatsiyani yechib, 1.0 qiymatini butun sonli `Uint8Array` ga `1` qilib
+yozgan (1/255 ≈ 0,004 → qora). Endi `primFromTriangles()` **xom massiv
+qiymatlarini** ko'chiradi, ustiga COLOR_* umuman tashlanadi.
+
+## Runtime
+
+`assets/poultry-runtime.js`:
+- `A.loadChickenParts()` / `A.chickenParts(length)` qo'shildi.
+- `A.rawCuts()` bilan umumiy `buildParts(model, holderName, rootName, length)`
+  funksiyasiga chiqarildi — ikkala model bir xil shartnomani ishlatadi.
+
+`index.html`:
+- `G.partRing` — buyurtmachi modeli uchun **oltita** asos (60° oralatib,
+  radius 5,05). Mahsulot qadoqlari halqasi `G.ring` tegilmagan.
+- `FLIGHT_TABLES` — uchish jadvali endi model nomiga qarab tanlanadi
+  (`flightOf`), halqa ham (`ringOf`). Jadval yozuvi:
+  `[bo'lak, asos indeksi, qo'nish burilishi, masshtab koeffitsienti]`.
+  Kichik bo'laklar asosda kattaroq ko'rsatiladi: dum ×2,10, bo'yin ×1,55,
+  qanotlar ×1,25.
+- `G.installChickenParts` eski `G.installRawCuts` o'rniga. `raw-chicken-cuts.glb`
+  endi yuklanmaydi.
+
+## Sahna (03-bo'lim, 6-sahna — «Birorta chiqindi tashqariga chiqmaydi»)
+
+Davomiyligi 8 s dan **11 s** ga uzaytirildi, ajralish sekinlashdi:
+
+| Vaqt | Nima bo'ladi |
+|---|---|
+| 0 – 1,5 s | butun xom tovuq kursida, sekin buriladi; kamera yaqin (radius 6,4) |
+| 0,7 – 3,2 s | oltita to'q-yashil asos ketma-ket ko'tariladi |
+| 1,5 – 8,1 s | bo'laklar navbat bilan ajralib, yoy bo'ylab o'z asosiga uchadi va kattalashadi |
+| 8,6 s dan | yetti yorliq chiziq bilan paydo bo'ladi, sahna shu holatda to'xtaydi |
+
+Kamera bir vaqtning o'zida 6,4 dan 11,6 radiusga chiqadi — butun tovuqdan
+boshlanib, yoyilgan bo'laklarni qamrab oladi.
+
+## Yorliqlar — `assets/story.js` → `STORY.chickenParts`
+
+| Kalit | Yorliq | Izoh |
+|---|---|---|
+| `torso` | To'sh va bel | markaziy bo'lak |
+| `wingL` / `wingR` | Chap qanot / O'ng qanot | — |
+| `legL` / `legR` | Chap oyoq / O'ng oyoq | son va boldir |
+| `neck` | Bo'yin | — |
+| `tail` | Dum | — |
+
+Nomlar modelning **haqiqiy bo'linishiga** mos yozilgan: to'sh alohida kesilmagan,
+u bel bilan bitta bo'lakda; son va boldir ham ajratilmagan, ular butun oyoq.
+Agar to'sh va son alohida kerak bo'lsa, tanani yana kesish kerak
+(`scripts/split-raw-chicken.mjs` dagi tekislik bilan kesish mantiqi bor).
+
+Matn o'zgartirish kerak bo'lsa faqat `assets/story.js` tahrirlanadi.
+
+---
+
+# Sokin Savdo — prezident tashrifi taqdimoti (2026-09-12, TZ-01 amalga oshirildi)
+
+Bu bo'lim eng yangisi. Undan pastdagi tarix o'zgarmagan holda saqlanadi.
+
+## Nima qilindi
+
+`docs/TZ-01-bosh-sahifa-va-hikoya.md` bo'yicha taqdimot to'liq qayta yozildi: hikoya
+2010-yildagi kichik go'sht savdosidan 2026-yildagi vertikal integratsiyalashgan
+parranda klasterigacha bo'lgan yo'lni ko'rsatadi.
+
+**Eng muhim qoida — ekrandagi har bir raqam faqat manbadan.** Oldingi versiyadagi
+butun shartli iqtisodiy model (tannarx, foyda, tushum, soliq, ish o'rni, SKU,
+investitsiya, bo'lak foizlari, bir tovuq narxi) va uni tahrirlash paneli kodning
+o'zidan olib tashlandi. Ekranda faqat quyidagilar bor:
+
+| Raqam | Manba |
+|---|---|
+| 2010 | faoliyat boshlangan yil |
+| 3 | 2010-yildagi xodimlar soni |
+| 25 000 | «kechagi kun» quvvati, bosh parranda |
+| 1 500 000 | 2026-yil quvvati, bosh parranda |
+| 2026 | joriy yil |
+
+Boshqa hech qanday son yo'q. Tasdiqlanmagan qiymat (yo'l xaritasidagi yillar,
+kelajak reja ko'rsatkichlari) ekranda `—` bo'lib turadi va kartasi xiralashadi.
+
+## Yagona manba: `assets/story.js`
+
+Barcha matn, bo'limlar tartibi, sahna soniyalari, raqamlar, qiymat zanjiri,
+yo'l xaritasi va reja kartalari shu faylda. `index.html` `CH` ni shundan hosil
+qiladi, `assets/presentation.js` esa faqat chizadi — u yerda birorta biznes
+raqami yozilmagan va hisoblanmaydi. **Matn yoki raqam o'zgartirish kerak bo'lsa
+faqat `assets/story.js` tahrirlanadi.**
+
+Buyurtmachi raqam bergach: `story.js` dagi tegishli `null` o'rniga qiymat yoziladi
+(masalan yo'l xaritasidagi `year: null` → `year: '2019'`), boshqa hech narsa
+o'zgarmaydi.
+
+## Tuzilma — 6 bo'lim, 13 sahna
+
+| # | Bo'lim | Davr | Sahnalar (beat) |
+|---|---|---|---|
+| 00 | Sokin Savdo (hero) | 2010 — 2026 | 3D yo'q (17-beat orqada tayyor turadi) |
+| 01 | 2010 · Boshlanish | 2010 | 0 tong ferma, 1 hovli |
+| 02 | O'sish · 25 ming bosh | Kechagi kun | 3 sanoat korpusi ko'tariladi, 2 o'z transportimiz yo'lda |
+| 03 | Klaster · 2026 | 2026 | 6 klaster quriladi, 7 yagona zanjir, 8 ona tovuq (Aviagen), 16 aqlli katak, 10 Marel sexi, 4 rendering/bo'laklar |
+| 04 | Hozirgi bosqich | 2026 · Hozir | 13 qurilish + 11 nuqtali yo'l xaritasi |
+| 05 | Keyingi marra | Keyingi bosqich | 14 bugungi klaster, 15 oltin orbit + reja kartalari |
+
+**Bir klik — bir fikr.** Sahna o'z animatsiyasini o'ynaydi va shu holatda
+to'xtab turadi; keyingisi faqat klik bilan ochiladi. Birinchi klik yarim
+o'ynagan animatsiyani tugatadi, ikkinchisi keyingi sahnaga o'tadi. Bo'limlar
+orasida veil o'tishi (1,45 s), bo'lim ichida esa uzluksiz kadr.
+
+## Har sahnadagi vizual mantiq
+
+Har sahna oltita talabni bajaradi: davr belgisi (chap pastda, oltin rangda),
+kuchli 3D kadr, faqat tegishli manba raqamlari, bir jumlalik izoh,
+**Sabab → Natija** satri va **qiymat zanjiri ko'rsatkichi**.
+
+Qiymat zanjiri — 9 bo'g'inli chiziq (Ona tovuq · Nasldor tuxum · Jo'ja · Boqish ·
+So'yish · Qayta ishlash · Kolbasa · Rendering · Savdo). To'ldirilgan bo'g'in =
+korxonaning o'zida. 2010-yilda bitta (Savdo), o'sish bosqichida ikkita, 2026-yilda
+to'qqiztasi ham to'la. Vertikal integratsiya shu bitta ko'rsatkichda ko'rinadi.
+Raqam yozilmaydi — faqat vizual holat.
+
+## Yangi 3D sahna: aqlli ko'p qavatli katak (16-beat)
+
+`cageHouseInterior()` — tovuqxona ichi: xizmat yo'lakchasining ikki yonida besh
+qavatli katak qatorlari, yem tarnovi, nipel suv liniyasi, tuxum va go'ng
+tasmalari, iqlim quvurlari, boshqaruv shkafi va sensorlar. `FAC["barn-76"]`
+qobig'i `interiorB` sahnasi yoqilganda yashiriladi, kamera yo'lakcha bo'ylab
+sekin yuradi. Geometriya materiallar bo'yicha birlashtirilgan; parranda bitta
+`InstancedMesh` (780 nusxa, ~150 uchburchakli proksi, nusxa bo'yicha pat rangi).
+To'liq LOD tovuq bu yerda 1,4 mln uchburchak berardi — panjara ortida farqi
+bilinmaydi, shuning uchun proksi ishlatildi: sahna 466 ming uchburchak, 60 fps.
+
+## Olib tashlanganlar
+
+- `#loader` yuklash ekrani va 3-2-1 sanoq — hero darhol ko'rinadi, 3D orqada yuklanadi
+- `FIG_SCHEMA`, `FIGS`, `ECON`, `calcData`, `waterfallHTML`, `econWaterfall`, `SV`/`SD`, `partRow`, `kpiHTML`, `barsHTML`, `chainHTML` — butun shartli iqtisod
+- «Raqamlar» muharriri (`#editor`) va «Batafsil» dialogi (`#details`) hamda ular ishlatgan `localStorage`/`claude.db` yozuvi
+- Bo'lak ustidagi narx oynasi (`partTip`) — `hideTip()` bo'sh funksiya bo'lib qoldi
+- Avtoijro taymeri (`#auto-countdown`) — `P.setPlaying` endi hech narsa qilmaydi
+- BEATS ichidagi 16 ta `dom()` funksiyasi (faqat o'chirilgan dialog ishlatardi)
+
+## Boshqaruv
+
+| Kirish | Amal |
+|---|---|
+| Klik / → / PageDown / Space | animatsiyani tugatadi, keyin keyingi sahna, bo'lim oxirida keyingi bo'lim |
+| ← / PageUp | oldingi sahna (tugagan holatda), bo'lim boshida oldingi bo'lim |
+| Home / End | hero / oxirgi bo'lim |
+| F yoki hero'dagi ○ | to'liq ekran |
+| Esc | foto → Explore → yig'ish |
+| Sahna nuqtalari | bo'lim ichidagi istalgan sahnaga |
+
+## Foto overlay
+
+`STORY.photos` bo'sh — shuning uchun «Fotoni ko'rish» tugmasi hech qayerda
+ko'rinmaydi va **birorta tarmoq so'rovi yuborilmaydi** (oflayn talabi).
+Buyurtmachi rasm bergach: faylni `assets/photos/` ga qo'yib, `story.js` dagi
+`photos` ro'yxatiga bitta satr qo'shiladi. Kalitlar sahnalarga allaqachon
+bog'langan: `2010-arxiv`, `aviagen`, `katak`, `marel`, `rendering`.
+
+## O'lchamlar
+
+1920×1080 asosiy. `@media(min-width:2200px)` blokida butun tipografiya 4K uchun
+qayta masshtablangan (3840×2160 da sarlavha ~126 px, raqamlar 56 px) — bu
+proyektor uchun muhim edi, ilgari matn juda kichik chiqardi. Landshaft telefonda
+(844×390) sabab→natija, diagramma, chiplar va zanjir yashiriladi, yo'l xaritasi
+4 nuqtaga qisqaradi.
+
+## QA
+
+- `node scripts/qa-click.mjs --out=qa/click-final2` — 40 ta tekshiruv. Ular orasida
+  `no-fabricated-numbers`: barcha 13 sahna matni skanerlanadi va ruxsat etilgan
+  ro'yxatdan tashqari birorta son topilmasligi shart; `no-invented-economics-words`:
+  «so'm», «Tannarx», «Foyda», «Soliq», «SKU», «Bir tovuqdan» hech qayerda yo'q;
+  `no-external-requests`: oflayn.
+- `node scripts/qa.mjs` — har beat uchun uchburchak/chizish chaqirig'i/kirish
+  kechikishi, kadr vaqti, render-on-demand, Explore, o'lcham sinovi, reduced-motion.
+- `node scripts/smoke.mjs` — tez yuklash va o'tish sinovi.
+
+## Cheklovlar
+
+- Bozor maydoni geometriyasi zaif edi (bo'sh oq qutilar), shuning uchun 02-bo'lim
+  ikkinchi sahnasi bozorga kesilmaydi: kamera yo'ldagi refrijeratorni kuzatadi.
+- Yo'l xaritasidagi 9 ta yil va kelajak reja kartalarining barchasi `—` holatida:
+  buyurtmachi tasdiqlashi kerak (TZ-01, 8.2-jadval).
+- 3D modellar prosedural va Sketchfab CC BY tovuqdan iborat; foto-real skan emas.
+
+---
+
 # Click presentation pass — implemented (2026-09-11, continued by Claude Fable 5.1 session 2)
 
 User request: replace scrolling with a premium white, six-chapter click-controlled presentation. Preserve all Uzbek content, figures/calculations/editor, Three.js scene, models, raycasting, Explore and all 16 internal beats. No Kage source or assets.

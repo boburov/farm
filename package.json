@@ -1,5 +1,5 @@
 {
-  "name": "bir-tovuqdan",
+  "name": "sokin-savdo",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,9 @@
     "assets:validate": "node scripts/validate-assets.mjs",
     "assets:node": "node scripts/generate-assets.mjs",
     "qa": "node scripts/qa.mjs",
-    "qa:quick": "node scripts/qa.mjs --quick"
+    "qa:quick": "node scripts/qa.mjs --quick",
+    "qa:click": "node scripts/qa-click.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
     "@gltf-transform/core": "^4.5.0",

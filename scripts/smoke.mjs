@@ -62,12 +62,19 @@ for (const size of sizes) {
     ok(`${tag} started-at-chapter-0`, s.started === true && s.cur === 0, s);
     const N = await page.evaluate(() => CH.length);
     console.log('info', tag, 'chapters', N);
-    for (let i = 1; i < N; i++) {
-      await page.keyboard.press('ArrowRight'); await wait(page, 1900);
-      await shot(page, `c${i}`);
-      s = await S(page); states.push(s);
-      ok(`${tag} arrow-right-to-${i}`, s.cur === i, s);
+    // bir klik = bir sahna: har bo'limda bir nechta sahna bo'lishi mumkin
+    let guard = 0, shots = 0, lastCh = 0;
+    while (guard++ < 60) {
+      const st = await page.evaluate(() => FarmPresentation.slotInfo());
+      if (!st.done) { await page.keyboard.press('ArrowRight'); await wait(page, 600); continue; }
+      if (st.chapter !== lastCh) { lastCh = st.chapter; await shot(page, `c${++shots}`); }
+      if (st.chapter === N - 1 && st.slot === st.slots - 1) break;
+      await page.keyboard.press('ArrowRight');
+      await wait(page, st.slot === st.slots - 1 ? 2200 : 1400);
     }
+    s = await S(page); states.push(s);
+    ok(`${tag} walks-to-last-chapter`, s.cur === N - 1, s);
+    ok(`${tag} visited-every-chapter`, shots === N - 1, { shots, want: N - 1 });
     await page.keyboard.press('End'); await wait(page, 1900); s = await S(page);
     ok(`${tag} key-end`, s.cur === N - 1, s);
     await page.keyboard.press('Home'); await wait(page, 1900); s = await S(page);
