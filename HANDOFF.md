@@ -196,9 +196,9 @@ Qator `value:null` bo'lsa ekranda **"—"** chiqadi va qator xiralashadi.
 Bu STEP_1 qoidasining ko'rinadigan tomoni: hujjatda raqam bo'lmasa, u
 o'ylab topilmaydi.
 
-Hozir bitta shunday joy bor: **2022-yil ishchi soni**. Buyurtmachi bergan
-referens rasmda "150+ ta" yozilgan, lekin bu raqam na `.docx`, na `.xlsx`
-da uchraydi. Raqam topilsa — `assets/years.js` da manbasi bilan qo'yiladi.
+Hozir bunday joy yo'q. **2022-yil ishchi soni (150)** ilgari bo'sh edi —
+uni buyurtmachi og'zaki tasdiqladi (2026-09-12). Manbasi hujjat emas,
+shuning uchun `assets/years.js` da izoh bilan belgilab qo'yilgan.
 
 ### `project` sahifasi
 
@@ -355,7 +355,6 @@ buyurtmachidan so'rash kerak.
 
 | Nima | Qayerda | Nega |
 |---|---|---|
-| "150+ ta ishchi" (2022) | 2022–2023 referensi | Ikkala hujjatda ham yo'q |
 | Prezident iqtibosi | 2025–2026 referensi | Hujjatlarda yo'q; haqiqiy shaxsga tasdiqlanmagan gap yozilmaydi |
 | Aviagen logotipi | 2025–2026 referensi | Uchinchi tomon brendi — faqat docx'dagi matn ishlatildi |
 | Karta izohlari (5×4 band) | istiqbol referensi | Hujjatda yo'q — loyiha mazmuni haqidagi taxminlar |

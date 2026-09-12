@@ -135,19 +135,20 @@
    * 2022 uchun bir aylanmadagi tovuq soni (220 ming) —
    *   docs/Yaratilgan_qiymat_Sokin_savdo.xlsx "Лист2" F3.
    *
-   * DIQQAT: 2022-yil uchun ISHCHI SONI ikkala hujjatda ham YO'Q.
-   * Buyurtmachi bergan referens rasmda "150+ ta" yozilgan, lekin u hujjatlarda
-   * uchramaydi — shuning uchun bu yerda `value:null`, ekranda "—" chiqadi.
-   * Agar raqam topilsa, shu joyga manbasi bilan qo'yiladi.
+   * 2022-yil ISHCHI SONI (150) ikkala hujjatda ham yo'q — uni BUYURTMACHI
+   * og'zaki tasdiqladi (2026-09-12). Ya'ni manbasi hujjat emas, mijozning
+   * o'zi; shu sababli alohida belgilab qo'yildi. Hujjatga kiritilsa, bu izoh
+   * yangilanadi.
    *
    * `growth` — hisoblangan: (2023 - 2022) / 2022 x 100.
    *   subsidiya 2 500 → 1 250  = -50%   (subsidiya kamaydi)
    *   tovuq      220 → 300     = +36%
+   *   ishchi     150 → 200     = +33%
    *   aylanma     66 → 90      = +36%
    *   hajm     3 300 → 4 500   = +36%
    *   narx    20 000 o'zgarmagan = 0%
-   * Ishchi soni va soliq/tannarx qatorlarida ikkala yilda bir xil ko'rsatkich
-   * yo'q — foiz ham ko'rsatilmaydi.
+   * Soliq/tannarx qatorida ikkala yilda bir xil ko'rsatkich yo'q — foiz ham
+   * ko'rsatilmaydi.
    */
   {
     id:'2022-2023',
@@ -165,7 +166,8 @@
         rows:[
           {icon:'subsidy', value:2500,  unit:'so‘m',      label:'Har bir kg ga subsidiya'},
           {icon:'hen',     value:220,   unit:'ming dona', label:'Bir aylanmadagi tovuq soni'},
-          {icon:'workers', value:null,                    label:'Ishchi soni (hujjatda yo‘q)'},
+          /* manbasi: buyurtmachi tasdig'i, hujjatda yo'q — yuqoridagi izohga qarang */
+          {icon:'workers', value:150,   unit:'ta',        label:'Ishchi soni'},
           {icon:'chart',   value:66,    unit:'mlrd so‘m', label:'Yillik aylanma'},
           {icon:'meat',    value:3300,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)'},
           {icon:'tax',     value:3.7,   unit:'mlrd so‘m', label:'Soliq imtiyozi'},
@@ -180,7 +182,8 @@
            growth:'-50%'},
           {icon:'hen',     value:300,   unit:'ming dona', label:'Bir aylanmadagi tovuq soni',
            growth:'+36%'},
-          {icon:'workers', value:200,   unit:'ta',        label:'Ishchi soni'},
+          {icon:'workers', value:200,   unit:'ta',        label:'Ishchi soni',
+           growth:'+33%'},
           {icon:'chart',   value:90,    unit:'mlrd so‘m', label:'Yillik aylanma',
            growth:'+36%'},
           {icon:'meat',    value:4500,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)',

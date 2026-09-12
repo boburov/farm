@@ -38,10 +38,11 @@ const ALLOWED = {
               · 3 300 tonna · 3.7 mlrd soliq imtiyozi · 20 000 so'm/kg
        2023 — 1 250 so'm/kg · 300 ming bosh · 200 ishchi · 90 mlrd
               · 4 500 tonna · ichki yem hisobiga 6.9 mlrd (8%) · 20 000 so'm/kg
-     50 / 36 / 0 — o'sish foizi, shu ikki ustundan hisoblangan; 1 — "1 kg".
-     2022 uchun ishchi soni hujjatda YO'Q — ekranda "—" chiqadi. */
-  '2022-2023': ['2022', '2023', '2500', '220', '66', '3300', '3.7', '20000',
-                '1250', '300', '200', '90', '4500', '6.9', '8', '50', '36', '0', '1'],
+     50 / 36 / 33 / 0 — o'sish foizi, shu ikki ustundan hisoblangan; 1 — "1 kg".
+     150 — 2022 ishchi soni: hujjatda yo'q, buyurtmachi tasdiqlagan
+     (assets/years.js dagi izohga qarang). */
+  '2022-2023': ['2022', '2023', '2500', '220', '150', '66', '3300', '3.7', '20000',
+                '1250', '300', '200', '90', '4500', '6.9', '8', '50', '36', '33', '0', '1'],
 
   /* docx 7-8-xatboshi (xlsx "Лист2" H/I bilan mos):
        2025 — 800 ming bosh · 300 ishchi · 240 mlrd · 12 000 t
