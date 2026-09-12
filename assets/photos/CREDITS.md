@@ -1,4 +1,4 @@
-# Panel fotosurati
+# Fon fotosuratlari
 
 ## 2010.jpg
 
@@ -15,6 +15,18 @@
 
 Kadrda o'qiladigan yozuv, brend logotipi, avtomobil raqami yoki 2010-yilga
 tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
+
+## 2020.jpg
+
+- **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
+  (`Gemini_Generated_Image_w7aznyw7aznyw7az.jpg`, 2528x1684).
+- **Tahrir:** pastdagi xira barglar va tepadagi ortiqcha osmon kesildi
+  (`extract {top:40, bottom:150}`), eni 2400 px, JPEG q82 → 2400x1418
+  (1.69:1), 426 KB.
+- **Kadr:** tovuqxona, "SO‘YISH VA QAYTA ISHLASH" liniyasi va yuk mashinasi —
+  2020–2021 hikoyasiga (boqish va so‘yish boshlandi) aynan mos.
+- Kadrdagi yagona yozuv o‘zbekcha va brendga tegishli; begona logotip,
+  avtomobil raqami yoki anaxronistik sana yo‘q.
 
 ## Qanday almashtiriladi
 

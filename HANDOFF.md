@@ -1,6 +1,7 @@
 # Sokin Savdo — topshiriq hujjati
 
-**Holat:** 2010-yil sahifasi tayyor. QA 25/25 o'tadi.
+**Holat:** 2010 va 2020–2021 sahifalari tayyor. QA 41/41 o'tadi.
+`←/→` o'qlari bilan sahifalar almashadi.
 
 Loyiha 2026-09-12 da to'liq qayta qurildi. Oldingi variant — 6 bob / 13 sahnadan
 iborat kinematik 3D prezentatsiya (`index.html` 7373 satr) — olib tashlandi.
@@ -10,7 +11,16 @@ Uni tiklash kerak bo'lsa: `git show 3b09ac1` va undan oldingi commitlar.
 
 ## Nima qurilgan
 
-Yillar bo'yicha infografika sahifasi. Hozir bitta yil — **2010**.
+Yillar bo'yicha infografika slaydlari. Hozir ikkitasi:
+
+| Sahifa | `layout` | Nima ko'rsatadi |
+|---|---|---|
+| `2010` | `single` | Bitta yil: tepada ikki statistika kartasi, suratda uch zona |
+| `2020-2021` | `compare` | Ikki yil yonma-yon + o'sish ustuni |
+
+Sahifa turi `assets/years.js` dagi `layout` maydoni bilan tanlanadi;
+`assets/page.js` da har turga alohida render funksiyasi bor
+(`renderSingle` / `renderCompare`). Fon, zanjir va animatsiya umumiy.
 
 Bir ekran (scroll yo'q, mobilda ruxsat), to'liq offline, hech qanday CDN yoki
 tashqi so'rov yo'q. Kompozitsiya buyurtmachi bergan referens rasmga mos:
@@ -137,7 +147,15 @@ Keyin: `scripts/qa.mjs` dagi `ALLOWED` ro'yxatiga yangi yilning raqamlarini
 qo'shish (har birining manbasini izohda ko'rsatib). `←/→` o'qlari avtomatik
 ishlaydi. Yangi panel sahnasi kerak bo'lsa — `assets/scenes.js` ga qo'shiladi.
 
-Boshqa yillar uchun tayyor ma'lumot `docs/` ichida: 2020, 2021, 2022, 2023,
+### O'sish foizlari (`compare`)
+
+`growth` maydoni — **o'ylab topilgan raqam emas**, ikki yilning o'z
+raqamlaridan hisoblangan: `(yangi - eski) / eski x 100`. Buni QA majburlaydi:
+`growth-matches-arithmetic` har bir foizni qaytadan hisoblab, ekrandagisi bilan
+solishtiradi. Ya'ni foizni qo'lda "tuzatib" qo'yib bo'lmaydi — yo raqamlar,
+yo foiz o'zgaradi.
+
+Boshqa yillar uchun tayyor ma'lumot `docs/` ichida: 2022, 2023,
 2025, 2026, 2026–2027 va istiqboldagi loyihalar.
 **2024-yil ikkala hujjatda ham yo'q** — buyurtmachidan so'rash kerak.
 

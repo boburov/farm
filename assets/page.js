@@ -11,6 +11,13 @@
     if(html!=null) n.innerHTML=html;
     return n;
   }
+  /* 20000 → "20 000" (uzilmas probel), 7.5 → "7.5" */
+  function fmt(v,dec){
+    var r=dec?Math.round(v*10)/10:Math.round(v), p=String(r).split('.');
+    p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u00A0');
+    return p.join('.');
+  }
+
   function icon(name,cls){
     var s=el('span',cls||'stat-icon');
     s.innerHTML=window.ICONS?ICONS(name):'';
@@ -119,6 +126,40 @@
     return host;
   }
 
+  /* --------------------------------------------------- taqqoslash ustuni */
+
+  function rowNode(r){
+    var li=el('li','row reveal');
+    li.appendChild(icon(r.icon,'row-icon'));
+
+    var body=el('span','row-body');
+    var v=el('span','row-value');
+    var num=el('span',null,'0');
+    num.dataset.to=String(r.value);
+    v.appendChild(num);
+    if(r.unit) v.appendChild(el('span','row-unit',r.unit));
+    body.appendChild(v);
+    body.appendChild(el('span','row-label',r.label));
+    li.appendChild(body);
+
+    if(r.growth!=null) li.appendChild(el('span','row-growth',r.growth));
+    return li;
+  }
+
+  function columnNode(c){
+    var sec=el('section','col col--'+(c.tone||'dark'));
+
+    var head=el('header','col-head reveal');
+    head.appendChild(el('span','col-year',c.year));
+    if(c.growthHead) head.appendChild(el('span','col-growth-head',c.growthHead));
+    sec.appendChild(head);
+
+    var ul=el('ul','rows');
+    c.rows.forEach(function(r){ ul.appendChild(rowNode(r)); });
+    sec.appendChild(ul);
+    return sec;
+  }
+
   /* --------------------------------------------------------------- zanjir */
 
   function chainNode(steps){
@@ -140,19 +181,20 @@
   /* ---------------------------------------------------------- hisoblagich */
 
   function runCounters(scope){
-    var nodes=scope.querySelectorAll('.stat-num');
+    var nodes=scope.querySelectorAll('[data-to]');
     Array.prototype.forEach.call(nodes,function(n,i){
       var to=parseFloat(n.dataset.to);
       if(!isFinite(to)) return;
-      if(REDUCED){ n.textContent=String(to); return; }
-      var dur=1000+i*120, start=null, delay=420+i*160;
+      var dec=to%1!==0;              /* 7.5 kasr qoladi, 3000 butun sanaladi */
+      if(REDUCED){ n.textContent=fmt(to,dec); return; }
+      var dur=760+i*40, start=null, delay=300+i*55;
       function step(ts){
         if(start===null) start=ts;
         var t=(ts-start-delay)/dur;
         if(t<0){ requestAnimationFrame(step); return; }
-        if(t>=1){ n.textContent=String(to); return; }
+        if(t>=1){ n.textContent=fmt(to,dec); return; }
         var e=1-Math.pow(1-t,3);
-        n.textContent=String(Math.round(to*e));
+        n.textContent=fmt(to*e,dec);
         requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
@@ -161,12 +203,9 @@
 
   /* --------------------------------------------------------------- render */
 
-  function render(y){
-    var page=document.getElementById('page');
-    page.innerHTML='';
-    page.classList.remove('ready');
-
-    /* yuqori qator: chap statistika · yil · o'ng statistika */
+  /* Bitta yil: tepada ikki statistika kartasi va yil belgisi, suratda zona
+     yozuvlari va oqim strelkalari. */
+  function renderSingle(y,page){
     var top=el('div','top');
     var left=y.stats.filter(function(s){ return s.side!=='right'; });
     var right=y.stats.filter(function(s){ return s.side==='right'; });
@@ -181,13 +220,40 @@
     right.forEach(function(s){ top.appendChild(statNode(s)); });
     page.appendChild(top);
 
-    /* butun ekran foni + ustidagi zona yozuvlari va oqim strelkalari */
     page.appendChild(backdropNode(y));
     page.appendChild(overlayNode(y));
+    page.appendChild(chainNode(y.chain));
+  }
+
+  /* Ikki yil yonma-yon: chapda o'tgan yil, o'ngda yangi yil va o'sish ustuni. */
+  function renderCompare(y,page){
+    var head=el('div','deck-head');
+    if(y.brand) head.appendChild(el('p','brandline reveal',y.brand));
+    head.appendChild(el('h1','deck-title reveal',y.title));
+    if(y.subtitle) head.appendChild(el('p','subtitle reveal',y.subtitle));
+    page.appendChild(head);
+
+    page.appendChild(backdropNode(y));
+
+    var wrap=el('div','compare');
+    (y.columns||[]).forEach(function(c){ wrap.appendChild(columnNode(c)); });
+    page.appendChild(wrap);
 
     page.appendChild(chainNode(y.chain));
+  }
 
-    document.title=y.title+' — Sokin Savdo';
+  function render(y){
+    var page=document.getElementById('page');
+    page.innerHTML='';
+    page.classList.remove('ready');
+    page.dataset.layout=y.layout||'single';
+    overlays=[];
+
+    if(y.layout==='compare') renderCompare(y,page);
+    else renderSingle(y,page);
+
+    document.title=(y.layout==='compare'?y.id.replace('-','–')+'-yillar':y.title)+
+                   ' — Sokin Savdo';
 
     /* navbatma-navbat ochilish */
     var order=Array.prototype.slice.call(page.querySelectorAll('.reveal'));
