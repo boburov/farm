@@ -1,7 +1,19 @@
 # Sokin Savdo — topshiriq hujjati
 
-**Holat:** 2010 va 2020–2021 sahifalari tayyor. QA 41/41 o'tadi.
-`←/→` o'qlari bilan sahifalar almashadi.
+**Holat:** 2010 va 2020–2021 sahifalari tayyor. QA 46/46 o'tadi.
+
+Sahifalar orasida uch xil yo'l bilan yurish mumkin, uchalasi bir holatni
+boshqaradi:
+
+| Usul | Qanday |
+|---|---|
+| Klaviatura | `←` `→` · `Home` `End` |
+| Sichqoncha | pastdagi nuqtalar |
+| Manzil | `http://127.0.0.1:5173/#2020-2021` |
+
+Hash tufayli sahifani to'g'ridan-to'g'ri ochish, yangilash va brauzerning
+orqaga/oldinga tugmalari ishlaydi; havolani yuborsa ham o'sha sahifa ochiladi.
+Hash — `assets/years.js` dagi `id` maydoni.
 
 Loyiha 2026-09-12 da to'liq qayta qurildi. Oldingi variant — 6 bob / 13 sahnadan
 iborat kinematik 3D prezentatsiya (`index.html` 7373 satr) — olib tashlandi.

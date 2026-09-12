@@ -268,14 +268,65 @@
     });
   }
 
-  var years=window.YEARS||[], at=0;
-  if(!years.length){ console.error('YEARS bo\'sh'); return; }
-  render(years[at]);
+  /* ------------------------------------------------------- sahifalar orasi */
 
-  /* bir nechta yil qo'shilganda o'qlar ishlaydi */
+  /* Manzil satridagi hash sahifani belgilaydi: /#2020-2021.
+     Shunda to'g'ridan-to'g'ri ochish, yangilash va brauzerning orqaga/oldinga
+     tugmalari ishlaydi; havolani birovga yuborsa ham o'sha sahifa ochiladi. */
+  function pagerNode(years,at,go){
+    if(years.length<2) return null;
+    var nav=el('nav','pager');
+    nav.setAttribute('aria-label','Sahifalar');
+    years.forEach(function(y,i){
+      var b=el('button','dot'+(i===at?' is-current':''));
+      b.type='button';
+      b.title=y.title||y.id;
+      b.setAttribute('aria-label',(y.title||y.id)+' sahifasi');
+      if(i===at) b.setAttribute('aria-current','true');
+      b.addEventListener('click',function(){ go(i); });
+      nav.appendChild(b);
+    });
+    return nav;
+  }
+
+  var years=window.YEARS||[];
+  if(!years.length){ console.error('YEARS bo\'sh'); return; }
+
+  function indexFromHash(){
+    var id=decodeURIComponent((location.hash||'').replace(/^#/,''));
+    var i=years.findIndex(function(y){ return y.id===id; });
+    return i<0?0:i;
+  }
+
+  var at=indexFromHash();
+
+  function show(i,pushHash){
+    at=Math.max(0,Math.min(years.length-1,i));
+    render(years[at]);
+    var page=document.getElementById('page'),
+        nav=pagerNode(years,at,go);
+    if(nav) page.appendChild(nav);
+    if(pushHash){
+      var want='#'+years[at].id;
+      if(location.hash!==want) location.hash=want;
+    }
+  }
+  function go(i){ show(i,true); }
+
+  show(at,false);
+  /* birinchi ochilishda manzil tozalanmasin, lekin hash yo'q bo'lsa qo'shilsin */
+  if(!location.hash) history.replaceState(null,'','#'+years[at].id);
+
+  addEventListener('hashchange',function(){
+    var i=indexFromHash();
+    if(i!==at) show(i,false);
+  });
+
   addEventListener('keydown',function(e){
     if(years.length<2) return;
-    if(e.key==='ArrowRight'&&at<years.length-1) render(years[++at]);
-    else if(e.key==='ArrowLeft'&&at>0) render(years[--at]);
+    if(e.key==='ArrowRight'&&at<years.length-1) go(at+1);
+    else if(e.key==='ArrowLeft'&&at>0) go(at-1);
+    else if(e.key==='Home') go(0);
+    else if(e.key==='End') go(years.length-1);
   });
 })();

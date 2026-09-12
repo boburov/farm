@@ -252,6 +252,58 @@ for (const [w, h] of SIZES) {
   await p.close();
 }
 
+/* ------------------------------------------------------------ navigatsiya */
+
+/* Hash manzil sahifani belgilaydi: to'g'ridan-to'g'ri ochish, brauzerning
+   orqaga tugmasi va pastdagi nuqtalar — uchalasi bir holatni boshqaradi. */
+{
+  const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const last = deck[deck.length - 1];
+
+  /* 1. to'g'ridan-to'g'ri hash bilan ochish */
+  await p.goto(`${URL}/#${last.id}`, { waitUntil: 'networkidle' });
+  await p.waitForSelector('.page.ready', { timeout: 15000 });
+  const direct = await p.evaluate(() => document.getElementById('page').dataset.layout);
+  direct === last.layout
+    ? pass('hash-opens-page', `#${last.id} → ${direct}`)
+    : fail('hash-opens-page', `kutilgan ${last.layout}, chiqdi ${direct}`);
+
+  /* 2. hash yo'q bo'lsa birinchi sahifa va manzil to'ldiriladi */
+  await p.goto(URL, { waitUntil: 'networkidle' });
+  await p.waitForSelector('.page.ready', { timeout: 15000 });
+  const first = await p.evaluate(() => location.hash);
+  first === '#' + deck[0].id
+    ? pass('hash-filled-on-load', first)
+    : fail('hash-filled-on-load', `kutilgan #${deck[0].id}, chiqdi "${first}"`);
+
+  /* 3. nuqtalar: soni, joriysi belgilangan, bosilganda o'tadi */
+  const dots = await p.evaluate(() => ({
+    count: document.querySelectorAll('.pager .dot').length,
+    current: document.querySelectorAll('.pager .dot.is-current').length
+  }));
+  dots.count === deck.length && dots.current === 1
+    ? pass('pager-dots', `${dots.count} ta nuqta, 1 tasi joriy`)
+    : fail('pager-dots', JSON.stringify(dots));
+
+  await p.click('.pager .dot:last-child');
+  await p.waitForSelector('.page.ready', { timeout: 15000 });
+  const afterClick = await p.evaluate(() => ({
+    hash: location.hash,
+    layout: document.getElementById('page').dataset.layout
+  }));
+  afterClick.hash === '#' + last.id && afterClick.layout === last.layout
+    ? pass('pager-click-navigates', afterClick.hash)
+    : fail('pager-click-navigates', JSON.stringify(afterClick));
+
+  /* 4. brauzerning orqaga tugmasi qaytaradi */
+  await p.goBack();
+  await p.waitForFunction(id => location.hash === '#' + id, deck[0].id, { timeout: 8000 })
+    .then(() => pass('browser-back-works'))
+    .catch(() => fail('browser-back-works', 'orqaga bosilganda hash qaytmadi'));
+
+  await p.close();
+}
+
 /* ------------------------------------------------- harakat kamaytirilgan -- */
 
 {
