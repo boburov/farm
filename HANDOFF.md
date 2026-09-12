@@ -2,15 +2,15 @@
 
 **Holat:** 2010, 2020–2021, 2022–2023, 2025–2026, 2026–2027 va istiqboldagi
 loyihalar sahifalari
-tayyor. QA 112/112 o'tadi.
+tayyor. QA 113/113 o'tadi.
 
 Sahifalar orasida uch xil yo'l bilan yurish mumkin, uchalasi bir holatni
 boshqaradi:
 
 | Usul | Qanday |
 |---|---|
-| Klaviatura | `←` `→` · `Home` `End` |
-| Sichqoncha | pastdagi nuqtalar |
+| Klaviatura | `←` `→` · `Home` `End` · `F` (to‘liq ekran) |
+| Sichqoncha | pastdagi nuqtalar, oldingi/keyingi tugmalari |
 | Manzil | `http://127.0.0.1:5173/#istiqbol` |
 
 Hash tufayli sahifani to'g'ridan-to'g'ri ochish, yangilash va brauzerning
@@ -198,14 +198,61 @@ ostida bo'laklarning mahsulotdagi ulushi (xlsx "Yaratilgan qiymat 2025-2026",
 C6:C14). Varaqdagi jami 100.4% — buyurtmachi faylidagi yaxlitlash, shuning
 uchun sahifada jami ko'rsatilmaydi.
 
-#### 3D tovuq (`centre.model`)
+#### 3D tovuq — vitrina rejimi (`centre.model`)
 
-`assets/chicken-parts.js` moduli shu yerda ishlatiladi: tovuq bo'laklarga
-ajralib, sekin aylanib turadi.
+`assets/chicken-parts.js` moduli. Yetti bo'lak **tik** turadi, tanish yuzi
+bilan kameraga qaraydi, teng oraliqda, kesishmaydi.
 
 ```js
-model:{length:1, ringRadius:1.25, radius:4.8, height:2.5, look:.28, spin:true}
+model:{gap:.30, margin:1.05, tilt:.22}
 ```
+
+**Burilishlar bir xil emas** — har tugunning o'z o'lchamidan kelib chiqadi
+(`DISPLAY` jadvali, `chicken-parts.js`):
+
+| Tugun | dim (x,y,z) | Burilish | Nega |
+|---|---|---|---|
+| `torso` | 0.66 × 0.46 × 0.75 | X −90° | uzunligi Z bo'ylab edi |
+| `legL/R` | 0.27 × 0.27 × 0.54 | X −90° (+ kichik Z) | boldir tik turadi |
+| `wingL/R` | **0.15** × 0.41 × 0.33 | Y ±90° | yupqa o'qi X — keng yuzi kameraga buriladi |
+| `neck` | **0.38** × 0.21 × 0.10 | Z 90° | yotib turgan edi |
+| `tail` | 0.19 × 0.22 × 0.06 | yo'q | keng yuzi allaqachon kameraga qaragan |
+
+**TUZOQ — `extras` ga ishonmang.** GLB `quantize` bosqichida har tugunga o'z
+transformi qo'shilgan, shuning uchun fayldagi `extras.center` geometriyaning
+haqiqiy markaziga to'g'ri kelmaydi. `showcase()` hech narsani taxmin qilmaydi:
+bo'lak burilgandan keyin **qayta o'lchanadi** (`measure()` — kvantlangan Int16
+qiymatlarni qo'lda float'ga o'giradi) va o'lchangan gabarit bo'yicha joyiga
+qo'yiladi.
+
+**TUZOQ 2 — koordinata fazasi.** O'lchash dunyo fazasida, joylashtirish esa
+ildiz ichida bo'ladi. `showcase()` avval ildiz masshtabini 1 ga keltiradi;
+aks holda qator ildiz masshtabiga ko'paytirilib, kadrdan chiqib ketadi.
+
+Kamera va yorliqlar:
+- `C.showcaseCamera(camera, margin, tilt)` — kadrga sig'dirish gorizontal
+  yarim ko'rish burchagi orqali (`atan(tan(vfov/2) * aspect)`), aks holda
+  qator kadrga sig'maydi.
+- Yorliqlar — **haqiqiy HTML** (`.model-label`), proyeksiya bilan har bo'lak
+  tagiga qo'yiladi; qo'shni bilan kesishsa pastki qatorga tushadi va ingichka
+  yo'l-yo'riq chizig'i chiziladi.
+- Kirish qisqa (~1.5 s), keyin sikl **to'xtaydi** (`host.dataset.anim`
+  = `stopped`) — uzluksiz aylanish yo'q, yorliqlar o'qiladi.
+
+#### ⚠️ Bog'lanmagan: 9 ta savdo bo'lagi ↔ 7 ta model qismi
+
+Brif "har bir nom va foizni o'z bo'lagi yoniga qo'ying" deydi, lekin bunday
+bog'lanish loyihada **hech qachon bo'lmagan** va uni chiqarib bo'lmaydi:
+
+- modelda oyoq **yaxlit**, hujjatda esa `Bedro` (son) va `Golen` (boldir)
+  alohida;
+- `File`, `Karkaz`, `Teri`, `Drakon` — hammasi tananing ichidan chiqadi;
+- `Qanot` 8% — ikkala qanot uchun jami, bitta qanotga yozib bo'lmaydi;
+- `Qanot uchi` modelda alohida tugun emas.
+
+Shuning uchun bo'laklarga **anatomik** nomlar qo'yildi, 9 ta foiz esa alohida
+ro'yxat bo'lib qoldi. Buyurtmachi bog'lanishni tasdiqlasa — `DISPLAY` ga
+`share` maydoni qo'shiladi va yorliqqa chiqadi.
 
 - `three.js`, `GLTFLoader`, `poultry-runtime.js` va `chicken-parts.js`
   **faqat shu sahifada**, `assets/page.js: loadModelScripts()` orqali
@@ -217,6 +264,10 @@ model:{length:1, ringRadius:1.25, radius:4.8, height:2.5, look:.28, spin:true}
   oq panelda yo'qolib ketardi.
 - `prefers-reduced-motion` da aylanish ham, sochilish animatsiyasi ham
   o'chadi — bo'laklar darhol yoyilgan holatda turadi.
+
+**QA tuzog'i 0:** "aylanmayapti"ni piksel solishtirish bilan tekshirib
+bo'lmaydi — dasturiy renderer kadrni har safar bir xil chizmaydi. Shuning
+uchun talabning o'zi o'lchanadi: `dataset.anim === 'stopped'`.
 
 **QA tuzog'i:** QA dasturiy renderer (swiftshader) da ishlaydi va GLB
 yuklanishi asosiy oqimni band qiladi. Shu sababli `settle()` bu sahifada

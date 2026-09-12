@@ -23,6 +23,7 @@
   <input id="spread" type="range" min="0" max="1" step="0.005" value="0">
   <span id="val">0.00</span>
   <button id="play">Avtomatik</button>
+  <button id="mode">Vitrina</button>
 </div>
 
 <script src="../assets/vendor/three.min.js"></script>
@@ -41,7 +42,7 @@
   renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
   document.body.appendChild(renderer.domElement);
 
-  var scene=new T.Scene(); scene.background=new T.Color(0x0d1512);
+  var scene=new T.Scene(); scene.background=new T.Color(0xeef4f0);
   var camera=new T.PerspectiveCamera(38,innerWidth/innerHeight,.1,200);
 
   scene.add(new T.HemisphereLight(0xcfe3d6,0x1a241f,.85));
@@ -54,7 +55,7 @@
   var fill=new T.DirectionalLight(0xbcd4c4,.6); fill.position.set(-7,5,-6); scene.add(fill);
 
   var floor=new T.Mesh(new T.CircleGeometry(16,64),
-    new T.MeshStandardMaterial({color:0x16201b,roughness:.95,metalness:0}));
+    new T.MeshStandardMaterial({color:0xdde9e2,roughness:.95,metalness:0}));
   floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
 
   /* markaziy kursi — torso shu yerda qoladi */
@@ -62,10 +63,10 @@
     new T.MeshStandardMaterial({color:0x293b2e,roughness:.8,metalness:0}));
   plinth.position.y=.14; plinth.receiveShadow=true; scene.add(plinth);
 
-  var angle=.83, radius=17, height=8.4;
+  var angle=.83, radius=17, height=8.4, look=.9;
   function placeCamera(){
     camera.position.set(Math.sin(angle)*radius,height,Math.cos(angle)*radius);
-    camera.lookAt(0,.9,0);
+    camera.lookAt(0,look,0);
   }
   placeCamera();
 
@@ -85,7 +86,11 @@
     val.textContent=p.toFixed(2);
     render();
   }
-  slider.addEventListener('input',function(){ playing=false; apply(parseFloat(slider.value)); });
+  slider.addEventListener('input',function(){
+    if(showcase){ ChickenParts.showcaseReveal(parseFloat(slider.value)); render();
+                  val.textContent=parseFloat(slider.value).toFixed(2); return; }
+    playing=false; apply(parseFloat(slider.value));
+  });
   playBtn.addEventListener('click',function(){ playing=!playing; t0=performance.now(); });
 
   /* sichqoncha bilan aylantirish */
@@ -105,10 +110,35 @@
   }
   requestAnimationFrame(loop);
 
+  var showcase=true;
+  function toShowcase(){
+    showcase=true;
+    plinth.visible=false;
+    var info=ChickenParts.showcase({gap:.34,baseline:0});
+    ChickenParts.showcaseReveal(1);
+    /* kadrga sig'dirish: kenglik bo'yicha masofa hisoblanadi */
+    ChickenParts.showcaseCamera(camera,1.16,.26);
+    render();
+    status.textContent='Vitrina — '+info.map(function(i){return i.key;}).join(' · ');
+  }
+  function toRing(){
+    showcase=false;
+    plinth.visible=true;
+    ChickenParts.showBases(true);
+    ChickenParts.root.rotation.y=-.30;
+    ChickenParts.setSpread(parseFloat(slider.value));
+    angle=.83; radius=17; height=8.4; look=.9;
+    placeCamera(); render();
+    status.textContent='Halqa rejimi';
+  }
+  document.getElementById('mode').addEventListener('click',function(){
+    showcase?toRing():toShowcase();
+    this.textContent=showcase?'Halqa':'Vitrina';
+  });
+
   ChickenParts.load().then(function(){
     ChickenParts.mount(scene,{length:2.3,position:[0,.4,0]});
-    status.textContent='OK — 7 bo\'lak: '+Object.keys(ChickenParts.parts).join(', ');
-    apply(0);
+    toShowcase();
   }).catch(function(e){
     status.textContent='XATO: '+e.message;
     console.error(e);

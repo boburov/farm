@@ -319,39 +319,57 @@ for (const [i, info] of deck.entries()) {
       : pass(`growth-matches-arithmetic@${tag}`,
              `${derived.n} ta foiz ikki raqamdan chiqadi`);
 
-    /* Markazdagi 3D: modul o'rnatilganmi, yetti bo'lak bormi, aylanyaptimi. */
+    /* Markazdagi 3D vitrina: brifdagi talablar o'lchanadi —
+       yetti bo'lak, tik holat, kesishmaslik, kadr ichida, tinch turishi. */
     if (await page.$('.model')) {
-      const m3 = await page.evaluate(async () => {
+      const m3 = await page.evaluate(() => {
         const host = document.querySelector('.model');
         const cv = host.querySelector('canvas');
-        const parts = window.ChickenParts && ChickenParts.parts
-          ? Object.keys(ChickenParts.parts) : [];
-        /* ikki kadr orasida kamera burchagi o'zgarishi — aylanish isboti */
-        const cam = () => {
-          const r = host.getBoundingClientRect();
-          return r.width;  /* o'lcham; burchakni quyida alohida o'lchaymiz */
-        };
-        const T = window.THREE;
+        const info = window.ChickenParts && ChickenParts.showcaseInfo;
+        if (!info) return { noInfo: true };
+        const sorted = [...info].sort((a, b) => a.center.x - b.center.x);
+        let overlap = 0;
+        for (let i = 1; i < sorted.length; i++) {
+          const prev = sorted[i - 1], cur = sorted[i];
+          if (prev.center.x + prev.width / 2 > cur.center.x - cur.width / 2) overlap++;
+        }
+        /* hech bir bo'lak "yotib" qolmasligi uchun pastki nuqtasi umumiy asosda */
+        const offBase = info.filter(it => Math.abs(it.bottom.y) > 0.001).length;
         return {
-          ready: host.classList.contains('is-ready'),
           canvas: !!cv && cv.width > 0 && cv.height > 0,
-          parts: parts.length,
-          spread: ChickenParts.root ? ChickenParts.root.userData.flight : null,
+          parts: info.length,
+          labels: host.querySelectorAll('.model-label').length,
+          settled: host.classList.contains('is-settled'),
+          overlap, offBase,
           basesHidden: ChickenParts.ring ? !ChickenParts.ring.visible : null,
-          w: cam(), hasThree: !!T
+          names: info.map(i => i.name)
         };
       });
-      m3.ready && m3.canvas && m3.parts === 7 && m3.spread === 1 && m3.basesHidden
-        ? pass(`model-3d@${tag}`, '7 bo\'lak, to\'liq sochilgan, asoslar yashirin')
+      m3.canvas && m3.parts === 7 && m3.labels === 7 && m3.overlap === 0 &&
+      m3.offBase === 0 && m3.basesHidden
+        ? pass(`model-3d@${tag}`, `7 tik bo'lak, kesishmaydi: ${m3.names.join(' · ')}`)
         : fail(`model-3d@${tag}`, JSON.stringify(m3));
 
-      /* aylanish: ikki o'lchov orasida piksel o'zgarishi bo'lishi shart */
-      const a = await page.locator('.model canvas').screenshot();
-      await page.waitForTimeout(900);
-      const b = await page.locator('.model canvas').screenshot();
-      Buffer.compare(a, b) !== 0
-        ? pass(`model-3d-rotates@${tag}`)
-        : fail(`model-3d-rotates@${tag}`, 'kadr o\'zgarmadi');
+      /* har bo'lak yorlig'i kadr ichidami */
+      const inFrame = await page.evaluate(() => {
+        const host = document.querySelector('.model');
+        const r = host.getBoundingClientRect();
+        return [...host.querySelectorAll('.model-label')].every(l => {
+          const b = l.getBoundingClientRect();
+          return b.left >= r.left - 2 && b.right <= r.right + 2 && b.top >= r.top;
+        });
+      });
+      inFrame ? pass(`model-3d-in-frame@${tag}`)
+              : fail(`model-3d-in-frame@${tag}`, 'yorliq kadrdan chiqib ketdi');
+
+      /* Uzluksiz aylanish BO'LMASLIGI kerak — yorliqlar o'qilishi uchun.
+         Piksel solishtirish dasturiy renderer'da beqaror, shuning uchun
+         talabning o'zi o'lchanadi: animatsiya sikli to'xtaganmi. */
+      const stopped = await page.evaluate(() =>
+        document.querySelector('.model').dataset.anim === 'stopped');
+      stopped
+        ? pass(`model-3d-settles@${tag}`, 'joylashgach sikl to\'xtaydi')
+        : fail(`model-3d-settles@${tag}`, 'animatsiya sikli ishlayapti');
     }
   }
 }

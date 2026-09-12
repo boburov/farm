@@ -157,8 +157,154 @@
     root.userData.flight=p;
   };
 
+  /* ==================================================== vitrina rejimi === */
+
+  /* Har bo'lak TIK turib, tanish yuzi bilan kameraga qaraydigan mahsulot
+     ko'rgazmasi. Burilishlar bir xil emas — GLB dagi har tugunning o'z
+     o'lchamidan kelib chiqadi (dim = max-min, model ramkasida):
+       torso  0.66 x 0.46 x 0.75  — uzunligi Z; X bo'yicha -90° tiklanadi
+       legL/R 0.27 x 0.27 x 0.54  — xuddi shunday
+       wingL/R 0.15 x 0.41 x 0.33 — yupqa o'q X; Y bo'yicha ±90° bilan keng
+                                    yuzi kameraga buriladi
+       neck   0.38 x 0.21 x 0.10  — yotib turadi; Z bo'yicha 90° bilan tikka
+       tail   0.19 x 0.22 x 0.06  — keng yuzi allaqachon kameraga qaragan
+     Nomlar anatomik — bu hujjatdagi 9 ta savdo bo'lagi EMAS (pastdagi izohga
+     qarang). */
+  var DISPLAY={
+    neck: {rot:[0,0,Math.PI/2],        h:0.90, name:'Bo‘yin', full:'Bo‘yin'},
+    wingL:{rot:[0,Math.PI/2,0],        h:1.08, name:'Qanot',  full:'Chap qanot'},
+    legL: {rot:[-Math.PI/2,0,0.12],    h:1.10, name:'Oyoq',   full:'Chap oyoq (son + boldir)'},
+    torso:{rot:[-Math.PI/2,0,0],       h:1.34, name:'Tana',   full:'Tana — karkas'},
+    legR: {rot:[-Math.PI/2,0,-0.12],   h:1.10, name:'Oyoq',   full:'O‘ng oyoq (son + boldir)'},
+    wingR:{rot:[0,-Math.PI/2,0],       h:1.08, name:'Qanot',  full:'O‘ng qanot'},
+    tail: {rot:[0,0,0],                h:0.84, name:'Dum',    full:'Dum'}
+  };
+  /* chapdan o'ngga tartib: juftlar tananing ikki yonida */
+  var ORDER=['neck','wingL','legL','torso','legR','wingR','tail'];
+
+  /* Bo'lakning AYNAN burilgan gabaritini o'lchaydi: geometriya kvantlangan
+     (Int16), shuning uchun xom qiymatlar qo'lda float'ga o'giriladi. */
+  function measure(m){
+    var box=new T.Box3(), v=new T.Vector3(), first=true;
+    m.updateMatrixWorld(true);
+    m.traverse(function(o){
+      if(!o.isMesh) return;
+      var at=o.geometry.attributes.position, arr=at.array,
+          k=at.normalized?(arr instanceof Int16Array?1/32767:arr instanceof Int8Array?1/127:1):1;
+      for(var i=0;i<at.count;i++){
+        v.set(at.getX(i)*k,at.getY(i)*k,at.getZ(i)*k).applyMatrix4(o.matrixWorld);
+        if(first){ box.min.copy(v); box.max.copy(v); first=false; }
+        else box.expandByPoint(v);
+      }
+    });
+    return box;
+  }
+
+  /* Bo'laklarni bir qatorga, bir asosga tik qo'yadi.
+     opts: {gap, baseline, scale}
+     Qaytaradi: [{key,name,group,width,height,center:Vector3,top:Vector3}] —
+     yorliqlarni shu nuqtalarga bog'lash uchun. */
+  C.showcase=function(opts){
+    opts=opts||{};
+    var root=C.root; if(!root) return [];
+    var parts=root.userData.parts;
+    var gap=opts.gap!==undefined?opts.gap:0.34;
+    var info=[];
+
+    /* Halqa va uchish holati bu rejimda ishlatilmaydi.
+       MUHIM: o'lchash dunyo koordinatasida, joylashtirish esa ildiz ichida
+       bo'ladi. Ildiz masshtabi 1 ga keltirilmasa, qator o'sha masshtabga
+       ko'paytirilib, kadrdan chiqib ketadi. */
+    C.showBases(false);
+    root.rotation.set(0,0,0);
+    root.scale.setScalar(1);
+    root.position.set(0,0,0);
+    if(C.group) C.group.position.set(0,0,0);
+    root.updateMatrixWorld(true);
+
+    /* Ikki bosqichli o'lchash. GLB `quantize` bosqichida har tugunga o'z
+       transformi qo'shilgan, shuning uchun `extras.center` geometriyaning
+       haqiqiy markaziga to'g'ri kelmaydi — taxmin qilib bo'lmaydi.
+       Shu sababli avval burilgan gabarit o'lchanadi, masshtab topiladi,
+       keyin QAYTA o'lchanib, bo'lak o'lchangan quti bo'yicha joyiga suriladi. */
+    ORDER.forEach(function(key){
+      var m=parts[key], d=DISPLAY[key];
+      if(!m||!d) return;
+      m.position.set(0,0,0);
+      m.scale.setScalar(1);
+      m.quaternion.setFromEuler(new T.Euler(d.rot[0],d.rot[1],d.rot[2]));
+      var b1=measure(m), s1=b1.getSize(new T.Vector3());
+      var sc=s1.y>1e-6?d.h/s1.y:1;
+      m.scale.setScalar(sc);
+      var b2=measure(m), s2=b2.getSize(new T.Vector3());
+      info.push({key:key,name:d.name,full:d.full||d.name,group:m,box:b2,size:s2,scale:sc});
+    });
+
+    /* kenglik bo'yicha joylashtirish — markazi 0 da qoladi */
+    var total=info.reduce(function(a,it){ return a+it.size.x; },0)+gap*(info.length-1);
+    var base=opts.baseline||0, x=-total/2;
+    info.forEach(function(it){
+      var w=it.size.x, h=it.size.y, cx=x+w/2;
+      var c=it.box.getCenter(new T.Vector3());
+      /* o'lchangan quti markazini kerakli joyga surish; pastki qirrasi asosda */
+      it.restX=cx-c.x;
+      it.restY=base-it.box.min.y;
+      it.restZ=-c.z;
+      it.group.position.set(it.restX,it.restY,it.restZ);
+      it.width=w; it.height=h;
+      it.center=new T.Vector3(cx,base+h/2,0);
+      it.top=new T.Vector3(cx,base+h,0);
+      it.bottom=new T.Vector3(cx,base,0);
+      x+=w+gap;
+    });
+    C.showcaseInfo=info;
+    C.showcaseWidth=total;
+    return info;
+  };
+
+  /* Vitrinani kadrga sig'diradigan kamera masofasi.
+     Gorizontal yarim ko'rish burchagi: atan(tan(vfov/2) * aspect) —
+     shuni hisobga olmasa qator kadrga sig'may qoladi. */
+  C.showcaseDistance=function(fovDeg,aspect,margin){
+    var info=C.showcaseInfo||[];
+    var w=(C.showcaseWidth||1)*(margin||1.12);
+    var h=info.reduce(function(a,it){ return Math.max(a,it.height); },1)*(margin||1.12);
+    var vt=Math.tan(fovDeg*Math.PI/360);
+    return Math.max(w/2/(vt*aspect), h/2/vt);
+  };
+
+  /* Kamera holati: old tomondan, biroz yuqoridan — mahsulot vitrinasi burchagi.
+     Juda past turса ufq bo'laklarni kesib o'tadi; juda tepadan esa tanish
+     yuzlari ko'rinmay qoladi. */
+  C.showcaseCamera=function(camera,margin,tilt){
+    var info=C.showcaseInfo||[];
+    var hMax=info.reduce(function(a,it){ return Math.max(a,it.height); },1);
+    var d=C.showcaseDistance(camera.fov,camera.aspect,margin||1.16);
+    var t=tilt===undefined?.26:tilt;          /* 0 = qat'iy old, 1 = tepadan */
+    var eyeY=hMax*(.48+t*.9);
+    camera.position.set(0,eyeY,d);
+    camera.lookAt(0,hMax*.46,0);
+    camera.updateProjectionMatrix();
+    return {distance:d,eyeY:eyeY,maxHeight:hMax};
+  };
+
+  /* Vitrina kirish animatsiyasi: bo'laklar pastdan ko'tarilib, joyiga
+     o'tiradi. p 0..1. Aylanish yo'q — yorliqlar o'qilishi kerak. */
+  C.showcaseReveal=function(p){
+    var info=C.showcaseInfo; if(!info) return;
+    p=clamp(p,0,1);
+    info.forEach(function(it,i){
+      var t=easeInOut(beat(p,i*.07,.55+i*.07));
+      it.group.position.y=it.restY-(1-t)*it.height*.55;
+      it.group.scale.setScalar(it.scale*(.88+.12*t));
+      it.group.traverse(function(o){
+        if(o.isMesh&&o.material){ o.material.transparent=t<1; o.material.opacity=t; }
+      });
+    });
+  };
+
   C.dispose=function(){
     if(C.group&&C.group.parent) C.group.parent.remove(C.group);
-    C.group=C.root=C.ring=C.parts=null;
+    C.group=C.root=C.ring=C.parts=C.showcaseInfo=null;
   };
 })();

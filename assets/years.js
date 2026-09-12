@@ -286,7 +286,7 @@
       title:'Tovuq go‘shti bo‘laklari va mahsulotdagi ulushi',
       /* 3D: tovuq bo'laklarga ajraladi va sekin aylanadi.
          three.js va GLB faqat shu sahifada yuklanadi (assets/page.js). */
-      model:{length:1, ringRadius:1.25, radius:4.8, height:2.5, look:.28, spin:true},
+      model:{gap:.30, margin:1.05, tilt:.22},
       items:[
         {label:'Akorachka',  value:13.8},
         {label:'File',       value:35.6},

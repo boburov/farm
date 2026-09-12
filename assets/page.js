@@ -205,6 +205,7 @@
     if(!scene3d) return;
     cancelAnimationFrame(scene3d.raf);
     removeEventListener('resize',scene3d.onResize);
+    if(scene3d.ro) scene3d.ro.disconnect();
     if(window.ChickenParts&&ChickenParts.dispose) ChickenParts.dispose();
     if(scene3d.renderer){
       scene3d.renderer.dispose();
@@ -217,61 +218,117 @@
   function buildScene(host,cfg){
     var T=THREE;
     var renderer=new T.WebGLRenderer({antialias:true,alpha:true});
-    renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));
     renderer.outputEncoding=T.sRGBEncoding;
     renderer.toneMapping=T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure=.98;
+    renderer.toneMappingExposure=1.02;
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.type=T.PCFSoftShadowMap;
     host.appendChild(renderer.domElement);
 
     var scene=new T.Scene();
-    var camera=new T.PerspectiveCamera(34,1,.1,120);
+    var camera=new T.PerspectiveCamera(30,1,.1,120);
 
-    /* envMap yo'q — yorug'lik ataylab yumshoq, aks holda go'sht oqarib ketadi */
-    scene.add(new T.HemisphereLight(0xf2f8f4,0xb9cfc2,.62));
-    var key=new T.DirectionalLight(0xffffff,.95); key.position.set(4,8,6); scene.add(key);
-    var fill=new T.DirectionalLight(0xcfe2d6,.38);
-    fill.position.set(-6,3,-5); scene.add(fill);
-    var rim=new T.DirectionalLight(0xffffff,.3);
-    rim.position.set(0,4,-8); scene.add(rim);
+    /* yumshoq studiya yorug'ligi: asosiy + to'ldiruvchi + orqadan kontur.
+       envMap yo'q, shuning uchun qiymatlar past — aks holda go'sht oqarib ketadi. */
+    scene.add(new T.HemisphereLight(0xffffff,0xcfe0d6,.58));
+    var key=new T.DirectionalLight(0xfff8f0,1.05);
+    key.position.set(2.6,5.4,4.2);
+    key.castShadow=true;
+    key.shadow.mapSize.set(1024,1024);
+    key.shadow.camera.left=-6; key.shadow.camera.right=6;
+    key.shadow.camera.top=5; key.shadow.camera.bottom=-2;
+    key.shadow.camera.near=.5; key.shadow.camera.far=20;
+    key.shadow.bias=-.0012;
+    scene.add(key);
+    var fill=new T.DirectionalLight(0xdcebe2,.42); fill.position.set(-4.2,2.4,3); scene.add(fill);
+    var rim=new T.DirectionalLight(0xffffff,.34);  rim.position.set(0,3.2,-5);   scene.add(rim);
 
-    /* asoslarsiz: kichik oq panelda to'q yashil kursilar ortiqcha */
+    /* kontakt soyasi uchun ko'rinmas yer — faqat soyani qabul qiladi */
+    var ground=new T.Mesh(new T.PlaneGeometry(40,40),
+      new T.ShadowMaterial({opacity:.16}));
+    ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+
     ChickenParts.showBases(false);
-    ChickenParts.mount(scene,{
-      length:cfg.length||1,
-      ringRadius:cfg.ringRadius||1.25,  /* kichik kadrda bo'laklar yaqinroq tursin */
-      position:[0,0,0]
-    });
+    ChickenParts.mount(scene,{length:1,position:[0,0,0]});
+    var info=ChickenParts.showcase({gap:cfg.gap||.36,baseline:0});
 
-    /* Go'sht tabiiy ravishda och — oq panelda yo'qolmasligi uchun materiallar
-       biroz to'qlashtiriladi (envMap yo'q, aks-nur ham yo'q). */
     ChickenParts.root.traverse(function(o){
-      if(!o.isMesh||!o.material||!o.material.color) return;
-      o.material.color.multiplyScalar(.93);
-      if(o.material.roughness!==undefined) o.material.roughness=Math.min(o.material.roughness,.58);
+      if(!o.isMesh) return;
+      o.castShadow=true;
+      if(o.material&&o.material.color){
+        o.material.color.multiplyScalar(.95);
+        if(o.material.roughness!==undefined)
+          o.material.roughness=Math.min(o.material.roughness,.62);
+      }
     });
 
-    var radius=cfg.radius||4.8, height=cfg.height||2.5, look=cfg.look||.28;
+    /* HTML yorliqlar — matn rasm ichida emas, haqiqiy DOM */
+    var labels=[];
+    var layer=el('div','model-labels');
+    info.forEach(function(it){
+      var l=el('div','model-label');
+      l.title=it.full||it.name;
+      l.appendChild(el('span','model-label-name',it.name));
+      layer.appendChild(l);
+      labels.push({node:l,info:it});
+    });
+    host.appendChild(layer);
+
+    var proj=new T.Vector3();
+    function placeLabels(){
+      var w=host.clientWidth, h=host.clientHeight;
+      var placed=[];
+      labels.forEach(function(l){
+        proj.copy(l.info.bottom).project(camera);
+        var x=(proj.x*.5+.5)*w, y=(-proj.y*.5+.5)*h;
+        /* To'qnashuvni oldini olish: qo'shni yorliq bilan kesishsa, pastki
+           qatorga tushiriladi. Yo'l-yo'riq chizig'i shunda chiziladi. */
+        var half=l.node.offsetWidth/2||30, row=0;
+        for(var i=0;i<placed.length;i++){
+          var q=placed[i];
+          if(q.row===row&&Math.abs(q.x-x)<half+q.half+6){ row=1; break; }
+        }
+        placed.push({x:x,half:half,row:row});
+        l.node.classList.toggle('is-row2',row===1);
+        l.node.style.transform='translate(-50%,0) translate('+x+'px,'+y+'px)';
+      });
+    }
+
     function resize(){
       var w=host.clientWidth, h=host.clientHeight;
       if(!w||!h) return;
       renderer.setSize(w,h,false);
-      camera.aspect=w/h; camera.updateProjectionMatrix();
+      camera.aspect=w/h;
+      ChickenParts.showcaseCamera(camera,cfg.margin||1.2,cfg.tilt!==undefined?cfg.tilt:.24);
+      placeLabels();
+      renderer.render(scene,camera);   /* rAF to'xtagan bo'lsa ham yangilanadi */
     }
     resize();
 
-    var t0=performance.now(), spin=cfg.spin!==false&&!REDUCED;
+    var t0=performance.now(), done=false;
     function frame(now){
       scene3d.raf=requestAnimationFrame(frame);
-      var el=(now-t0)/1000;
-      /* avval sochiladi, keyin sekin aylanadi */
-      var spread=REDUCED?1:Math.min(1,Math.max(0,(el-.35)/2.2));
-      ChickenParts.setSpread(spread);
-      var a=(cfg.yaw||.7)+(spin?el*.16:0);
-      camera.position.set(Math.sin(a)*radius,height,Math.cos(a)*radius);
-      camera.lookAt(0,look,0);
+      var el2=(now-t0)/1000;
+      /* qisqa, vazmin kirish: bo'laklar pastdan ko'tarilib joyiga o'tiradi.
+         Uzluksiz aylanish YO'Q — yorliqlar o'qilishi kerak. */
+      var p=REDUCED?1:Math.min(1,Math.max(0,(el2-.25)/1.5));
+      ChickenParts.showcaseReveal(p);
       renderer.render(scene,camera);
+      if(p>=1&&!done){ done=true; host.classList.add('is-settled'); placeLabels(); }
+      if(p>=1&&!cfg.idle){
+        cancelAnimationFrame(scene3d.raf); scene3d.raf=0;
+        /* Sikl to'xtadi — uzluksiz aylanish yo'q, yorliqlar o'qiladi.
+           Belgini QA ham, foydalanuvchi ham tekshira oladi. */
+        host.dataset.anim='stopped';
+      }
     }
-    scene3d={renderer:renderer,onResize:resize,raf:0};
+    /* Blok balandligi CSS bilan beriladi va sahna qurilganda hali 0 bo'lishi
+       mumkin — o'sha payt kamera ham, canvas ham noto'g'ri o'lchamda qolardi.
+       ResizeObserver haqiqiy o'lcham paydo bo'lishi bilan qayta hisoblaydi. */
+    var ro=null;
+    if(window.ResizeObserver){ ro=new ResizeObserver(resize); ro.observe(host); }
+    scene3d={renderer:renderer,onResize:resize,raf:0,ro:ro,host:host};
     addEventListener('resize',resize);
     scene3d.raf=requestAnimationFrame(frame);
   }
@@ -283,8 +340,8 @@
       .then(function(){ return ChickenParts.load(); })
       .then(function(){
         if(!host.isConnected) return;      /* sahifa almashib ketgan bo'lsa */
+        host.classList.add('is-ready');    /* avval balandlik, keyin sahna */
         buildScene(host,cfg);
-        host.classList.add('is-ready');
       })
       .catch(function(e){
         /* 3D yuklanmasa sahifa buzilmaydi — blok shunchaki bo'sh qoladi */
@@ -598,8 +655,18 @@
     }
   }
 
+  /* Atmosfera qatlami bir marta quriladi va sahifalar almashganda qolaveradi. */
+  function ensureAmbient(){
+    if(document.querySelector('.ambient')) return;
+    var a=el('div','ambient');
+    a.setAttribute('aria-hidden','true');
+    a.innerHTML='<span></span><span></span><span></span>';
+    document.body.insertBefore(a,document.body.firstChild);
+  }
+
   function render(y){
     var page=document.getElementById('page');
+    ensureAmbient();
     disposeScene();              /* oldingi sahifadagi 3D to'xtatiladi */
     page.innerHTML='';
     page.classList.remove('ready');
@@ -634,10 +701,38 @@
   /* Manzil satridagi hash sahifani belgilaydi: /#2022-2023.
      Shunda to'g'ridan-to'g'ri ochish, yangilash va brauzerning orqaga/oldinga
      tugmalari ishlaydi; havolani birovga yuborsa ham o'sha sahifa ochiladi. */
+  function navButton(cls,label,glyph,onClick){
+    var b=el('button','navbtn '+cls);
+    b.type='button';
+    b.setAttribute('aria-label',label);
+    b.title=label;
+    b.innerHTML=glyph;
+    b.addEventListener('click',onClick);
+    return b;
+  }
+
+  var ARROW_L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>';
+  var ARROW_R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+  var FS_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  var FS_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+
+  function toggleFullscreen(){
+    if(document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();
+  }
+
   function pagerNode(years,at,go){
     if(years.length<2) return null;
     var nav=el('nav','pager');
     nav.setAttribute('aria-label','Sahifalar');
+
+    nav.appendChild(navButton('navbtn--prev','Oldingi sahifa',ARROW_L,function(){ go(at-1); }));
+
+    var dots=el('div','dots');
     years.forEach(function(y,i){
       var b=el('button','dot'+(i===at?' is-current':''));
       b.type='button';
@@ -645,8 +740,21 @@
       b.setAttribute('aria-label',(y.title||y.id)+' sahifasi');
       if(i===at) b.setAttribute('aria-current','true');
       b.addEventListener('click',function(){ go(i); });
-      nav.appendChild(b);
+      dots.appendChild(b);
     });
+    nav.appendChild(dots);
+
+    nav.appendChild(navButton('navbtn--next','Keyingi sahifa',ARROW_R,function(){ go(at+1); }));
+
+    var fs=navButton('navbtn--fs','To‘liq ekran',
+      document.fullscreenElement?FS_OFF:FS_ON,toggleFullscreen);
+    nav.appendChild(fs);
+    document.addEventListener('fullscreenchange',function(){
+      if(fs.isConnected) fs.innerHTML=document.fullscreenElement?FS_OFF:FS_ON;
+    });
+
+    nav.querySelector('.navbtn--prev').disabled=at===0;
+    nav.querySelector('.navbtn--next').disabled=at===years.length-1;
     return nav;
   }
 
@@ -688,5 +796,6 @@
     else if(e.key==='ArrowLeft'&&at>0) go(at-1);
     else if(e.key==='Home') go(0);
     else if(e.key==='End') go(years.length-1);
+    else if(e.key==='f'||e.key==='F') toggleFullscreen();
   });
 })();
