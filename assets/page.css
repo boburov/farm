@@ -63,6 +63,21 @@ html,body{
   padding:var(--gutter) var(--gutter) var(--chain-h,0px);
 }
 
+/* ------------------------------------------------- ikonka qalinligi --- */
+
+/* Lucide 24x24 da chiziq qalinligi 2 — bu kichik o'lchamda to'g'ri, lekin
+   132 px li statistika ikonkasida ~11 px bo'lib, og'ir ko'rinadi. Shuning
+   uchun qalinlik kontekstga qarab ingichkalashtiriladi: ikonka qanchalik
+   katta bo'lsa, chiziq shunchalik nozik. */
+.stat-icon svg              {stroke-width:1.35}
+.total-icon svg,
+.kpi-icon svg               {stroke-width:1.6}
+.chain-icon svg             {stroke-width:1.7}
+.row-icon svg,
+.plan-icon svg,
+.track-icon svg             {stroke-width:1.85}
+.chain .arrow svg           {stroke-width:2}
+
 /* ---------------------------------------------------------- atmosfera --- */
 
 /* Yumshoq tuman va katta shaffof organik shakllar. Hammasi kontent ORTIDA

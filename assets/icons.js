@@ -1,183 +1,91 @@
-/* Inline SVG ikonkalar — tarmoq so'rovi yo'q, offline kafolati saqlanadi.
+/* Ikonkalar — Lucide (https://lucide.dev), ISC litsenziyasi.
  *
- * Ikki oila:
- *   FILL — buyurtmachi referensidagi uslub: qalin, yaxlit piktogrammalar.
- *          Sahifada ishlatiladigan hammasi shu yerda.
- *   LINE — nozik konturli variantlar. Hozir ishlatilmaydi, keyingi yillar
- *          (yem, parchalash, qadoqlash) uchun tayyor turibdi.
- * Bir nom ikkala oilada bo'lsa FILL ustun turadi.
+ * Yo'llar lucide-static@0.544.0 dan olinib, shu faylga JOYLASHTIRILGAN:
+ * sahifa hech qanday tashqi so'rov qilmaydi va loyihaga yangi bog'liqlik
+ * qo'shilmaydi (`no-external-requests` kafolati). Yangilash uchun o'sha
+ * paketdagi `icons/<nom>.svg` ichidagi markupni ko'chirish kifoya —
+ * izohdagi `lucide:` nomi qaysi faylligini ko'rsatadi.
  *
- * Hammasi 24x24 koordinatada (strelkalardan tashqari), currentColor bilan.
- * Diqqat: FILL ichidagi ildiz `fill="currentColor"` — stroke bilan chizilgan
- * yordamchi chiziqlarga albatta `fill="none"` yozish kerak, aks holda ochiq
- * kontur to'lib ketadi.
+ * Lucide 24x24 koordinatada, chiziqli (stroke) uslubda. Markupda chiziq
+ * qalinligi 2, lekin CSS uni kontekst bo'yicha ingichkalashtiradi: katta
+ * o'lchamda 2 juda og'ir ko'rinadi (assets/page.css — "ikonka qalinligi").
  */
 (function(){
 
-  /* ---------------------------------------------------- to'ldirilgan oila */
-  var FILL={
+  var P={
+    /* ishchi soni — lucide:users */
+    workers:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><path d="M16 3.128a4 4 0 0 1 0 7.744" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><circle cx="9" cy="7" r="4" />',
 
-    /* uch ishchi — o'rtadagisi oldinda, kattaroq */
-    workers:'<circle cx="5.4" cy="7.6" r="2.5"/>'+
-            '<path d="M1.2 20.2v-3.3a4.2 4.2 0 0 1 8.4 0v3.3z"/>'+
-            '<circle cx="18.6" cy="7.6" r="2.5"/>'+
-            '<path d="M14.4 20.2v-3.3a4.2 4.2 0 0 1 8.4 0v3.3z"/>'+
-            '<circle cx="12" cy="5.6" r="3.1"/>'+
-            '<path d="M6.6 21.4v-4.6a5.4 5.4 0 0 1 10.8 0v4.6z"/>',
+    /* narx — lucide:coins */
+    money:'<circle cx="8" cy="8" r="6" /><path d="M18.09 10.37A6 6 0 1 1 10.34 18" /><path d="M7 6h1v4" /><path d="m16.71 13.88.7.71-2.82 2.82" />',
 
-    /* tanga ustuni — narx */
-    money:  '<ellipse cx="12" cy="5.4" rx="7.6" ry="2.7"/>'+
-            '<path d="M4.4 8.1c0 1.5 3.4 2.7 7.6 2.7s7.6-1.2 7.6-2.7v2.6c0 1.5-3.4 2.7-7.6 2.7'+
-              'S4.4 12.2 4.4 10.7z"/>'+
-            '<path d="M4.4 13.1c0 1.5 3.4 2.7 7.6 2.7s7.6-1.2 7.6-2.7v2.6c0 1.5-3.4 2.7-7.6 2.7'+
-              'S4.4 17.2 4.4 15.7z"/>'+
-            '<path d="M4.4 18.1c0 1.5 3.4 2.7 7.6 2.7s7.6-1.2 7.6-2.7v1.5c0 1.5-3.4 2.7-7.6 2.7'+
-              'S4.4 21.1 4.4 19.6z"/>',
+    /* kredit — lucide:banknote */
+    cash:'<rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" />',
 
-    /* pul dastasi — kredit */
-    cash:   '<path d="M2 6.4h16.4v9.4H2z"/>'+
-            '<rect x="4.4" y="8.8" width="11.6" height="4.6" rx="2.3" fill="#fff" opacity=".5"/>'+
-            '<path d="M4 17.2h16.4v1.9H4z"/>'+
-            '<path d="M6 20.4h16v1.9H6z"/>',
+    /* parranda / bosh soni — lucide:bird */
+    hen:'<path d="M16 7h.01" /><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20" /><path d="m20 7 2 .5-2 .5" /><path d="M10 18v3" /><path d="M14 17.75V21" /><path d="M7 18a6 6 0 0 0 3.84-10.61" />',
 
-    /* tovuq silueti — bir aylanmadagi bosh soni.
-       Bo'yin ataylab alohida: bosh bevosita tanaga tegib tursa, ikki dumaloq
-       qo'shilib ketadi va siluet tovuqqa emas, boshqa hayvonga o'xshab qoladi. */
-    hen:    '<path d="M6.2 10.8 2.3 4.9l.6 5.7-2.7 1.4 5.3 1.8z"/>'+        /* dum */
-            '<ellipse cx="11.5" cy="14.3" rx="6.4" ry="5"/>'+               /* tana */
-            '<path d="M14.5 11.4c-.5-2.3.5-4.2 2.6-5l2.3 3.5z"/>'+          /* bo'yin */
-            '<circle cx="17.7" cy="5.7" r="2.9"/>'+                         /* bosh */
-            '<path d="M20.5 5 23.9 6.1l-3.4 1.8z"/>'+                       /* tumshuq */
-            '<path d="M15.3 3a1.4 1.4 0 1 1 2-1.2 1.4 1.4 0 1 1 2.2 1z"/>'+ /* taroq */
-            '<circle cx="18.6" cy="5.2" r=".75" fill="#fff"/>'+
-            '<path d="M9.4 19.2v2.4M13.6 19.2v2.4" fill="none" stroke="currentColor" '+
-              'stroke-width="1.8" stroke-linecap="round"/>',
+    /* yillik aylanma — lucide:trending-up */
+    chart:'<path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" />',
 
-    /* o'sish grafigi — yillik aylanma */
-    chart:  '<path d="M2.4 20.4h19.2v1.9H2.4z"/>'+
-            '<path d="M4.4 13.4h3.4v6H4.4zM9.6 10.2H13v9.2H9.6zM14.8 6.6h3.4v12.8h-3.4z"/>'+
-            '<path d="M4.9 9.2 10 5.4l3.4 2.5 5.2-4.7" fill="none" stroke="currentColor" '+
-              'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'+
-            '<path d="M14.9 2.2h4.6v4.4z"/>',
+    /* ishlab chiqarish hajmi — lucide:drumstick */
+    meat:'<path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23" /><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59" />',
 
-    /* go'sht kesimi — ishlab chiqarish hajmi.
-       Faqat blob "zaytun"ga o'xshaydi; shaklni go'sht qiladigan narsa —
-       ichidagi oq SUYAK. Koordinatalar absolyut, shunda kadrni to'la egallaydi. */
-    meat:   '<path d="M2.6 12.1c0-4.3 4-7.7 9.2-7.7 5.5 0 9.6 3 9.6 7.1 0 4.6-4.3 8.1-9.9 8.1'+
-              '-5.2 0-8.9-3-8.9-7.5z"/>'+
-            '<path d="M15.9 8.8h1.7v6.6h-1.7z" fill="#fff" opacity=".72"/>'+
-            '<circle cx="16.75" cy="8.5" r="1.45" fill="#fff" opacity=".72"/>'+
-            '<circle cx="16.75" cy="15.7" r="1.45" fill="#fff" opacity=".72"/>'+
-            '<ellipse cx="8.6" cy="11.6" rx="2.8" ry="2" fill="#fff" opacity=".32" '+
-              'transform="rotate(-15 8.6 11.6)"/>',
+    /* ishlab chiqaruvchi — lucide:factory */
+    factory:'<path d="M12 16h.01" /><path d="M16 16h.01" /><path d="M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z" /><path d="M8 16h.01" />',
 
-    /* subsidiya — tanga ustuni ustida qo'shimcha belgisi */
-    subsidy:'<ellipse cx="10.4" cy="8.6" rx="6.8" ry="2.5"/>'+
-            '<path d="M3.6 11.1c0 1.4 3 2.5 6.8 2.5s6.8-1.1 6.8-2.5v2.4c0 1.4-3 2.5-6.8 2.5'+
-              'S3.6 14.9 3.6 13.5z"/>'+
-            '<path d="M3.6 15.8c0 1.4 3 2.5 6.8 2.5s6.8-1.1 6.8-2.5v2.2c0 1.4-3 2.5-6.8 2.5'+
-              'S3.6 19.7 3.6 18.3z"/>'+
-            '<circle cx="18.9" cy="5.1" r="4.3"/>'+
-            '<path d="M18.1 2.8h1.6v1.5h1.5v1.6h-1.5v1.5h-1.6V5.9h-1.5V4.3h1.5z" fill="#fff"/>',
+    /* tovuq boqish — lucide:warehouse */
+    barn:'<path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11" /><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z" /><path d="M6 13h12" /><path d="M6 17h12" />',
 
-    /* soliq imtiyozi — hujjat va foiz belgisi */
-    tax:    '<path d="M4.1 1.9h10.2l5.6 5.6v14.6H4.1z"/>'+
-            '<path d="M14.3 1.9 19.9 7.5h-5.6z" fill="#fff" opacity=".55"/>'+
-            '<circle cx="9.4" cy="12.4" r="2" fill="#fff"/>'+
-            '<circle cx="14.6" cy="17.6" r="2" fill="#fff"/>'+
-            '<path d="M15.1 10.6 9.9 19.4" fill="none" stroke="#fff" stroke-width="1.8" '+
-              'stroke-linecap="round"/>',
+    /* so'yish va qayta ishlash — lucide:utensils-crossed */
+    blade:'<path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8" /><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7" /><path d="m2.1 21.8 6.4-6.3" /><path d="m19 5-7 7" />',
 
-    /* ichki yem ishlab chiqarish — tishli g'ildirak */
-    gear:   '<path d="M9.8 1.6h4.4l.5 2.6 2.1 1.2 2.4-1.1 2.2 3.8-1.9 1.8v2.4l1.9 1.8-2.2 3.8'+
-              '-2.4-1.1-2.1 1.2-.5 2.6H9.8l-.5-2.6-2.1-1.2-2.4 1.1-2.2-3.8L4.5 12V9.6L2.6 7.8'+
-              'l2.2-3.8 2.4 1.1 2.1-1.2z"/>'+
-            '<circle cx="12" cy="10.8" r="3.4" fill="#fff" opacity=".62"/>',
+    /* tashish — lucide:truck */
+    truck:'<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" /><path d="M15 18H9" /><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" /><circle cx="17" cy="18" r="2" /><circle cx="7" cy="18" r="2" />',
 
-    /* ishlab chiqaruvchi: ombor + tovuq belgisi */
-    factory:'<path d="M2.2 21.4V9.1l5.3 3.1V9.1l5.3 3.1V5.4h8.9v16z"/>'+
-            '<rect x="4.6" y="16.4" width="2.2" height="3" fill="#fff" opacity=".5"/>'+
-            '<rect x="9.1" y="16.4" width="2.2" height="3" fill="#fff" opacity=".5"/>'+
-            '<rect x="14.6" y="16.4" width="2.2" height="3" fill="#fff" opacity=".5"/>'+
-            '<rect x="18.1" y="16.4" width="2.2" height="3" fill="#fff" opacity=".5"/>'+
-            '<path d="M16.8 8.1a1.5 1.5 0 1 1 2.1 2.1c.7.8 1 1.8 1 2.7 0 1.8-1.5 3-3.4 3'+
-              's-3.4-1.3-3.4-3.1c0-1.7 1.2-2.9 2.9-3.2z" fill="#fff" opacity=".55"/>',
+    /* bozorda sotish — lucide:store */
+    market:'<path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5" /><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244" /><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05" />',
 
-    /* tovuqxona — boqish */
-    barn:   '<path d="M12 3.1 22.2 8.3v2H1.8v-2z"/>'+
-            '<path d="M3.7 10.9h16.6v9.9H3.7z"/>'+
-            '<path d="M9.3 20.8v-6.1h5.4v6.1z" fill="#fff" opacity=".55"/>',
+    /* subsidiya — lucide:hand-coins */
+    subsidy:'<path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17" /><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9" /><path d="m2 16 6 6" /><circle cx="16" cy="9" r="2.9" /><circle cx="6" cy="5" r="3" />',
 
-    /* qassob pichog'i — so'yish. Uchi chapda, dastasi o'ngda. */
-    blade:  '<path d="M1.5 13.6 12.9 5.7v7.9z"/>'+                 /* tig' */
-            '<path d="M12.9 5.7h2.4v7.9h-2.4z"/>'+                 /* tovon */
-            '<rect x="15.3" y="7.9" width="7.2" height="3.3" rx="1.65"/>'+  /* dasta */
-            '<circle cx="17.6" cy="9.55" r=".55" fill="#fff" opacity=".6"/>'+
-            '<circle cx="20.2" cy="9.55" r=".55" fill="#fff" opacity=".6"/>',
+    /* soliq imtiyozi — lucide:badge-percent */
+    tax:'<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" /><path d="m15 9-6 6" /><path d="M9 9h.01" /><path d="M15 15h.01" />',
 
-    /* yuk mashinasi — tashish */
-    truck:  '<path d="M1.4 5.6h11.9v10.9H1.4z"/>'+
-            '<path d="M13.3 8.9h3.9l3.8 3.6v4h-7.7z"/>'+
-            '<circle cx="6.4" cy="18.4" r="2.4"/>'+
-            '<circle cx="17.2" cy="18.4" r="2.4"/>',
+    /* yem ishlab chiqarish — lucide:cog */
+    gear:'<path d="M11 10.27 7 3.34" /><path d="m11 13.73-4 6.93" /><path d="M12 22v-2" /><path d="M12 2v2" /><path d="M14 12h8" /><path d="m17 20.66-1-1.73" /><path d="m17 3.34-1 1.73" /><path d="M2 12h2" /><path d="m20.66 17-1.73-1" /><path d="m20.66 7-1.73 1" /><path d="m3.34 17 1.73-1" /><path d="m3.34 7 1.73 1" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="12" r="8" />',
 
-    /* ko'p qavatli kataklar — boqish tizimi */
-    cage:   '<path d="M2.2 2.8h19.6v2.4H2.2zM2.2 8.2h19.6v2.4H2.2zM2.2 13.6h19.6v2.4H2.2z'+
-              'M2.2 19h19.6v2.4H2.2z"/>'+
-            '<path d="M2.2 2.8h2v18.6h-2zM20 2.8h1.8v18.6H20zM11 2.8h2v18.6h-2z" opacity=".7"/>',
+    /* ko'p qavatli kataklar — lucide:layers */
+    cage:'<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />',
 
-    /* qadoqlash — plyonkali lotok */
-    pack:   '<path d="M2.4 8.6h19.2l-1.6 11.8H4z"/>'+
-            '<path d="M2.4 8.6 5.6 3.6h12.8l3.2 5z" opacity=".72"/>'+
-            '<ellipse cx="9.4" cy="13.8" rx="3" ry="2.2" fill="#fff" opacity=".5"/>'+
-            '<ellipse cx="15.2" cy="14.4" rx="2.6" ry="1.9" fill="#fff" opacity=".5"/>',
+    /* qadoqlash — lucide:package */
+    pack:'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" /><path d="M12 22V12" /><polyline points="3.29 7 12 12 20.71 7" /><path d="m7.5 4.27 9 5.15" />',
 
-    /* rendering liniyasi — chiqindini qayta ishlash */
-    recycle:'<path d="M12 1.6 15.6 8H8.4z"/>'+
-            '<path d="M3.4 18.6 7 12.2l6.2 3.6-3.6 6.2z" opacity=".82"/>'+
-            '<path d="M20.6 18.6 17 12.2l-6.2 3.6 3.6 6.2z" opacity=".64"/>'+
-            '<circle cx="12" cy="12.6" r="2.1" fill="#fff" opacity=".55"/>',
+    /* rendering liniyasi — lucide:recycle */
+    recycle:'<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5" /><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12" /><path d="m14 16-3 3 3 3" /><path d="M8.293 13.596 7.196 9.5 3.1 10.598" /><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843" /><path d="m13.378 9.633 4.096 1.098 1.097-4.096" />',
 
-    /* bozor rastasi: tepada to'lqinli tent, ostida peshtaxta.
-       Tent va rasta orasida bo'shliq qoldirilgan, aks holda bir xil rangdagi
-       ikki shakl qo'shilib, bitta quti bo'lib ko'rinadi. */
-    market: '<path d="M1.1 9.2 3.3 3.4h17.4l2.2 5.8z"/>'+
-            '<path d="M1.1 9.2q2.2 3 4.4 0 2.2 3 4.4 0 2.2 3 4.4 0 2.2 3 4.4 0 2.2 3 4.3 0z"/>'+
-            '<path d="M3.9 13.2h16.2v7.4H3.9z"/>'+
-            '<rect x="2.9" y="12" width="18.2" height="2" rx=".7"/>'+
-            '<rect x="9.3" y="15.4" width="5.4" height="5.2" fill="#fff" opacity=".55"/>'
+    /* bo'laklarga bo'lib sotish — lucide:split */
+    cuts:'<path d="M16 3h5v5" /><path d="M8 3H3v5" /><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3" /><path d="m15 9 6-6" />',
+
+    /* zanjir strelkasi — lucide:arrow-right */
+    arrow:'<path d="M5 12h14" /><path d="m12 5 7 7-7 7" />',
+
+    /* aylanma (zaxira) — lucide:refresh-cw */
+    cycle:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" />',
+
+    /* yem (zaxira) — lucide:wheat */
+    feed:'<path d="M2 22 16 8" /><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" /><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" /><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" /><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z" /><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" /><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" /><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />',
+
+    /* quti (zaxira) — lucide:package-open */
+    box:'<path d="M12 22v-9" /><path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z" /><path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13" /><path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z" />'
   };
 
-  /* ------------------------------------------- chiziqli oila (zaxirada) -- */
-  var LINE={
-    cycle:  '<path d="M20.2 12a8.2 8.2 0 1 1-2.6-6"/><path d="M20.4 2.6v3.8h-3.8"/>'+
-            '<circle cx="12" cy="12" r="2.4"/>',
-    feed:   '<path d="M3.4 19.6h17.2"/><path d="M5.4 19.6 12 6.8l6.6 12.8"/>'+
-            '<path d="M8.4 14.2h7.2"/><circle cx="12" cy="4.2" r="1.4"/>',
-    cuts:   '<path d="M4.6 8.2a3.4 3.4 0 0 1 5-3 3.4 3.4 0 0 1 5.6 2"/>'+
-            '<path d="M4.6 8.2c-1.3 1.4-1.8 3-1.8 4.6 0 3.4 2.6 5.8 5.6 5.8"/>'+
-            '<path d="M15.2 7.2c2.2.9 3.8 3 3.8 5.6 0 3.4-2.6 5.8-5.8 5.8"/>'+
-            '<path d="M12 4.6v14.2"/>',
-    box:    '<path d="M3.4 7.6 12 3.4l8.6 4.2v8.8L12 20.6l-8.6-4.2z"/>'+
-            '<path d="M3.4 7.6 12 11.8l8.6-4.2"/><path d="M12 11.8v8.8"/>'
-  };
-
-  /* Zanjir qatoridagi qalin strelka — referensdagidek yaxlit yashil. */
-  var ARROW=
-    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'+
-      '<path d="M2.6 9.7h11.1V5.2L22.4 12l-8.7 6.8v-4.5H2.6z"/>'+
-    '</svg>';
-
-  /* Fon suratidagi zonalar orasidagi qalin egri strelka — yaxlit, uchi keng
-     uchburchak. Alohida viewBox, chunki u keng va past. */
-  /* Soya ishlatilmaydi: strelka suratdan oq kontur (hoshiya) bilan ajratiladi —
-     avval kengroq oq chiziq, ustidan yashil shakl. */
+  /* Fon suratidagi zonalar orasidagi qalin egri strelka — bu ikonka emas,
+     kompozitsiya elementi, shuning uchun Lucide bilan almashtirilmadi. */
   var SWOOSH=
     '<svg viewBox="0 0 126 56" fill="none" aria-hidden="true" focusable="false">'+
-      '<g stroke="#fff" stroke-opacity=".9" stroke-linecap="round" '+
-        'stroke-linejoin="round" fill="none">'+
-        '<path d="M6 47C24 15 58 4 90 21" stroke-width="20"/>'+
-        '<path d="M118.9 38.2 86.2 40.1 102.2 10.1Z" stroke-width="7"/>'+
+      '<g stroke="#fff" stroke-opacity=".9" stroke-linecap="round" stroke-width="21">'+
+        '<path d="M6 47C24 15 58 4 90 21"/>'+
       '</g>'+
       '<path d="M6 47C24 15 58 4 90 21" stroke="currentColor" stroke-width="13" '+
         'stroke-linecap="round"/>'+
@@ -186,14 +94,9 @@
 
   window.ICONS=function(name){
     if(name==='swoosh') return SWOOSH;
-    if(name==='arrow')  return ARROW;
-    if(FILL[name]){
-      return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" '+
-             'focusable="false">'+FILL[name]+'</svg>';
-    }
-    var d=LINE[name]; if(!d) return '';
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '+
-           'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '+
-           'focusable="false">'+d+'</svg>';
+    var d=P[name]; if(!d) return '';
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+           'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+
+           'aria-hidden="true" focusable="false">'+d+'</svg>';
   };
 })();
