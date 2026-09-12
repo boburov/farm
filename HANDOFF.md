@@ -32,10 +32,11 @@ tashqi so'rov yo'q. Kompozitsiya buyurtmachi bergan referens rasmga mos:
 └──────────────────────────────────────────────────────────────┘
 ```
 
-Uch panel — 2010-yilgi qiymat zanjirining uchta bo'g'ini. Hozir ular
-**vektor sahnalar** bilan chiziladi (`assets/scenes.js`); `assets/photos/`
-ga `2010-1.jpg`, `2010-2.jpg`, `2010-3.jpg` qo'yilsa sahifa avtomat fotoga
-o'tadi. Talablar va rad etilgan stok foto variantlari —
+Panel bandi — 2010-yilgi qiymat zanjirining uchta bo'g'ini. Ustida
+buyurtmachi bergan keng surat (`assets/photos/2010.jpg`) turadi: chapda ishlab
+chiqaruvchi, o'rtada yuklash, o'ngda bozor — yashil strelkalar aynan zonalar
+chegarasiga tushadi. Surat yuklanmasa sahifa `assets/scenes.js` dagi uchta
+vektor sahnaga tushadi. Talablar va almashtirish tartibi —
 `assets/photos/CREDITS.md`.
 
 ---
@@ -74,7 +75,7 @@ manbasini `assets/years.js` izohiga yozish kerak.
 | `assets/page.css` | dizayn tokenlari, layout, statistika, panellar, mobil |
 | `assets/icons.js` | inline SVG ikonkalar (tarmoq so'rovi yo'q) |
 | `assets/scenes.js` | uch panel uchun vektor sahnalar (foto zaxirasi) |
-| `assets/photos/` | panel fotolari uchun joy + `CREDITS.md` (talablar) |
+| `assets/photos/` | `2010.jpg` (keng surat) + `CREDITS.md` (manba, talablar) |
 | `assets/chicken-parts.js` | **parchalanish animatsiyasi moduli** — pastga qarang |
 | `assets/poultry-runtime.js` | GLB adapter, faqat `chicken-parts.glb` uchun |
 | `assets/models/chicken-parts.glb` | 7 bo'lakli tovuq, 4.4 MB, o'z ichiga yopiq |
@@ -98,7 +99,8 @@ manbasini `assets/years.js` izohiga yozish kerak.
     {side:'right', icon:'money',   value:7.5, unit:'mlrd so\'m',
      label:'Yillik aylanma:', note:'…'}
   ],
-  panels:[ {scene:'…', photo:'assets/photos/2020-1.jpg', alt:'…'}, … ],
+  photo:'assets/photos/2020.jpg', photoAlt:'…',
+  panels:[ {scene:'producer'}, {scene:'transport'}, {scene:'bazaar'} ],
   chain: [ {icon,label}, … ]
 }
 ```

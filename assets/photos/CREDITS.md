@@ -1,47 +1,45 @@
-# Panel fotosuratlari
+# Panel fotosurati
 
-Sahifadagi uch panel (`ishlab chiqaruvchidan olish → tashish → bozorda sotish`)
-hozircha **vektor sahnalar** bilan chiziladi — `assets/scenes.js`.
+## 2010.jpg
 
-Haqiqiy fotosurat qo'yish uchun shu papkaga quyidagi nomlar bilan tashlang:
+- **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
+  (`Gemini_Generated_Image_sjv6jvsjv6jvsjv6.jpg`, 2528x1684).
+- **Tahrir:** tepadagi bo'sh osmon va elektr simlari hamda pastdagi bo'sh beton
+  kesib tashlandi (`extract {top:440, bottom:64}`), eni 2400 px ga keltirildi,
+  JPEG q82 → 2400x1120 (2.14:1), 327 KB.
+- **Kadr:** chapda ishlab chiqaruvchi, o'rtada yashiklarni yuk mashinasiga
+  ortish, o'ngda bozor rastasi — sahifadagi uch bo'g'inga aynan mos tushadi,
+  shuning uchun u butun panel bandini qoplaydi va yashil strelkalar zonalar
+  chegarasiga tushadi.
 
-| Fayl | Nima ko'rsatilishi kerak |
-|---|---|
-| `2010-1.jpg` | Ishlab chiqaruvchidan tovuq go'shti olinayotgani (sovuq xona, yashiklar) |
-| `2010-2.jpg` | Yashiklar yuk mashinasiga ortilayotgani |
-| `2010-3.jpg` | Bozorda tovuq go'shti sotilayotgani |
+Kadrda o'qiladigan yozuv, brend logotipi, avtomobil raqami yoki 2010-yilga
+tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
 
-Sahifa ularni avtomat ko'taradi (`assets/page.js` → `panelNode`), fayl
-bo'lmasa yoki yuklanmasa vektor sahna joyida qoladi. Kodga tegish shart emas.
+## Qanday almashtiriladi
 
-Tavsiya: kengligi ~1400–2000 px, deyarli kvadrat kadr (panel kvadratga yaqin),
-JPEG sifat ~82.
+`assets/years.js` dagi yil obyektida `photo` maydoni. Fayl yo'q bo'lsa yoki
+yuklanmasa sahifa `assets/scenes.js` dagi uchta vektor sahnaga tushadi —
+kodga tegish shart emas.
 
-## Talablar
+Talablar:
 
-- **Litsenziya**: tijorat maqsadida erkin bo'lishi shart. Manbani shu faylga yozing.
-- **Yozuvsiz**: kadrda o'qiladigan yozuv, do'kon peshlavhasi, brend logotipi yoki
-  avtomobil raqami bo'lmasin — ular begona til/brendni ekranga olib chiqadi va
-  raqam (masalan avtomobil raqami) `no-fabricated-numbers` tekshiruvini chalg'itadi.
-- **Anaxronizmsiz**: 2010-yil sahifasida keyingi yillarga tegishli sana yoki
-  kalendar ko'rinmasin.
-- **Lokal**: fayl shu papkada saqlanadi, CDN havolasi ishlatilmaydi
-  (`no-external-requests` kafolati).
+- tijorat uchun erkin litsenziya (yoki buyurtmachiniki), manba shu yerga yoziladi;
+- kadrda o'qiladigan yozuv, peshlavha, brend logotipi yoki avtomobil raqami bo'lmasin;
+- 2010-yil sahifasida keyingi yillarga tegishli sana/kalendar ko'rinmasin;
+- fayl shu papkada lokal saqlanadi, CDN havolasi ishlatilmaydi
+  (`no-external-requests` kafolati);
+- tavsiya: eni ~2400 px, keng nisbat (~2:1), JPEG sifat ~82.
 
-## Tekshirilgan va rad etilgan variantlar (2026-09-12)
+## Rad etilgan stok variantlar (2026-09-12)
 
-Unsplash'dan to'rtta nomzod ko'rib chiqildi, uchtasi yaroqsiz:
+Buyurtmachi surat berishidan oldin Unsplash'dan to'rtta nomzod tekshirildi,
+uchtasi yaroqsiz chiqdi — mos, toza bepul stok foto topilmadi:
 
-- `unsplash.com/photos/7zzxrZMe280` — bozor vitrinasida butun tovuqlar.
-  Mazmunan mos, lekin kadr yuqorisida gruzin yozuvlari, brend shishalari va
-  2010-yilga tegishli bo'lmagan kalendar raqami bor. Pastki qismini kesib
-  ishlatish mumkin.
-- `unsplash.com/photos/eHltrxVNHtY` — bozor rastasi: kamerraga qarab turgan
-  yuzlar, Adidas va ABA logotiplari, xitoy/xmer yozuvlari. **Rad etildi.**
-- `unsplash.com/photos/4QZBIdS6SWY` — yuk mashinasi: oq-qora, "PASAR" yozuvi,
-  avtomobil raqami ko'rinadi. **Rad etildi.**
-- `unsplash.com/photos/M-Owv7Ax-dE` — furgon: ulkan "MEALPRO.COM" brendi va
-  Kaliforniya avtomobil raqami. **Rad etildi.**
-
-Xulosa: bu hikoya uchun mos, toza bepul stok foto topilmadi. Fotolarni
-buyurtmachi bergan referens uslubida alohida tayyorlash kerak.
+- `unsplash.com/photos/eHltrxVNHtY` — kameraga qarab turgan yuzlar, Adidas va
+  ABA logotiplari, xitoy/xmer yozuvlari.
+- `unsplash.com/photos/4QZBIdS6SWY` — oq-qora, "PASAR" yozuvi, avtomobil raqami.
+- `unsplash.com/photos/M-Owv7Ax-dE` — ulkan "MEALPRO.COM" brendi va Kaliforniya
+  avtomobil raqami.
+- `unsplash.com/photos/7zzxrZMe280` — mazmunan mos edi, lekin kadr yuqorisida
+  gruzin yozuvlari, brend shishalari va 2010-yilga tegishli bo'lmagan kalendar
+  raqami bor.

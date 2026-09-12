@@ -114,18 +114,18 @@ await page.waitForTimeout(2500);   /* hisoblagichlar tugashini kutamiz */
   n === 3 ? pass('chain-three-steps') : fail('chain-three-steps', `${n} ta bosqich`);
 }
 
-/* 6. har panelda vizual bor — foto yoki vektor zaxira */
+/* 6. panel bandida vizual bor — keng foto yoki vektor sahnalar */
 {
-  const st = await page.evaluate(() =>
-    [...document.querySelectorAll('.panel')].map(p => ({
-      photo: p.classList.contains('has-photo'),
-      scene: !!p.querySelector('svg.scene')
-    })));
-  const empty = st.filter(p => !p.photo && !p.scene).length;
-  empty
-    ? fail('panels-have-visual', `${empty} ta panel bo'sh`)
-    : pass('panels-have-visual',
-        st.filter(p => p.photo).length + ' foto, ' + st.filter(p => !p.photo).length + ' vektor');
+  const st = await page.evaluate(() => {
+    const host = document.querySelector('.panels');
+    return {
+      photo: host.classList.contains('has-photo'),
+      scenes: host.querySelectorAll('svg.scene').length
+    };
+  });
+  st.photo || st.scenes === 3
+    ? pass('panels-have-visual', st.photo ? 'keng foto' : '3 vektor sahna')
+    : fail('panels-have-visual', JSON.stringify(st));
 }
 
 /* 7. hech qanday tashqi so'rov yo'q (offline kafolati) */
@@ -134,8 +134,8 @@ external.length
   : pass('no-external-requests');
 
 /* 8. 404 / yuklanmagan resurs yo'q.
- *    Panel fotolari (assets/photos/2010-*.jpg) hali qo'yilmagan — ular yo'q bo'lsa
- *    sahifa vektor sahnaga tushadi, bu kutilgan holat va xato hisoblanmaydi. */
+ *    assets/photos/ dagi fayl yo'q bo'lsa sahifa vektor sahnaga tushadi —
+ *    bu kutilgan zaxira holati, qattiq xato emas. */
 {
   const OPTIONAL = /assets\/photos\//;
   const hard = failedReq.filter(u => !OPTIONAL.test(u));

@@ -46,20 +46,25 @@
 
   /* --------------------------------------------------------------- panellar */
 
-  /* Foto bo'lsa ko'rsatiladi, bo'lmasa vektor sahna qoladi. */
+  /* Har panel — bitta vektor sahna. Yil uchun keng foto berilgan bo'lsa,
+     u butun bandni qoplab ustiga chiqadi (quyida stripPhoto). */
   function panelNode(p){
     var d=el('div','panel reveal');
     d.innerHTML=window.SCENES?SCENES(p.scene):'';
-    if(p.photo){
-      var img=new Image();
-      img.alt=p.alt||'';
-      img.decoding='async';
-      img.addEventListener('load',function(){ d.classList.add('has-photo'); });
-      img.addEventListener('error',function(){ img.remove(); });
-      img.src=p.photo;
-      d.appendChild(img);
-    }
     return d;
+  }
+
+  /* Butun bandni qoplaydigan keng surat. Yuklanmasa vektor sahnalar qoladi. */
+  function stripPhoto(y,host){
+    if(!y.photo) return;
+    var img=new Image();
+    img.className='strip-photo';
+    img.alt=y.photoAlt||'';
+    img.decoding='async';
+    img.addEventListener('load',function(){ host.classList.add('has-photo'); });
+    img.addEventListener('error',function(){ img.remove(); });
+    img.src=y.photo;
+    host.appendChild(img);
   }
 
   /* --------------------------------------------------------------- zanjir */
@@ -118,9 +123,10 @@
     right.forEach(function(s){ top.appendChild(statNode(s)); });
     page.appendChild(top);
 
-    /* panellar va ular orasidagi strelkalar */
+    /* panellar, ustidagi keng foto va ular orasidagi strelkalar */
     var panels=el('div','panels');
     y.panels.forEach(function(p){ panels.appendChild(panelNode(p)); });
+    stripPhoto(y,panels);
     for(var i=1;i<y.panels.length;i++){
       var a=el('div','panel-arrow panel-arrow--'+i+' reveal');
       a.innerHTML=window.ICONS?ICONS('arrow'):'';

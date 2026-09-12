@@ -13,8 +13,9 @@
  * yillarga bir xil qo'yilgan hisob parametri — tarixiy narx emas, shuning uchun
  * 2010 sahifasida ko'rsatilmaydi.
  *
- * PANELLAR: har birida `photo` va `scene` bor. Foto fayli mavjud bo'lsa
- * ko'rsatiladi, bo'lmasa vektor sahna (assets/scenes.js) qoladi.
+ * PANELLAR: `photo` — butun bandni qoplaydigan bitta keng surat (uchta zona:
+ * ishlab chiqaruvchi · yuklash · bozor). U yuklanmasa `panels` dagi vektor
+ * sahnalar (assets/scenes.js) ko'rinib qoladi.
  */
 (function(){
   window.YEARS=[{
@@ -29,13 +30,13 @@
        label:'Yillik aylanma:', note:'yiliga 6 marta aylanma'}
     ],
 
+    photo:'assets/photos/2010.jpg',
+    photoAlt:'Ishlab chiqaruvchidan olingan tovuq go‘shti yuk mashinasiga '+
+             'ortilib, bozorga yetkazilmoqda',
     panels:[
-      {scene:'producer',  photo:'assets/photos/2010-1.jpg',
-       alt:'Ishlab chiqaruvchidan tovuq go‘shti olinmoqda'},
-      {scene:'transport', photo:'assets/photos/2010-2.jpg',
-       alt:'Yashiklar yuk mashinasiga ortilmoqda'},
-      {scene:'bazaar',    photo:'assets/photos/2010-3.jpg',
-       alt:'Bozorda tovuq go‘shti sotilmoqda'}
+      {scene:'producer'},
+      {scene:'transport'},
+      {scene:'bazaar'}
     ],
 
     chain:[
