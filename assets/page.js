@@ -294,6 +294,91 @@
     scene3d.raf=requestAnimationFrame(frame);
   }
 
+  /* Markazdagi yaxlit tovuq — bo'laklarga ajralmaydi va AYLANMAYDI:
+     yonboshdan olingan bitta tanish siluetda qotib turadi (aylanayotgan
+     model atrofdagi foizlardan diqqatni tortadi). Bir marta render qilinadi,
+     keyin faqat o'lcham o'zgarganda qayta chiziladi.
+     Vitrina sahnasidan farqi: yorliq yo'q, asoslar yo'q, kamera butun
+     tovuqning gabaritiga qarab sozlanadi. */
+  function buildWholeScene(host){
+    var T=THREE;
+    var renderer=new T.WebGLRenderer({antialias:true,alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));
+    renderer.outputEncoding=T.sRGBEncoding;
+    renderer.toneMapping=T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.02;
+    renderer.setClearAlpha(0);
+    host.appendChild(renderer.domElement);
+
+    var scene=new T.Scene();
+    var camera=new T.PerspectiveCamera(26,1,.05,60);
+
+    scene.add(new T.HemisphereLight(0xffffff,0xd6e0d6,.66));
+    var key=new T.DirectionalLight(0xfffaf2,.92); key.position.set(1.6,4.2,3.0); scene.add(key);
+    var fill=new T.DirectionalLight(0xdfeae2,.42); fill.position.set(-3.4,1.8,2.6); scene.add(fill);
+    var rim=new T.DirectionalLight(0xffffff,.34);  rim.position.set(0,2.4,-4.2);   scene.add(rim);
+
+    ChickenParts.showBases(false);
+    var group=ChickenParts.mount(scene,{length:1,position:[0,0,0],yaw:0});
+    ChickenParts.setSpread(0);
+
+    ChickenParts.root.traverse(function(o){
+      if(!o.isMesh||!o.material) return;
+      if(o.material.roughness!==undefined)
+        o.material.roughness=Math.max(Math.min(o.material.roughness,.74),.56);
+      if(o.material.metalness!==undefined) o.material.metalness=0;
+    });
+
+    /* Kadrni butun tovuqning o'z gabaritiga moslash: model ildizi markazga
+       suriladi, kamera esa shar radiusidan kelib chiqib orqaga chekinadi. */
+    var box=new T.Box3().setFromObject(ChickenParts.root),
+        c=box.getCenter(new T.Vector3()),
+        r=box.getBoundingSphere(new T.Sphere()).radius||.5;
+    group.position.set(-c.x,-c.y,-c.z);
+    /* Yonbosh ko'rinish: model ramkasida tovuq Z bo'ylab yotadi, shuning
+       uchun Y bo'yicha -90° — kallasi kameraga tiralib qolmaydi. */
+    var pose=new T.Group(); pose.name='chicken-whole-pose';
+    pose.rotation.y=-Math.PI/2;
+    scene.remove(group); pose.add(group); scene.add(pose);
+
+    function resize(){
+      var w=host.clientWidth, h=host.clientHeight;
+      if(!w||!h) return;
+      renderer.setSize(w,h,false);
+      camera.aspect=w/h;
+      /* gorizontal ko'rish burchagi ham hisobga olinadi — tor kadrda
+         tovuqning boshi va dumi chetdan chiqib ketmasin */
+      var vt=Math.tan(camera.fov*Math.PI/360), m=r*1.18;
+      camera.position.set(0,r*.30,Math.max(m/vt,m/(vt*camera.aspect)));
+      camera.lookAt(0,0,0);
+      camera.updateProjectionMatrix();
+      renderer.render(scene,camera);
+    }
+    resize();
+
+    var ro=null;
+    if(window.ResizeObserver){ ro=new ResizeObserver(resize); ro.observe(host); }
+    scene3d={renderer:renderer,onResize:resize,raf:0,ro:ro};
+    addEventListener('resize',resize);
+  }
+
+  function wholeModelNode(){
+    var host=el('div','cuts-model');
+    host.setAttribute('aria-hidden','true');   /* ma'noni halqadagi raqamlar beradi */
+    loadModelScripts()
+      .then(function(){ return ChickenParts.load(); })
+      .then(function(){
+        if(!host.isConnected) return;
+        buildWholeScene(host);
+        host.classList.add('is-in');
+      })
+      .catch(function(e){
+        console.warn('3D yuklanmadi:',e.message);
+        host.remove();                          /* halqa 3D siz ham to'liq ishlaydi */
+      });
+    return host;
+  }
+
   function modelNode(cfg){
     var host=el('div','model');
     host.setAttribute('aria-label','Tovuq bo‘laklari — 3D ko‘rgazma');
@@ -324,6 +409,11 @@
      qatoriga tegib ketmasin. */
   var RX=36, RY=26.5, CY=49, GAP=.8;   /* GAP — yoylar orasidagi tirqish */
 
+  /* Markazda yaxlit 3D tovuq turadi — u bilan birga halqa ham, "100%"
+     yozuvi ham ortiqcha (buyurtmachi: "borderlar, 100% kerak emas").
+     false qilinsa eski halqa + foiz doirasi qaytadi. */
+  var CENTRE_3D=true;
+
   function cutsNode(centre){
     var items=(centre.items||[]).slice().sort(function(a,b){ return b.value-a.value; }),
         total=items.reduce(function(s,c){ return s+c.value; },0),
@@ -348,31 +438,33 @@
     /* Halqa: har yoy — pathLength=100 bo'yicha kesilgan doira. Ranglar
        quyuq yashildan sarg'ish urg'uga o'tadi (palitradan tashqariga chiqmaydi). */
     var NS='http://www.w3.org/2000/svg';
-    var svg=document.createElementNS(NS,'svg');
-    svg.setAttribute('class','cuts-donut');
-    svg.setAttribute('viewBox','0 0 240 240');
-    svg.setAttribute('aria-hidden','true');
-    var track=document.createElementNS(NS,'circle');
-    track.setAttribute('class','cuts-track');
-    track.setAttribute('cx','120'); track.setAttribute('cy','120'); track.setAttribute('r','86');
-    svg.appendChild(track);
-    var g=document.createElementNS(NS,'g');
-    g.setAttribute('transform','rotate(-90 120 120)');
-    parts.forEach(function(p,i){
-      var arc=document.createElementNS(NS,'circle');
-      arc.setAttribute('class','cuts-arc');
-      arc.setAttribute('cx','120'); arc.setAttribute('cy','120'); arc.setAttribute('r','86');
-      arc.setAttribute('pathLength','100');
-      /* yoyning uzunligi CSS o'zgaruvchisida — sahna ochilganda noldan
-         shu qiymatgacha chiziladi (`.cuts.is-in`). */
-      arc.setAttribute('stroke-dashoffset',(-p.off).toFixed(2));
-      arc.style.setProperty('--len',p.len.toFixed(2));
-      arc.style.setProperty('--t',(i/(parts.length-1||1)).toFixed(3));
-      arc.style.setProperty('--d',(120+i*70)+'ms');
-      g.appendChild(arc);
-    });
-    svg.appendChild(g);
-    host.appendChild(svg);
+    if(!CENTRE_3D){
+      var svg=document.createElementNS(NS,'svg');
+      svg.setAttribute('class','cuts-donut');
+      svg.setAttribute('viewBox','0 0 240 240');
+      svg.setAttribute('aria-hidden','true');
+      var track=document.createElementNS(NS,'circle');
+      track.setAttribute('class','cuts-track');
+      track.setAttribute('cx','120'); track.setAttribute('cy','120'); track.setAttribute('r','86');
+      svg.appendChild(track);
+      var g=document.createElementNS(NS,'g');
+      g.setAttribute('transform','rotate(-90 120 120)');
+      parts.forEach(function(p,i){
+        var arc=document.createElementNS(NS,'circle');
+        arc.setAttribute('class','cuts-arc');
+        arc.setAttribute('cx','120'); arc.setAttribute('cy','120'); arc.setAttribute('r','86');
+        arc.setAttribute('pathLength','100');
+        /* yoyning uzunligi CSS o'zgaruvchisida — sahna ochilganda noldan
+           shu qiymatgacha chiziladi (`.cuts.is-in`). */
+        arc.setAttribute('stroke-dashoffset',(-p.off).toFixed(2));
+        arc.style.setProperty('--len',p.len.toFixed(2));
+        arc.style.setProperty('--t',(i/(parts.length-1||1)).toFixed(3));
+        arc.style.setProperty('--d',(120+i*70)+'ms');
+        g.appendChild(arc);
+      });
+      svg.appendChild(g);
+      host.appendChild(svg);
+    }
 
     /* Halqadan bo'lakka ingichka bog'lovchi — qaysi yoy kimniki ekani ko'rinsin.
        Chiziq halqa chetidan boshlanib, rasmga yetmay tugaydi. */
@@ -393,15 +485,22 @@
     });
     host.insertBefore(stems,host.firstChild);
 
-    var core=el('div','cuts-core');
-    var num=el('b','cuts-core-num','0');
-    num.dataset.to=String(Math.round(total));   /* hisoblagich noldan sanaydi */
-    var top=el('span','cuts-core-top');
-    top.appendChild(num);
-    top.appendChild(el('i',null,'%'));
-    core.appendChild(top);
-    core.appendChild(el('em','cuts-core-lbl',items.length+' bo‘lak'));
-    host.appendChild(core);
+    /* Halqa markazida yaxlit 3D tovuq: bo'laklar undan kelib chiqqani
+       ko'rinib tursin. Yuklanmasa host o'chadi — halqa o'z holicha qoladi. */
+    host.classList.add('has-model');
+    host.appendChild(wholeModelNode());
+
+    if(!CENTRE_3D){
+      var core=el('div','cuts-core');
+      var num=el('b','cuts-core-num','0');
+      num.dataset.to=String(Math.round(total));   /* hisoblagich noldan sanaydi */
+      var top=el('span','cuts-core-top');
+      top.appendChild(num);
+      top.appendChild(el('i',null,'%'));
+      core.appendChild(top);
+      core.appendChild(el('em','cuts-core-lbl',items.length+' bo‘lak'));
+      host.appendChild(core);
+    }
 
     parts.forEach(function(p,i){
       /* `reveal` emas: bo'lak markazdan o'z joyiga uchib chiqadi, shuning
