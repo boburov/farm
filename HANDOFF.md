@@ -75,6 +75,31 @@ Talablar va almashtirish tartibi — `assets/photos/CREDITS.md`.
 ishlatilmaydi — `body` foni uni bekitib qo'yadi. QA shuni tekshiradi
 (`backdrop-fullscreen`, `bodyBg === 'none'`).
 
+### Ikonkalar — Lucide
+
+`assets/icons.js` — **Lucide** (https://lucide.dev, ISC) ikonkalari.
+Yo'llar `lucide-static@0.544.0` dan olinib faylga **joylashtirilgan**:
+sahifa tashqi so'rov qilmaydi va loyihada yangi bog'liqlik yo'q.
+`lucide-react` ishlatilmadi — bu loyihada React ham, build-qadam ham yo'q.
+
+Yangilash: o'sha paketdagi `icons/<nom>.svg` ichidagi markupni ko'chirish
+kifoya. Har yozuv ustidagi izohda Lucide'dagi nomi ko'rsatilgan
+(`lucide:drumstick` kabi).
+
+Moslashtirish: `workers→users`, `money→coins`, `cash→banknote`, `hen→bird`,
+`chart→trending-up`, `meat→drumstick`, `barn→warehouse`,
+`blade→utensils-crossed`, `market→store`, `subsidy→hand-coins`,
+`tax→badge-percent`, `gear→cog`, `cage→layers`, `pack→package`,
+`cuts→split`, `arrow→arrow-right`; `factory`, `truck`, `recycle` o'z nomi bilan.
+
+**Chiziq qalinligi.** Lucide 24x24 da `stroke-width:2` — kichik o'lchamda
+to'g'ri, lekin 132 px li statistika ikonkasida ~11 px bo'lib og'ir ko'rinadi.
+Shuning uchun CSS kontekst bo'yicha ingichkalashtiradi (`page.css` —
+"ikonka qalinligi"): katta 1.35, o'rtacha 1.6–1.7, kichik 1.85.
+
+Fondagi qalin egri strelka (`swoosh`) almashtirilmadi — u ikonka emas,
+kompozitsiya elementi.
+
 ### Vizual uslub
 
 Buyurtmachi referensiga moslangan: **to'ldirilgan** (kontur emas) yashil
@@ -128,7 +153,7 @@ manbasini `assets/years.js` izohiga yozish kerak.
 | `assets/years.js` | **barcha matn va raqamlar shu yerda**, manba izohlari bilan |
 | `assets/page.js` | YEARS dan DOM quradi, hisoblagich, staggered ochilish |
 | `assets/page.css` | dizayn tokenlari, layout, statistika, panellar, mobil |
-| `assets/icons.js` | inline SVG ikonkalar (tarmoq so'rovi yo'q) |
+| `assets/icons.js` | Lucide ikonkalari, inline (tarmoq so'rovi yo'q) |
 | `assets/scenes.js` | fon uchun uchta vektor sahna (foto zaxirasi) |
 | `assets/photos/` | `2010.jpg` (keng surat) + `CREDITS.md` (manba, talablar) |
 | `assets/chicken-parts.js` | **parchalanish animatsiyasi moduli** — pastga qarang |
