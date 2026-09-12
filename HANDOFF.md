@@ -1,7 +1,7 @@
 # Sokin Savdo — topshiriq hujjati
 
-**Holat:** 2010, 2020–2021, 2022–2023 va 2025–2026 sahifalari tayyor.
-QA 80/80 o'tadi.
+**Holat:** 2010, 2020–2021, 2022–2023, 2025–2026 va 2026–2027 sahifalari
+tayyor. QA 95/95 o'tadi.
 
 Sahifalar orasida uch xil yo'l bilan yurish mumkin, uchalasi bir holatni
 boshqaradi:
@@ -10,7 +10,7 @@ boshqaradi:
 |---|---|
 | Klaviatura | `←` `→` · `Home` `End` |
 | Sichqoncha | pastdagi nuqtalar |
-| Manzil | `http://127.0.0.1:5173/#2025-2026` |
+| Manzil | `http://127.0.0.1:5173/#2026-2027` |
 
 Hash tufayli sahifani to'g'ridan-to'g'ri ochish, yangilash va brauzerning
 orqaga/oldinga tugmalari ishlaydi; havolani yuborsa ham o'sha sahifa ochiladi.
@@ -32,6 +32,7 @@ Yillar bo'yicha infografika slaydlari. Hozir ikkitasi:
 | `2020-2021` | `compare` | Ikki yil yonma-yon + o'sish ustuni |
 | `2022-2023` | `compare` | Subsidiya va ichki yem — klaster boshlanishi |
 | `2025-2026` | `compare` | Klaster kengaydi + markazda bo'laklar ulushi |
+| `2026-2027` | `project` | Marel majmuasi: foto polosa + ko'rsatkichlar + yo'nalishlar |
 
 Sahifa turi `assets/years.js` dagi `layout` maydoni bilan tanlanadi;
 `assets/page.js` da har turga alohida render funksiyasi bor
@@ -172,6 +173,20 @@ Hozir bitta shunday joy bor: **2022-yil ishchi soni**. Buyurtmachi bergan
 referens rasmda "150+ ta" yozilgan, lekin bu raqam na `.docx`, na `.xlsx`
 da uchraydi. Raqam topilsa — `assets/years.js` da manbasi bilan qo'yiladi.
 
+### `project` sahifasi
+
+Uchinchi tur. Bu yerda surat **fon emas** — sahifa oqimidagi gorizontal
+polosa (`.band`, balandligi 52vh dan oshmaydi). Tepada yil belgisi,
+hamkorlar qatori va investitsiya kartasi; polosadan keyin ko'rsatkichlar
+qatori va majmuaning yo'nalishlari.
+
+Yo'nalishlar tartib raqami (1–4) CSS hisoblagichi (`counter-increment`)
+bilan chiziladi — u DOM matniga tushmaydi, shuning uchun
+`no-fabricated-numbers` tekshiruvini chalg'itmaydi.
+
+Uchinchi tomon nomlari (Parranda Investment, Marel) faqat matn bilan
+beriladi — logotip ishlatilmaydi.
+
 ### Markaziy blok (`centre`)
 
 `compare` sahifada ustunlar orasida bo'sh joy qoladi. Unga ixtiyoriy jadval
@@ -203,8 +218,16 @@ solishtiradi. Ya'ni foizni qo'lda "tuzatib" qo'yib bo'lmaydi — yo raqamlar,
 yo foiz o'zgaradi. Qo'shimcha: ikkala yilda ham raqam bo'lmagan qatorda foiz
 turib qolsa, QA shuni ham xato deb belgilaydi.
 
-Boshqa yillar uchun tayyor ma'lumot `docs/` ichida: 2026–2027 (Marel
-majmuasi) va istiqboldagi loyihalar.
+Qolgan material: `docs/` ichidagi **istiqboldagi loyihalar** ro'yxati
+(Andijon yem zavodi, kalbasa, ona tovuq, 500 do'kon, naslli chorva —
+jami 36 mln $, 1 780 ish o'rni).
+
+### Hujjatlar orasidagi ziddiyat
+
+2026–2027 yillik aylanmasi `.docx` da **1.5 trln**, `.xlsx` "Лист2" J6 da
+esa **1200 mlrd (1.2 trln)**. Sahifada docx raqami turibdi (buyurtmachi
+bergan referens rasmda ham 1.5 trln). Qaysi biri to'g'ri ekanini
+buyurtmachidan so'rash kerak.
 
 ### Referenslardan ataylab olinmagan narsalar
 

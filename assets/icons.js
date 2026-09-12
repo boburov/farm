@@ -121,6 +121,23 @@
             '<circle cx="6.4" cy="18.4" r="2.4"/>'+
             '<circle cx="17.2" cy="18.4" r="2.4"/>',
 
+    /* ko'p qavatli kataklar — boqish tizimi */
+    cage:   '<path d="M2.2 2.8h19.6v2.4H2.2zM2.2 8.2h19.6v2.4H2.2zM2.2 13.6h19.6v2.4H2.2z'+
+              'M2.2 19h19.6v2.4H2.2z"/>'+
+            '<path d="M2.2 2.8h2v18.6h-2zM20 2.8h1.8v18.6H20zM11 2.8h2v18.6h-2z" opacity=".7"/>',
+
+    /* qadoqlash — plyonkali lotok */
+    pack:   '<path d="M2.4 8.6h19.2l-1.6 11.8H4z"/>'+
+            '<path d="M2.4 8.6 5.6 3.6h12.8l3.2 5z" opacity=".72"/>'+
+            '<ellipse cx="9.4" cy="13.8" rx="3" ry="2.2" fill="#fff" opacity=".5"/>'+
+            '<ellipse cx="15.2" cy="14.4" rx="2.6" ry="1.9" fill="#fff" opacity=".5"/>',
+
+    /* rendering liniyasi — chiqindini qayta ishlash */
+    recycle:'<path d="M12 1.6 15.6 8H8.4z"/>'+
+            '<path d="M3.4 18.6 7 12.2l6.2 3.6-3.6 6.2z" opacity=".82"/>'+
+            '<path d="M20.6 18.6 17 12.2l-6.2 3.6 3.6 6.2z" opacity=".64"/>'+
+            '<circle cx="12" cy="12.6" r="2.1" fill="#fff" opacity=".55"/>',
+
     /* bozor rastasi: tepada to'lqinli tent, ostida peshtaxta.
        Tent va rasta orasida bo'shliq qoldirilgan, aks holda bir xil rangdagi
        ikki shakl qo'shilib, bitta quti bo'lib ko'rinadi. */

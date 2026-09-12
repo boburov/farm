@@ -50,6 +50,16 @@ tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
   so'yish · parchalash · qadoqlash), shuning uchun butun saqlandi.
 - Kadrda yozuv, logotip yoki avtomobil raqami yo'q.
 
+## 2026.jpg
+
+- **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
+  (`Gemini_Generated_Image_7mfprk7mfprk7mfp.jpg`, 3936x1088 = 3.62:1).
+- **Tahrir:** kesilmagan — eni 2400 px ga keltirilib siqilgan → 2400x663,
+  155 KB. Nisbati o'zi gorizontal polosa uchun mos.
+- **Ishlatilishi:** butun ekran foni EMAS — `layout:'project'` sahifasidagi
+  gorizontal polosa (`.band`), balandligi 52vh dan oshmaydi.
+- Kadrda yozuv, logotip yoki avtomobil raqami yo'q.
+
 ## Qanday almashtiriladi
 
 `assets/years.js` dagi yil obyektida `photo` maydoni. Fayl yo'q bo'lsa yoki

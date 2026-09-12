@@ -304,5 +304,71 @@
       {icon:'blade',  label:'So‘yish va qayta ishlash'},
       {icon:'cuts',   label:'Bo‘laklarga bo‘lib sotish'}
     ]
+  },
+
+  /* ====================================================== 2026–2027 ====== */
+  /* Manba — docs/Tovuqchilik_rivojlanish_tarixi.docx, 9-xatboshi:
+   *   "2026-2027-yil Parranda Investment hamkorlikda Gollandiya davlatining
+   *    Marel kompaniyasining so'yish va qadoqlash majmuasi va rendering
+   *    liniyasi (chiqindini qayta ishlash asosida yemga qo'shimcha mahsulot
+   *    ishlab chiqarish) va ko'p qavatli kataklarda tovuq boqish tizimi.
+   *    Loyihaning umumiy qiymati 35 mln dollar, shundan 20 mln dollar
+   *    investitsiya Parranda Investment hisobidan. Shundan keyin 24 mln bosh
+   *    parranda, 60 ming tonna go'sht ishlab chiqarish boshlanadi va summa
+   *    1.5 trlnga yetadi. 180 mlrd summa soliq imtiyoz kutilyapti."
+   *
+   * DIQQAT — hujjatlar orasida ziddiyat: yillik aylanma docx'da "1.5 trln",
+   * xlsx "Лист2" J6 da esa 1200 mlrd (= 1.2 trln). Bu yerda docx raqami
+   * olindi, chunki buyurtmachi bergan referens rasmda ham 1.5 trln turibdi.
+   * Qaysi biri to'g'ri ekanini buyurtmachidan so'rash kerak.
+   *
+   * Bu sahifada o'sish foizi yo'q: 2026-2027 — prognoz, oldingi yil bilan
+   * bir xil ko'rsatkichlar qatori emas.
+   */
+  {
+    id:'2026-2027',
+    layout:'project',
+    brand:'Sokin Savdo',
+    title:'2026–2027',
+    titleSuffix:'yil',
+    subtitle:'Yangi bosqich — yanada katta imkoniyatlar',
+
+    photo:'assets/photos/2026.jpg',
+    photoAlt:'Yangi so‘yish va qadoqlash majmuasi — kechki ko‘rinish',
+
+    /* Uchinchi tomon nomlari hujjatdagidek matn bilan beriladi;
+       logotiplar ishlatilmaydi. */
+    partners:{
+      a:'Parranda Investment',
+      b:'Marel',
+      note:'Gollandiya — so‘yish va qadoqlash yechimlari'
+    },
+
+    invest:{
+      label:'Loyihaning umumiy qiymati',
+      value:35, unit:'mln $',
+      cells:[
+        {label:'Parranda Investment hisobidan', value:20,  unit:'mln $'},
+        {label:'Soliq imtiyoz (kutilayotgan)',  value:180, unit:'mlrd so‘m'}
+      ]
+    },
+
+    kpis:[
+      {icon:'hen',   label:'Yillik parranda soni',    value:24,  unit:'mln bosh'},
+      {icon:'meat',  label:'Go‘sht ishlab chiqarish', value:60,  unit:'ming tonna'},
+      {icon:'chart', label:'Yillik aylanma (prognoz)',value:1.5, unit:'trln so‘m'},
+      {icon:'tax',   label:'Soliq imtiyoz (kutilayotgan)', value:180, unit:'mlrd so‘m'}
+    ],
+
+    tracks:{
+      title:'Majmuaning asosiy yo‘nalishlari',
+      items:[
+        {icon:'cage',    label:'Ko‘p qavatli kataklarda tovuq boqish tizimi'},
+        {icon:'blade',   label:'So‘yish majmuasi', note:'Marel'},
+        {icon:'pack',    label:'Qadoqlash majmuasi', note:'Marel'},
+        {icon:'recycle', label:'Rendering liniyasi',
+         note:'Chiqindini qayta ishlab, yemga qo‘shimcha mahsulot'}
+      ]
+    }
   }];
 })();

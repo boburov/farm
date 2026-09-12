@@ -207,6 +207,7 @@
   /* --------------------------------------------------------------- zanjir */
 
   function chainNode(steps){
+    if(!steps||!steps.length) return null;
     var ul=el('ul','chain reveal');
     steps.forEach(function(step,i){
       if(i){
@@ -266,7 +267,7 @@
 
     page.appendChild(backdropNode(y));
     page.appendChild(overlayNode(y));
-    page.appendChild(chainNode(y.chain));
+    var ch=chainNode(y.chain); if(ch) page.appendChild(ch);
   }
 
   /* Ikki yil yonma-yon: chapda o'tgan yil, o'ngda yangi yil va o'sish ustuni. */
@@ -286,7 +287,107 @@
     cols.slice(1).forEach(function(c){ wrap.appendChild(columnNode(c)); });
     page.appendChild(wrap);
 
-    page.appendChild(chainNode(y.chain));
+    var ch=chainNode(y.chain); if(ch) page.appendChild(ch);
+  }
+
+  /* Loyiha sahifasi: fon emas, gorizontal foto polosa. Tepada yil, hamkorlar
+     va investitsiya kartasi; polosadan keyin ko'rsatkichlar qatori va
+     majmuaning yo'nalishlari. */
+  function renderProject(y,page){
+    var head=el('header','proj-head');
+
+    var yb=el('div','proj-year');
+    if(y.brand) yb.appendChild(el('p','brandline reveal',y.brand));
+    var badge=el('div','year-badge year-badge--wide reveal');
+    badge.innerHTML='<span>'+y.title+'</span>'+
+      (y.titleSuffix?'<span class="suffix">'+y.titleSuffix+'</span>':'');
+    yb.appendChild(badge);
+    if(y.subtitle) yb.appendChild(el('p','subtitle reveal',y.subtitle));
+    head.appendChild(yb);
+
+    if(y.partners){
+      var pr=el('div','partners reveal');
+      pr.appendChild(el('span','partner',y.partners.a));
+      pr.appendChild(el('span','partner-x','×'));
+      pr.appendChild(el('span','partner',y.partners.b));
+      if(y.partners.note) pr.appendChild(el('span','partner-note',y.partners.note));
+      head.appendChild(pr);
+    }
+
+    if(y.invest){
+      var inv=el('div','invest reveal');
+      inv.appendChild(el('p','invest-label',y.invest.label));
+      var iv=el('p','invest-value');
+      var n=el('span',null,'0'); n.dataset.to=String(y.invest.value);
+      iv.appendChild(n);
+      if(y.invest.unit) iv.appendChild(el('span','invest-unit',y.invest.unit));
+      inv.appendChild(iv);
+      var cells=el('ul','invest-cells');
+      (y.invest.cells||[]).forEach(function(c){
+        var li=el('li');
+        li.appendChild(el('span','cell-label',c.label));
+        var cv=el('span','cell-value');
+        var cn=el('span',null,'0'); cn.dataset.to=String(c.value);
+        cv.appendChild(cn);
+        if(c.unit) cv.appendChild(el('span','cell-unit',c.unit));
+        li.appendChild(cv);
+        cells.appendChild(li);
+      });
+      inv.appendChild(cells);
+      head.appendChild(inv);
+    }
+    page.appendChild(head);
+
+    /* gorizontal foto polosa */
+    var band=el('figure','band reveal');
+    if(y.photo){
+      var img=new Image();
+      img.className='band-photo';
+      img.alt=y.photoAlt||'';
+      img.decoding='async';
+      img.addEventListener('load',function(){ band.classList.add('has-photo'); });
+      img.addEventListener('error',function(){ img.remove(); });
+      img.src=y.photo;
+      band.appendChild(img);
+    }
+    page.appendChild(band);
+
+    if(y.kpis){
+      var ul=el('ul','kpis');
+      y.kpis.forEach(function(k){
+        var li=el('li','kpi reveal');
+        li.appendChild(icon(k.icon,'kpi-icon'));
+        var b=el('span','kpi-body');
+        b.appendChild(el('span','kpi-label',k.label));
+        var v=el('span','kpi-value');
+        var kn=el('span',null,'0'); kn.dataset.to=String(k.value);
+        v.appendChild(kn);
+        if(k.unit) v.appendChild(el('span','kpi-unit',k.unit));
+        b.appendChild(v);
+        li.appendChild(b);
+        ul.appendChild(li);
+      });
+      page.appendChild(ul);
+    }
+
+    if(y.tracks){
+      var sec=el('section','tracks');
+      sec.appendChild(el('h2','tracks-title reveal',y.tracks.title));
+      var ol=el('ol','track-list');
+      y.tracks.items.forEach(function(t){
+        var li=el('li','track reveal');
+        li.appendChild(icon(t.icon,'track-icon'));
+        var b=el('span','track-body');
+        b.appendChild(el('span','track-label',t.label));
+        if(t.note) b.appendChild(el('span','track-note',t.note));
+        li.appendChild(b);
+        ol.appendChild(li);
+      });
+      sec.appendChild(ol);
+      page.appendChild(sec);
+    }
+
+    var ch2=chainNode(y.chain); if(ch2) page.appendChild(ch2);
   }
 
   function render(y){
@@ -297,9 +398,10 @@
     overlays=[];
 
     if(y.layout==='compare') renderCompare(y,page);
+    else if(y.layout==='project') renderProject(y,page);
     else renderSingle(y,page);
 
-    document.title=(y.layout==='compare'?y.id.replace('-','–')+'-yillar':y.title)+
+    document.title=(y.layout==='single'?y.title:y.id.replace('-','–')+'-yillar')+
                    ' — Sokin Savdo';
 
     /* navbatma-navbat ochilish */

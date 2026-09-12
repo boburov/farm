@@ -53,7 +53,16 @@ const ALLOWED = {
        13.8 · 35.6 · 8 · 7 · 12 · 12 · 3 · 5 · 4 */
   '2025-2026': ['2025', '2026', '800', '300', '240', '12000', '8', '20000', '2024',
                 '1.5', '400', '75', '450', '22500', '31.4', '88', '293', '0', '1',
-                '13.8', '35.6', '7', '12', '3', '5', '4']
+                '13.8', '35.6', '7', '12', '3', '5', '4'],
+
+  /* docx 9-xatboshi: 35 mln $ loyiha (shundan 20 mln $ Parranda Investment
+     hisobidan) · 24 mln bosh · 60 ming tonna · 1.5 trln so'm · 180 mlrd so'm
+     soliq imtiyozi kutilyapti.
+     DIQQAT: aylanma docx'da 1.5 trln, xlsx "Лист2" J6 da 1200 mlrd — ziddiyat
+     buyurtmachidan so'ralishi kerak; hozircha docx raqami ko'rsatilyapti.
+     Yo'nalishlar tartib raqami (1-4) CSS hisoblagichi bilan chiziladi,
+     DOM matniga tushmaydi. */
+  '2026-2027': ['2026', '2027', '35', '20', '180', '24', '60', '1.5']
 };
 
 const SIZES = [[1920, 1080], [1600, 900], [1440, 900], [1280, 720], [1024, 768], [390, 844]];
@@ -137,8 +146,9 @@ for (const [i, info] of deck.entries()) {
       : pass(`counters-land@${tag}`);
   }
 
-  /* 3. fon butun ekranni qoplaydi (manfiy z-index xatosiga qarshi qo'riqchi) */
-  {
+  /* 3. fon butun ekranni qoplaydi (manfiy z-index xatosiga qarshi qo'riqchi).
+        Loyiha sahifasida fon yo'q — u gorizontal polosa ishlatadi. */
+  if (info.layout !== 'project') {
     const st = await page.evaluate(() => {
       const host = document.querySelector('.backdrop');
       const img = host.querySelector('.backdrop-photo');
@@ -184,6 +194,30 @@ for (const [i, info] of deck.entries()) {
     ar === 'skipped' || ar.every(d => d < 2)
       ? pass(`arrows-on-zone-edges@${tag}`, ar === 'skipped' ? 'foto yo\'q' : 'chetlanish < 2px')
       : fail(`arrows-on-zone-edges@${tag}`, JSON.stringify(ar));
+  } else if (info.layout === 'project') {
+    const c = await page.evaluate(id => {
+      const y = window.YEARS.find(v => v.id === id);
+      return {
+        band: document.querySelectorAll('.band').length,
+        bandPhoto: document.querySelector('.band').classList.contains('has-photo'),
+        kpis: document.querySelectorAll('.kpi').length,
+        tracks: document.querySelectorAll('.track').length,
+        want: { kpis: y.kpis.length, tracks: y.tracks.items.length }
+      };
+    }, tag);
+    c.band === 1 && c.bandPhoto && c.kpis === c.want.kpis && c.tracks === c.want.tracks
+      ? pass(`layout-shape@${tag}`,
+             `foto polosa · ${c.kpis} ko'rsatkich · ${c.tracks} yo'nalish`)
+      : fail(`layout-shape@${tag}`, JSON.stringify(c));
+
+    /* Polosa fon emas: sahifa oqimida turishi va ekranni to'la qoplamasligi shart. */
+    const band = await page.evaluate(() => {
+      const r = document.querySelector('.band').getBoundingClientRect();
+      return { h: Math.round(r.height), vh: innerHeight };
+    });
+    band.h < band.vh * 0.6
+      ? pass(`band-is-a-strip@${tag}`, `${band.h}px / ${band.vh}px`)
+      : fail(`band-is-a-strip@${tag}`, JSON.stringify(band));
   } else {
     /* Kutilgan sonlar ma'lumotdan olinadi — yangi yil qo'shilsa QA o'zi moslashadi. */
     const c = await page.evaluate(id => {
