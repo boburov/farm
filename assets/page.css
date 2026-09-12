@@ -17,6 +17,7 @@
   --muted:#65736A;        /* ikkinchi darajali matn */
   --rule:#D9E2D9;         /* ingichka ajratgich */
   --gold:#B59A65;         /* kichik urg'u */
+  --num:#0A0F0C;          /* raqamlar: sarlavhadan quyuqroq — urg'u ular  */
   --sage:#CBD9CB;
 
   --ease:cubic-bezier(.22,1,.36,1);
@@ -56,6 +57,17 @@ html,body{
   display:flex;align-items:baseline;justify-content:space-between;
   gap:16px;position:relative;z-index:2;
 }
+/* so'zbelgi va bosqich nomi yonma-yon, orasida nozik ajratgich */
+.shell-left{display:flex;align-items:baseline;gap:clamp(10px,1.4vw,26px);flex-wrap:wrap}
+.shell-eyebrow{
+  font-size:clamp(10px,.78vw,15px);
+  font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);position:relative;padding-left:clamp(10px,1.4vw,26px);
+}
+.shell-eyebrow::before{
+  content:"";position:absolute;left:0;top:50%;translate:0 -50%;
+  width:1px;height:1em;background:var(--rule);
+}
 .wordmark{
   font-size:clamp(10px,.78vw,15px);
   font-weight:700;letter-spacing:.36em;text-transform:uppercase;
@@ -75,14 +87,7 @@ html,body{
 }
 
 /* chapga tekislangan yirik sarlavha */
-.lede{flex:0 0 auto;max-width:min(62ch,72%)}
-.lede-year{
-  display:block;
-  font-size:clamp(11px,.9vw,17px);
-  font-weight:700;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gold);
-  margin-bottom:clamp(3px,.6vh,10px);
-}
+.lede{flex:0 0 auto;max-width:min(93ch,100%)}
 .lede-title{
   margin:0;
   font-size:clamp(24px,3.5vw,68px);
@@ -93,7 +98,7 @@ html,body{
   margin:clamp(4px,.8vh,12px) 0 0;
   font-size:clamp(11px,1.05vw,20px);
   font-weight:500;line-height:1.35;color:var(--muted);
-  max-width:52ch;
+  max-width:78ch;
 }
 
 /* ---------------------------------------------------------- atmosfera --- */
@@ -130,6 +135,13 @@ html,body{
   gap:clamp(18px,3vw,64px);align-items:stretch;
 }
 .split--model{grid-template-columns:60fr 40fr}
+/* Loyiha sahnasi: surat kengroq — bino aniq ko'rinadi, raqamlar o'ngda. */
+.split--project{grid-template-columns:61fr 39fr}
+/* Loyiha sahnasida sarlavha bloki ixcham — bo'shliq suratga beriladi. */
+.page[data-layout="project"] .scene{gap:clamp(7px,1.3vh,18px)}
+.page[data-layout="project"] .lede-title{font-size:clamp(22px,2.9vw,54px)}
+.page[data-layout="project"] .lede-sub{font-size:clamp(10px,.9vw,17px)}
+.page[data-layout="project"] .visual img{object-position:center 52%}
 
 /* Inshoot tasviri: aniq maydon, chetlari yumshoq niqob bilan fonga singiydi.
    Binoning o'zi oqartirilmaydi — niqob faqat chekkalarda ishlaydi. */
@@ -192,7 +204,7 @@ html,body{
 .lr-val{
   display:flex;align-items:baseline;gap:.28em;flex-wrap:wrap;
   font-size:clamp(14px,1.5vw,31px);
-  font-weight:700;letter-spacing:-.028em;color:var(--ink);
+  font-weight:700;letter-spacing:-.028em;color:var(--num);
   font-variant-numeric:tabular-nums;
 }
 .lr-val em{font-style:normal;font-size:.48em;font-weight:600;letter-spacing:normal;color:var(--muted)}
@@ -206,7 +218,7 @@ html,body{
   font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;
   white-space:nowrap;
 }
-.lr-suffix{margin-left:-.16em;font-weight:700;color:var(--ink)}
+.lr-suffix{margin-left:-.16em;font-weight:700;color:var(--num)}
 .lr-dash{color:var(--muted);font-weight:600}
 
 /* -------------------------------------------------------------- oqim --- */
@@ -260,7 +272,109 @@ html,body{
 }
 .shares-list li{display:flex;align-items:baseline;gap:.4em;
   font-size:clamp(8.5px,.72vw,15px);color:var(--muted)}
-.shares-list b{font-size:1.22em;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.shares-list b{font-size:1.22em;font-weight:700;color:var(--num);font-variant-numeric:tabular-nums}
+
+/* ------------------------------------------------- bo'laklar halqasi --- */
+
+/* Markazda halqa, atrofida to'qqiz bo'lak surati. Joylashuv JS'da
+   hisoblanadi (ellips bo'ylab burchak) va --x / --y bilan beriladi;
+   --k — bo'lak ulushiga mos kattalik koeffitsienti (0.34 … 1). */
+.cuts{
+  position:relative;flex:1 1 auto;min-height:clamp(200px,38vh,520px);
+  container-type:size;   /* bo'lak kattaligi maydonning BO'YIGA ham qaraydi */
+}
+
+.cuts-stems{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cuts-stem{
+  stroke:var(--rule);stroke-width:1;
+  /* chiziq markazdan bo'lakka qarab chiziladi */
+  stroke-dasharray:1;stroke-dashoffset:1;
+  transition:stroke-dashoffset .7s var(--ease) var(--d,0ms);
+}
+.cuts.is-in .cuts-stem{stroke-dashoffset:0}
+
+.cuts-donut{
+  position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);
+  width:min(24%,clamp(104px,15vh,196px));height:auto;overflow:visible;
+}
+.cuts-track{fill:none;stroke:var(--rule);stroke-width:9}
+.cuts-arc{
+  fill:none;stroke-width:9;stroke-linecap:butt;
+  /* yoy noldan o'z ulushigacha chiziladi */
+  stroke-dasharray:0 100;
+  transition:stroke-dasharray .8s var(--ease) var(--d,0ms);
+  /* quyuq yashildan sarg'ish urg'uga — ulush kamaygani sayin ochroq */
+  stroke:color-mix(in oklab,var(--ink) calc(100% - var(--t) * 72%),var(--gold));
+}
+
+.cuts.is-in .cuts-arc{stroke-dasharray:var(--len) calc(100 - var(--len))}
+
+.cuts-core{
+  position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;
+}
+.cuts-core-top{display:flex;align-items:baseline;gap:.06em}
+.cuts-core-top i{
+  font-style:normal;font-size:.5em;font-weight:700;color:var(--num);
+}
+.cuts-core{opacity:0;transition:opacity .6s var(--ease) .1s}
+.cuts.is-in .cuts-core{opacity:1}
+.cuts-core-num{
+  font-size:clamp(14px,1.55vw,31px);font-weight:800;letter-spacing:-.03em;
+  color:var(--num);font-variant-numeric:tabular-nums;
+}
+/* Halqa markazidagi yozuv ham bo'lak nomlari bilan bir xil o'lchamda — o'sha
+   sababga ko'ra `--ink`. */
+.cuts-core-lbl{
+  font-style:normal;font-size:clamp(8.5px,.62vw,12px);
+  font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);
+}
+
+.cut{
+  position:absolute;left:var(--x);top:var(--y);
+  /* markazlash `translate` xossasi bilan — `.reveal` ning transform'i buni
+     bekor qilib yubormasin */
+  translate:-50% -50%;
+  /* boshlanish holati: markazda, kichik va ko'rinmas — `is-in` bilan
+     o'z joyiga uchib chiqadi */
+  opacity:0;
+  transform:translate(calc((50 - var(--xn)) * 1cqw),
+                      calc((var(--cy) - var(--yn)) * 1cqh)) scale(.45);
+  transition:opacity .55s var(--ease) var(--d,0ms),
+             transform .85s var(--ease) var(--d,0ms);
+  margin:0;
+  /* eni bo'yicha o'lcham, lekin past maydonda balandlik bo'yicha cheklanadi —
+     aks holda pastki bo'lak yozuvi maydondan chiqib ketadi */
+  width:min(calc((7 + 11.5 * var(--k)) * 1cqw),calc((12 + 19 * var(--k)) * 1cqh));
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.cuts.is-in .cut{opacity:1;transform:none}
+.cut-pct-wrap{display:flex;align-items:baseline;gap:.06em}
+.cut-pct-wrap i{font-style:normal;font-size:.72em;font-weight:700;color:var(--num)}
+
+.cut-img{
+  display:block;width:100%;height:auto;
+  opacity:0;transition:opacity .7s var(--ease);
+  filter:drop-shadow(0 6px 14px rgba(18,62,43,.14));
+}
+.cut.has-photo .cut-img{opacity:1}
+.cut-cap{
+  display:flex;flex-direction:column;align-items:center;line-height:1.1;
+  /* yozuv qo'shni bo'lak rasmi ostida qolib ketmasin */
+  position:relative;z-index:3;
+  text-shadow:0 1px 4px rgba(244,246,242,1),0 0 10px rgba(244,246,242,1),
+              0 0 18px rgba(244,246,242,.85);
+}
+.cut-pct{
+  font-size:clamp(9px,.82vw,17px);font-weight:800;letter-spacing:-.02em;
+  color:var(--num);font-variant-numeric:tabular-nums;
+}
+/* Bo'lak nomi och fonda va rasm chetida turadi — `--muted` (4.4:1) bu o'lchamda
+   o'qilmadi, shuning uchun `--ink` (10.8:1) va kattaroq eng kichik o'lcham. */
+.cut-name{
+  font-style:normal;font-size:clamp(8.5px,.62vw,12px);
+  font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+}
 
 /* ----------------------------------------------------- 2010 (hikoya) --- */
 
@@ -272,7 +386,7 @@ html,body{
 .figure-value{
   display:flex;align-items:baseline;gap:.22em;
   font-size:clamp(38px,6.6vw,140px);
-  font-weight:800;line-height:.92;letter-spacing:-.05em;color:var(--ink);
+  font-weight:800;line-height:.92;letter-spacing:-.05em;color:var(--num);
   font-variant-numeric:tabular-nums;
 }
 /* birlik katta raqamning manfiy kerningini MEROS QILMAYDI — aks holda
@@ -290,6 +404,25 @@ html,body{
 
 .hero{flex:1 1 auto;min-height:0;display:grid;
   grid-template-rows:minmax(0,1fr) auto;gap:clamp(10px,2vh,28px)}
+
+/* O'ng ustun — ko'rsatkichlar ustma-ust, yirik terilgan */
+.pdata{
+  min-height:0;display:flex;flex-direction:column;justify-content:center;
+  gap:clamp(8px,1.6vh,24px);
+}
+.split--project .metrics{
+  grid-template-columns:1fr;gap:0;padding-top:0;border-top:none;
+}
+.split--project .metric{
+  padding:clamp(6px,1.1vh,15px) 0;border-top:1px solid var(--rule);gap:3px;
+}
+.split--project .metric:first-child{border-top:none;padding-top:0}
+.split--project .metric-label{font-size:clamp(9px,.72vw,15px);letter-spacing:.14em}
+.split--project .metric-value{font-size:clamp(26px,2.7vw,58px)}
+.split--project .metric.is-lead .metric-value{font-size:clamp(32px,3.6vw,76px)}
+.split--project .substrip{gap:clamp(8px,1.4vw,26px)}
+.split--project .sub-label{font-size:clamp(8.5px,.7vw,14px)}
+.split--project .sub-value{font-size:clamp(14px,1.3vw,28px)}
 .metrics{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:clamp(10px,2vw,44px);
@@ -303,7 +436,7 @@ html,body{
 .metric-value{
   display:flex;align-items:baseline;gap:.24em;
   font-size:clamp(17px,2.1vw,44px);
-  font-weight:800;letter-spacing:-.032em;color:var(--ink);
+  font-weight:800;letter-spacing:-.032em;color:var(--num);
   font-variant-numeric:tabular-nums;
 }
 .metric-value em{font-style:normal;font-size:.44em;font-weight:600;letter-spacing:normal;color:var(--muted)}
@@ -321,7 +454,7 @@ html,body{
 .sub-value{
   display:flex;align-items:baseline;gap:.22em;
   font-size:clamp(12px,1.15vw,24px);font-weight:700;letter-spacing:-.024em;
-  color:var(--ink);font-variant-numeric:tabular-nums;
+  color:var(--num);font-variant-numeric:tabular-nums;
 }
 .sub-value em{font-style:normal;font-size:.5em;font-weight:600;
   letter-spacing:normal;color:var(--muted)}
@@ -386,7 +519,7 @@ html,body{
 .project-when{font-size:clamp(8px,.64vw,13px);font-weight:500;color:var(--muted)}
 .project-value{
   display:flex;align-items:baseline;gap:.22em;
-  font-size:clamp(13px,1.3vw,28px);font-weight:800;letter-spacing:-.028em;color:var(--ink);
+  font-size:clamp(13px,1.3vw,28px);font-weight:800;letter-spacing:-.028em;color:var(--num);
   font-variant-numeric:tabular-nums;
 }
 .project-value em{font-style:normal;font-size:.5em;font-weight:600;letter-spacing:normal;color:var(--muted)}
@@ -405,7 +538,7 @@ html,body{
 .total-value{
   display:flex;align-items:baseline;gap:.22em;
   font-size:clamp(24px,3.4vw,72px);font-weight:800;line-height:.96;
-  letter-spacing:-.04em;color:var(--ink);font-variant-numeric:tabular-nums;
+  letter-spacing:-.04em;color:var(--num);font-variant-numeric:tabular-nums;
 }
 .total-value em{font-style:normal;font-size:.3em;font-weight:700;letter-spacing:normal;color:var(--ink)}
 .total-label{
@@ -468,7 +601,7 @@ html,body{
   .page{height:auto;min-height:100dvh;grid-template-rows:auto auto auto;
     padding-bottom:var(--pad-y)}
   .lede{max-width:none}
-  .split,.split--model{grid-template-columns:1fr;gap:16px}
+  .split,.split--model,.split--project{grid-template-columns:1fr;gap:16px}
   .visual{height:min(34vh,260px)}
   .ledger-head,.ledger-row{grid-template-columns:minmax(0,1fr) minmax(0,.8fr) minmax(0,.8fr)}
   .figures{gap:22px}
@@ -479,6 +612,14 @@ html,body{
   .totals{gap:20px}
   .totals-note{margin-left:0;flex:1 0 100%}
   .model{min-height:44vh}
+  /* Telefonda maydon tor — halqa maydoni balandroq, bo'laklar kichrayadi,
+     yozuvlar esa aksincha kattaroq (7px o'qilmaydi). */
+  .cuts{min-height:100vw}
+  .cuts-donut{width:30%}
+  .cut{width:calc(9% + 13% * var(--k))}
+  .cuts-core-num{font-size:20px}
+  .cut-pct{font-size:12px}
+  .cut-name{font-size:9.5px;letter-spacing:.1em}
   .timeline{flex-wrap:wrap;gap:10px}
   .tl-btn{font-size:10px;letter-spacing:0}
 }
@@ -489,5 +630,7 @@ html,body{
   .zone.reveal,.page.ready .zone.reveal{transform:translateX(-50%)}
   .flow-arrow.reveal,.page.ready .flow-arrow.reveal{transform:translate(-50%,-50%)}
   .ambient i{animation:none}
-  .visual img,.project-shot img,.model-label,.navbtn,.tl-btn{transition:none}
+  .visual img,.project-shot img,.model-label,.cut-img,.navbtn,.tl-btn{transition:none}
+  .cut,.cuts-arc,.cuts-stem,.cuts-core{transition:none}
+  .cut{opacity:1;transform:none}
 }

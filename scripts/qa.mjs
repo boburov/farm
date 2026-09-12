@@ -51,10 +51,12 @@ const ALLOWED = {
               ona tovuq · 450 mlrd · 22 500 t · 31.4 mlrd · 20 000 so'm/kg
      88 / 293 / 0 — hisoblangan o'sish; 1 — "1 kg"; 2024 — soliq imtiyozi davri.
      Markazdagi bo'laklar ulushi — xlsx "Yaratilgan qiymat 2025-2026" C6:C14:
-       13.8 · 35.6 · 8 · 7 · 12 · 12 · 3 · 5 · 4 */
+       13.8 · 35.6 · 8 · 7 · 12 · 12 · 3 · 5 · 4
+     100 va 9 — halqa markazidagi yozuv: shu ulushlarning jami va soni,
+     ya'ni yangi ma'lumot emas, o'sha ro'yxatdan kelib chiqadi. */
   '2025-2026': ['2025', '2026', '800', '300', '240', '12000', '8', '20000', '2024',
                 '1.5', '400', '75', '450', '22500', '31.4', '88', '293', '0', '1',
-                '13.8', '35.6', '7', '12', '3', '5', '4'],
+                '13.8', '35.6', '7', '12', '3', '5', '4', '100', '9'],
 
   /* docx 9-xatboshi: 35 mln $ loyiha (shundan 20 mln $ Parranda Investment
      hisobidan) · 24 mln bosh · 60 ming tonna · 1.5 trln so'm · 180 mlrd so'm
@@ -81,6 +83,8 @@ const pass = (name, note = '') => results.push({ name, ok: true, note });
 const fail = (name, note) => results.push({ name, ok: false, note });
 
 async function resolveChromium() {
+  /* O'rnatma buzilgan bo'lsa, QA_CHROME bilan boshqa brauzer ko'rsatiladi. */
+  if (process.env.QA_CHROME) return process.env.QA_CHROME;
   let executablePath = chromium.executablePath();
   try { await access(executablePath); return executablePath; } catch {}
   const cache = `${process.env.HOME}/Library/Caches/ms-playwright`;
@@ -201,27 +205,10 @@ for (const [i, info] of deck.entries()) {
       arrows: document.querySelectorAll('.flow-arrow').length,
       chain: document.querySelectorAll('.flow li:not(.is-link)').length
     }));
-    c.stats === 2 && c.zones === 3 && c.arrows === 2 && c.chain === 3
-      ? pass(`layout-shape@${tag}`, '2 statistika · 3 zona · 2 strelka · 3 bosqich')
+    c.stats === 2 && c.zones === 3 && c.arrows === 0 && c.chain === 3
+      ? pass(`layout-shape@${tag}`, '2 statistika · 3 zona · strelkasiz · 3 bosqich')
       : fail(`layout-shape@${tag}`, JSON.stringify(c));
 
-    /* strelkalar suratdagi zona chegaralarida turibdi */
-    const ar = await page.evaluate(() => {
-      const img = document.querySelector('.backdrop-photo');
-      const y = window.YEARS.find(v => v.layout === 'single');
-      const at = (y && y.arrowsAt) || [];
-      const nodes = [...document.querySelectorAll('.flow-arrow')];
-      if (!img || !img.naturalWidth) return 'skipped';
-      const scale = Math.max(innerWidth / img.naturalWidth, innerHeight / img.naturalHeight);
-      const rw = img.naturalWidth * scale, off = (innerWidth - rw) / 2;
-      return nodes.map((n, k) => {
-        const r = n.getBoundingClientRect();
-        return Math.abs((off + at[k] * rw) - (r.left + r.width / 2));
-      });
-    });
-    ar === 'skipped' || ar.every(d => d < 2)
-      ? pass(`arrows-on-zone-edges@${tag}`, ar === 'skipped' ? 'foto yo\'q' : 'chetlanish < 2px')
-      : fail(`arrows-on-zone-edges@${tag}`, JSON.stringify(ar));
   } else if (info.layout === 'plans') {
     const c = await page.evaluate(id => {
       const y = window.YEARS.find(v => v.id === id);
@@ -325,6 +312,39 @@ for (const [i, info] of deck.entries()) {
       ? fail(`growth-matches-arithmetic@${tag}`, JSON.stringify(derived.bad))
       : pass(`growth-matches-arithmetic@${tag}`,
              `${derived.n} ta foiz ikki raqamdan chiqadi`);
+
+    /* Markazdagi bo'laklar halqasi: to'qqizta bo'lak, har birining surati
+       yuklangan, foizlar ma'lumot bilan bir xil va hech biri kadrdan
+       chiqib ketmagan. */
+    if (await page.$('.cuts')) {
+      const w = await page.evaluate(() => {
+        const host = document.querySelector('.cuts');
+        const r = host.getBoundingClientRect();
+        const figs = [...host.querySelectorAll('.cut')];
+        return {
+          parts: figs.length,
+          loaded: figs.filter(f => f.classList.contains('has-photo')).length,
+          arcs: host.querySelectorAll('.cuts-arc').length,
+          pcts: figs.map(f => parseFloat(f.querySelector('.cut-pct').textContent)),
+          outside: figs.filter(f => {
+            const b = f.getBoundingClientRect();
+            return b.left < r.left - 2 || b.right > r.right + 2 ||
+                   b.top < r.top - 2 || b.bottom > r.bottom + 2;
+          }).map(f => f.querySelector('.cut-name').textContent)
+        };
+      });
+      const want = await page.evaluate(id =>
+        window.YEARS.find(y => y.id === id).centre.items.map(i => i.value), tag);
+      const sum = w.pcts.reduce((a, b) => a + b, 0);
+      const same = want.length === w.pcts.length &&
+                   [...want].sort((a, b) => a - b).join() ===
+                   [...w.pcts].sort((a, b) => a - b).join();
+      w.parts === want.length && w.loaded === want.length &&
+      w.arcs === want.length && same && !w.outside.length
+        ? pass(`cuts-wheel@${tag}`,
+               `${w.parts} bo'lak, surat va foiz joyida (jami ${sum.toFixed(1)}%)`)
+        : fail(`cuts-wheel@${tag}`, JSON.stringify(w));
+    }
 
     /* Markazdagi 3D vitrina: brifdagi talablar o'lchanadi —
        yetti bo'lak, tik holat, kesishmaslik, kadr ichida, tinch turishi. */

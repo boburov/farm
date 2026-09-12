@@ -40,8 +40,7 @@
     /* Suratdagi nuqtalar — surat kengligining ulushi sifatida (0..1), piksel
        emas. Fon `cover` bilan qirqilgani uchun ekran nisbati o'zgarsa piksel
        holati ham o'zgaradi; `assets/page.js: placeOverlays` uni har safar
-       qayta hisoblaydi, shuning uchun yozuv ham, strelka ham joyidan siljimaydi. */
-    arrowsAt:[0.335, 0.645],
+       qayta hisoblaydi, shuning uchun yozuv joyidan siljimaydi. */
     zones:[
       {at:0.150, label:'Ishlab chiqaruvchi'},
       {at:0.490, label:'Tashish'},
@@ -293,19 +292,23 @@
        sahifada jami ko'rsatilmaydi. */
     centre:{
       title:'Tovuq go‘shti bo‘laklari va mahsulotdagi ulushi',
-      /* 3D: tovuq bo'laklarga ajraladi va sekin aylanadi.
-         three.js va GLB faqat shu sahifada yuklanadi (assets/page.js). */
-      model:{gap:.30, margin:1.05, tilt:.22},
+      /* Bo'laklar halqasi: markazda 100% doirasi, atrofida to'qqiz bo'lak
+         surati (assets/photos/cuts/ — fon shaffof PNG). Har bo'lakning kattaligi
+         ulushiga bog'liq. 3D sahna o'rniga keldi: rasm har qurilmada bir xil
+         ko'rinadi, three.js va GLB yuklanmaydi.
+         `model` ma'lumoti kerak bo'lsa qaytarish mumkin — assets/page.js
+         ikkalasini ham qo'llaydi. */
+      wheel:true,
       items:[
-        {label:'Akorachka',  value:13.8},
-        {label:'File',       value:35.6},
-        {label:'Qanot',      value:8},
-        {label:'Golen',      value:7},
-        {label:'Bedro',      value:12},
-        {label:'Drakon',     value:12},
-        {label:'Teri',       value:3},
-        {label:'Karkaz',     value:5},
-        {label:'Qanot uchi', value:4}
+        {key:'akorachka',  label:'Akorachka',  value:13.8},
+        {key:'file',       label:'File',       value:35.6},
+        {key:'qanot',      label:'Qanot',      value:8},
+        {key:'golen',      label:'Golen',      value:7},
+        {key:'bedro',      label:'Bedro',      value:12},
+        {key:'drakon',     label:'Drakon',     value:12},
+        {key:'teri',       label:'Teri',       value:3},
+        {key:'karkas',     label:'Karkaz',     value:5},
+        {key:'qanot-uchi', label:'Qanot uchi', value:4}
       ]
     },
 
@@ -347,7 +350,7 @@
     subtitle:'Yangi bosqich — yanada katta imkoniyatlar',
 
     photo:'assets/photos/2026.jpg',
-    photoAlt:'Yangi so‘yish va qadoqlash majmuasi — kechki ko‘rinish',
+    photoAlt:'Yangi so‘yish va qadoqlash majmuasi — ko‘chadan ko‘rinishi',
 
     /* Uchinchi tomon nomlari hujjatdagidek matn bilan beriladi;
        logotiplar ishlatilmaydi. */

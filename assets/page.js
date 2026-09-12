@@ -39,16 +39,19 @@
 
   /* ------------------------------------------------------------ qobiq --- */
 
+  /* Tepa qator: so'zbelgi, bosqich nomi va davr — uchalasi yonma-yon. */
   function shellTop(y){
     var top=el('header','shell-top');
-    top.appendChild(el('span','wordmark',y.brand||'Sokin Savdo'));
+    var left=el('div','shell-left');
+    left.appendChild(el('span','wordmark',y.brand||'Sokin Savdo'));
+    if(y.eyebrow) left.appendChild(el('span','shell-eyebrow',y.eyebrow));
+    top.appendChild(left);
     top.appendChild(el('span','period',y.period||y.title||y.id));
     return top;
   }
 
   function lede(y){
     var d=el('div','lede');
-    if(y.eyebrow) d.appendChild(el('span','lede-year reveal',y.eyebrow));
     d.appendChild(el('h1','lede-title reveal',y.title));
     if(y.subtitle) d.appendChild(el('p','lede-sub reveal',y.subtitle));
     return d;
@@ -273,9 +276,10 @@
     function frame(now){
       scene3d.raf=requestAnimationFrame(frame);
       var t=(now-t0)/1000;
-      /* qisqa kirish, keyin mahsulotlar QIMIRLAMAYDI — yorliqlar o'qiladi */
-      var p=REDUCED?1:Math.min(1,Math.max(0,(t-.2)/1.4));
-      ChickenParts.showcaseReveal(p);
+      /* butun tovuq ko'rinadi, keyin bo'laklarga ajraladi; oxirida
+         mahsulotlar QIMIRLAMAYDI — yorliqlar o'qiladi */
+      var p=REDUCED?1:Math.min(1,Math.max(0,(t-.2)/3.2));
+      ChickenParts.showcaseIntro(p);
       renderer.render(scene,camera);
       if(p>=1&&!done){ done=true; host.classList.add('is-settled'); placeLabels(); }
       if(p>=1){
@@ -303,6 +307,134 @@
         console.warn('3D yuklanmadi:',e.message);
         host.classList.add('is-failed');
       });
+    return host;
+  }
+
+  /* ------------------------------------------------- bo'laklar halqasi --- */
+
+  /* To'qqiz bo'lak markazdagi halqa atrofida ellips bo'ylab joylashadi.
+     Burchaklar qo'lda tanlangan — yozuvlar bir-birining ustiga tushmasin;
+     radius koeffitsienti (r) ayrimlarini ichkariroq oladi.
+     Bo'lakning kattaligi ulushiga bog'liq, lekin chiziqli emas: eng kichigi
+     ham ko'rinib tursin uchun daraja 0.65. */
+  var ORBIT=[{a:19,r:1.06},{a:56,r:.88},{a:112,r:1.06},{a:148,r:1},{a:182,r:1.02},
+             {a:220,r:1},{a:258,r:1},{a:300,r:1},{a:336,r:1.12}];
+  /* Ellips radiuslari va markazi — .cuts maydonining foizida. Bo'yiga
+     kichikroq, markazi esa biroz tepada: pastki bo'lakning yozuvi zanjir
+     qatoriga tegib ketmasin. */
+  var RX=36, RY=26.5, CY=49, GAP=.8;   /* GAP — yoylar orasidagi tirqish */
+
+  function cutsNode(centre){
+    var items=(centre.items||[]).slice().sort(function(a,b){ return b.value-a.value; }),
+        total=items.reduce(function(s,c){ return s+c.value; },0),
+        top=items.length?items[0].value:1,
+        host=el('div','cuts'),
+        acc=0;
+
+    var parts=items.map(function(c,i){
+      var o=ORBIT[i]||{a:i*40,r:1}, t=o.a*Math.PI/180,
+          len=Math.max(.8,c.value/total*100-GAP),
+          off=acc/total*100+GAP/2;
+      acc+=c.value;
+      return {
+        item:c,
+        x:50+RX*o.r*Math.sin(t),
+        y:CY-RY*o.r*Math.cos(t),
+        len:len, off:off,
+        k:.34+.66*Math.pow(c.value/top,.65)
+      };
+    });
+
+    /* Halqa: har yoy — pathLength=100 bo'yicha kesilgan doira. Ranglar
+       quyuq yashildan sarg'ish urg'uga o'tadi (palitradan tashqariga chiqmaydi). */
+    var NS='http://www.w3.org/2000/svg';
+    var svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('class','cuts-donut');
+    svg.setAttribute('viewBox','0 0 240 240');
+    svg.setAttribute('aria-hidden','true');
+    var track=document.createElementNS(NS,'circle');
+    track.setAttribute('class','cuts-track');
+    track.setAttribute('cx','120'); track.setAttribute('cy','120'); track.setAttribute('r','86');
+    svg.appendChild(track);
+    var g=document.createElementNS(NS,'g');
+    g.setAttribute('transform','rotate(-90 120 120)');
+    parts.forEach(function(p,i){
+      var arc=document.createElementNS(NS,'circle');
+      arc.setAttribute('class','cuts-arc');
+      arc.setAttribute('cx','120'); arc.setAttribute('cy','120'); arc.setAttribute('r','86');
+      arc.setAttribute('pathLength','100');
+      /* yoyning uzunligi CSS o'zgaruvchisida — sahna ochilganda noldan
+         shu qiymatgacha chiziladi (`.cuts.is-in`). */
+      arc.setAttribute('stroke-dashoffset',(-p.off).toFixed(2));
+      arc.style.setProperty('--len',p.len.toFixed(2));
+      arc.style.setProperty('--t',(i/(parts.length-1||1)).toFixed(3));
+      arc.style.setProperty('--d',(120+i*70)+'ms');
+      g.appendChild(arc);
+    });
+    svg.appendChild(g);
+    host.appendChild(svg);
+
+    /* Halqadan bo'lakka ingichka bog'lovchi — qaysi yoy kimniki ekani ko'rinsin.
+       Chiziq halqa chetidan boshlanib, rasmga yetmay tugaydi. */
+    var stems=document.createElementNS(NS,'svg');
+    stems.setAttribute('class','cuts-stems');
+    stems.setAttribute('viewBox','0 0 100 100');
+    stems.setAttribute('preserveAspectRatio','none');
+    stems.setAttribute('aria-hidden','true');
+    parts.forEach(function(p,i){
+      var dx=p.x-50, dy=p.y-CY, f0=.42, f1=.72,
+          ln=document.createElementNS(NS,'line');
+      ln.setAttribute('class','cuts-stem');
+      ln.setAttribute('x1',(50+dx*f0).toFixed(2)); ln.setAttribute('y1',(CY+dy*f0).toFixed(2));
+      ln.setAttribute('x2',(50+dx*f1).toFixed(2)); ln.setAttribute('y2',(CY+dy*f1).toFixed(2));
+      ln.setAttribute('vector-effect','non-scaling-stroke');
+      ln.style.setProperty('--d',(320+i*70)+'ms');
+      stems.appendChild(ln);
+    });
+    host.insertBefore(stems,host.firstChild);
+
+    var core=el('div','cuts-core');
+    var num=el('b','cuts-core-num','0');
+    num.dataset.to=String(Math.round(total));   /* hisoblagich noldan sanaydi */
+    var top=el('span','cuts-core-top');
+    top.appendChild(num);
+    top.appendChild(el('i',null,'%'));
+    core.appendChild(top);
+    core.appendChild(el('em','cuts-core-lbl',items.length+' bo‘lak'));
+    host.appendChild(core);
+
+    parts.forEach(function(p,i){
+      /* `reveal` emas: bo'lak markazdan o'z joyiga uchib chiqadi, shuning
+         uchun o'zining transform'i kerak (`--xn`/`--yn` — markazgacha masofa). */
+      var fig=el('figure','cut');
+      fig.style.setProperty('--x',p.x.toFixed(2)+'%');
+      fig.style.setProperty('--y',p.y.toFixed(2)+'%');
+      fig.style.setProperty('--xn',p.x.toFixed(2));
+      fig.style.setProperty('--yn',p.y.toFixed(2));
+      fig.style.setProperty('--k',p.k.toFixed(3));
+      fig.style.setProperty('--d',(160+i*70)+'ms');
+      if(p.item.key){
+        var img=new Image();
+        img.alt=p.item.label; img.decoding='async';
+        img.className='cut-img';
+        img.addEventListener('load',function(){ fig.classList.add('has-photo'); });
+        img.addEventListener('error',function(){ img.remove(); });
+        img.src='assets/photos/cuts/'+p.item.key+'.png';
+        fig.appendChild(img);
+      }
+      var cap=el('figcaption','cut-cap');
+      var pct=el('b','cut-pct','0');
+      pct.dataset.to=String(p.item.value);
+      var wrap=el('span','cut-pct-wrap');
+      wrap.appendChild(pct);
+      wrap.appendChild(el('i',null,'%'));
+      cap.appendChild(wrap);
+      cap.appendChild(el('em','cut-name',p.item.label));
+      fig.appendChild(cap);
+      host.appendChild(fig);
+    });
+
+    host.style.setProperty('--cy',CY);
     return host;
   }
 
@@ -335,13 +467,16 @@
     var scene=el('div','scene');
     scene.appendChild(lede(y));
 
-    var hasModel=!!(y.centre&&y.centre.model);
-    var split=el('div','split'+(hasModel?' split--model':''));
+    /* Markaziy ko'rgazma: `wheel` — rasmli bo'laklar halqasi, `model` — 3D
+       sahna. Ikkalasi ham bo'lmasa oddiy surat qoladi. */
+    var hasWheel=!!(y.centre&&y.centre.wheel),
+        hasModel=!hasWheel&&!!(y.centre&&y.centre.model);
+    var split=el('div','split'+(hasWheel||hasModel?' split--model':''));
 
-    if(hasModel){
+    if(hasWheel||hasModel){
       var stage=el('div','stage reveal');
-      stage.appendChild(modelNode(y.centre.model));
-      if(y.centre.items&&y.centre.items.length){
+      stage.appendChild(hasWheel?cutsNode(y.centre):modelNode(y.centre.model));
+      if(!hasWheel&&y.centre.items&&y.centre.items.length){
         var sh=el('div','shares');
         sh.appendChild(el('p','shares-title',y.centre.title));
         var ul=el('ul','shares-list');
@@ -354,6 +489,8 @@
         sh.appendChild(ul);
         stage.appendChild(sh);
       }
+      if(hasWheel&&y.centre.title)
+        stage.insertBefore(el('p','shares-title',y.centre.title),stage.firstChild);
       split.appendChild(stage);
     }else{
       split.appendChild(visual(y));
@@ -366,7 +503,9 @@
     page.appendChild(scene);
   }
 
-  /* Loyiha — keng inshoot tasviri, ochiq ko'rsatkichlar qatori */
+  /* Loyiha — chapda inshoot tasviri, o'ngda ko'rsatkichlar (boshqa
+     sahnalardagi kompozitsiya bilan bir xil). Surat kengroq maydon oladi,
+     raqamlar esa o'ng ustunda yirik qilib teriladi. */
   function renderProject(y,page){
     var scene=el('div','scene');
     scene.appendChild(lede(y));
@@ -374,17 +513,19 @@
     if(y.partners){
       var pr=el('div','partners reveal');
       pr.appendChild(el('span',null,y.partners.a));
-      pr.appendChild(el('span','x','×'));
+      pr.appendChild(el('span','x','\u00d7'));
       pr.appendChild(el('span',null,y.partners.b));
       if(y.partners.note) pr.appendChild(el('span','note',y.partners.note));
       scene.appendChild(pr);
     }
 
-    var hero=el('div','hero');
-    hero.appendChild(visual(y));
+    var split=el('div','split split--project');
+    split.appendChild(visual(y));
 
-    /* Asosiy qator: loyiha qiymati (urg'uli) + uchta ko'rsatkich.
-       Investitsiya taqsimoti ostidagi nozik qatorda. */
+    /* O'ng ustun: loyiha qiymati (urg'uli) + uchta ko'rsatkich, pastida
+       investitsiya taqsimoti. */
+    var side=el('div','pdata');
+
     var strip=[];
     if(y.invest) strip.push({label:y.invest.label,value:y.invest.value,
                              unit:y.invest.unit,lead:true});
@@ -397,8 +538,7 @@
       m.appendChild(value('metric-value',c.value,c.unit));
       ms.appendChild(m);
     });
-    hero.appendChild(ms);
-    scene.appendChild(hero);
+    side.appendChild(ms);
 
     if(y.invest&&y.invest.cells&&y.invest.cells.length){
       var sub=el('div','substrip reveal');
@@ -408,8 +548,11 @@
         it.appendChild(value('sub-value',c.value,c.unit));
         sub.appendChild(it);
       });
-      scene.appendChild(sub);
+      side.appendChild(sub);
     }
+
+    split.appendChild(side);
+    scene.appendChild(split);
 
     var tracks=(y.tracks&&y.tracks.items)||[];
     if(tracks.length){
@@ -582,6 +725,8 @@
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         page.classList.add('ready');
+        var wheel=page.querySelector('.cuts');
+        if(wheel) wheel.classList.add('is-in');
         placeOverlays();
         runCounters(page);
       });

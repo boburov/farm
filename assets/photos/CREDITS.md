@@ -3,28 +3,29 @@
 ## 2010.jpg
 
 - **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
-  (`Gemini_Generated_Image_sjv6jvsjv6jvsjv6.jpg`, 2528x1684).
-- **Tahrir:** faqat eng chetlari kesildi (`extract {top:56, bottom:40}`), eni
-  2400 px ga keltirildi, JPEG q82 → 2400x1508 (1.59:1), 351 KB.
-  Osmon ataylab saqlandi — referens kompozitsiyasida statistika kartalari
-  aynan osmon ustida yotadi.
-- **Kadr:** chapda ishlab chiqaruvchi, o'rtada yashiklarni yuk mashinasiga
-  ortish, o'ngda bozor rastasi — sahifadagi uch bo'g'inga aynan mos tushadi,
-  shuning uchun u butun ekranni qoplaydi va qalin egri strelkalar zonalar
-  chegarasiga tushadi.
+  (`Gemini_Generated_Image_h4ktfmh4ktfmh4kt.jfif`, 1264x842).
+- **Tahrir:** kesilmadi, faqat JFIF → JPEG ga o'girildi → 1264x842 (1.50:1),
+  249 KB. Eni asl faylnikidek qoldirildi — sun'iy kattalashtirish detal
+  qo'shmaydi.
+- **Kadr:** uch panelli surat — chapda tovuqxona va yashiklarga joylash,
+  o'rtada yashiklarni yuk mashinasiga ortish, o'ngda bozor rastasi — sahifadagi
+  uch bo'g'inga aynan mos tushadi, shuning uchun u butun ekranni qoplaydi va
+  qalin egri strelkalar zonalar chegarasiga tushadi.
 
 Kadrda o'qiladigan yozuv, brend logotipi, avtomobil raqami yoki 2010-yilga
 tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
+(Rastadagi doskada faqat tovuq chizmasi bor, matn yo'q.)
 
 ## 2020.jpg
 
 - **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
-  (`Gemini_Generated_Image_w7aznyw7aznyw7az.jpg`, 2528x1684).
-- **Tahrir:** pastdagi xira barglar va tepadagi ortiqcha osmon kesildi
-  (`extract {top:40, bottom:150}`), eni 2400 px, JPEG q82 → 2400x1418
-  (1.69:1), 426 KB.
-- **Kadr:** tovuqxona, "SO‘YISH VA QAYTA ISHLASH" liniyasi va yuk mashinasi —
-  2020–2021 hikoyasiga (boqish va so‘yish boshlandi) aynan mos.
+  (`Gemini_Generated_Image_w5goq7w5goq7w5go.jfif`, 1264x842).
+- **Tahrir:** tepadagi osmon va pastdagi xira barglar markazdan teng kesildi
+  (`sips -c 748 1264`), JPEG q82 → 1264x748 (1.69:1), 308 KB.
+  Eni asl faylnikidek qoldirildi — sun'iy kattalashtirish detal qo'shmaydi.
+- **Kadr:** ochiq tovuqxona, yem siloslari va oldingi planda "SO‘YISH VA QAYTA
+  ISHLASH" liniyasi — 2020–2021 hikoyasiga (boqish va so‘yish boshlandi)
+  aynan mos.
 - Kadrdagi yagona yozuv o‘zbekcha va brendga tegishli; begona logotip,
   avtomobil raqami yoki anaxronistik sana yo‘q.
 
@@ -52,13 +53,15 @@ tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
 
 ## 2026.jpg
 
-- **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
-  (`Gemini_Generated_Image_7mfprk7mfprk7mfp.jpg`, 3936x1088 = 3.62:1).
-- **Tahrir:** kesilmagan — eni 2400 px ga keltirilib siqilgan → 2400x663,
-  155 KB. Nisbati o'zi gorizontal polosa uchun mos.
+- **Manba:** buyurtmachi bergan haqiqiy surat (`2026-09-12 21.55.48.jpg`,
+  1195x896 = 1.33:1). Oldingi Gemini surati 2026-09-12 da shu foto bilan
+  almashtirildi.
+- **Tahrir:** yo'q — fayl asl holida qo'yildi (112 KB). Eni 2400 px ga
+  cho'zilmadi, chunki manba o'zi 1195 px.
 - **Ishlatilishi:** butun ekran foni EMAS — `layout:'project'` sahifasidagi
-  gorizontal polosa (`.band`), balandligi 52vh dan oshmaydi.
-- Kadrda yozuv, logotip yoki avtomobil raqami yo'q.
+  tasvir maydoni (`.visual`, `object-fit:cover`), shuning uchun nisbati
+  muhim emas: yuqori/pastdan kesiladi.
+- Kadrda binodagi kichik peshtaxta yozuvi bor; avtomobil raqami o'qilmaydi.
 
 ## plans-1.jpg … plans-5.jpg (istiqboldagi loyihalar)
 

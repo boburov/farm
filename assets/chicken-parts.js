@@ -276,7 +276,93 @@
     C.showcaseHeight=yCursor-base-rowGap;
     C.showcaseInfo=info;
     C.showcaseWidth=widest;
+    prepareWhole(info,base);
     return info;
+  };
+
+  /* Vitrina "butun tovuq" holatidan boshlanadi: har bo'lak avval o'z joyida
+     turgan yaxlit tovuqni tashkil qiladi, keyin bo'laklarga ajralib qatorga
+     tarqaladi. Shu yerda har bo'lak uchun o'sha BOSHLANG'ICH transform
+     hisoblanadi (root ichida, vitrina kadriga sig'adigan qilib).
+
+     Butun tovuq model ramkasida Z bo'ylab yotadi — to'g'ridan qaralsa
+     kallasi bilan kameraga tiralib qoladi, shuning uchun Y bo'yicha -90°
+     buriladi: yonboshdan, tanish siluet. */
+  var WHOLE_YAW=-Math.PI/2;
+  function prepareWhole(info,baseline){
+    var q=new T.Quaternion().setFromEuler(new T.Euler(0,WHOLE_YAW,0));
+    var box=null, rotHome=[];
+
+    /* 1-bosqich: burilgan butun tovuqning gabaritini o'lchash (masshtab 1) */
+    info.forEach(function(it){
+      var m=it.group, h=m.userData.home.clone().applyQuaternion(q);
+      rotHome.push(h);
+      m.quaternion.copy(q).multiply(m.userData.homeQuaternion);
+      m.position.copy(h);
+      m.scale.setScalar(1);
+      var b=measure(m);
+      box=box?box.union(b):b;
+    });
+    if(!box) return;
+
+    /* 2-bosqich: kadr ichiga sig'diruvchi masshtab va markaz.
+       Butun tovuq kadrni to'ldirib yubormaydi: u vitrina o'lchamining ~2/3
+       qismini egallaydi. Kattaroq bo'lsa tana bo'lagi qatordagi o'z
+       o'lchamidan bir necha barobar katta chiqib, o'tish paytida kadr
+       chetidan chiqib ketadi. */
+    var size=box.getSize(new T.Vector3()), c=box.getCenter(new T.Vector3());
+    var H=C.showcaseHeight||1, W=C.showcaseWidth||1;
+    var s=Math.min(size.y>1e-6?H*.66/size.y:1, size.x>1e-6?W*.58/size.x:1);
+    var cy=baseline+H*.5;
+
+    info.forEach(function(it,i){
+      var m=it.group;
+      it.wholeQuaternion=new T.Quaternion().copy(q).multiply(m.userData.homeQuaternion);
+      it.wholePos=rotHome[i].clone().sub(c).multiplyScalar(s).add(new T.Vector3(0,cy,0));
+      it.wholeScale=s;
+      /* vitrinadagi tayanch transformni qaytarib qo'yamiz */
+      m.quaternion.setFromEuler(new T.Euler(DISPLAY[it.key].rot[0],DISPLAY[it.key].rot[1],DISPLAY[it.key].rot[2]));
+      m.position.set(it.restX,it.restY,it.restZ);
+      m.scale.setScalar(it.scale);
+    });
+    C.wholeReady=true;
+  }
+
+  /* Butun tovuqdan vitrinaga o'tish. p 0 = yaxlit tovuq, 1 = qatordagi
+     bo'laklar. Har bo'lak navbatma-navbat, yoy chizib joyiga boradi. */
+  C.showcaseSplit=function(p){
+    var info=C.showcaseInfo; if(!info||!C.wholeReady){ C.showcaseReveal(p); return; }
+    p=clamp(p,0,1);
+    var pos=new T.Vector3();
+    info.forEach(function(it,i){
+      var t=easeInOut(beat(p,i*.05,.68+i*.05)), u=1-t, m=it.group;
+      /* yoy: o'rtada biroz ko'tarilib o'tadi, shunda bo'laklar bir-birini kesmaydi.
+         Ko'tarilish kichik — katta bo'lsa tepadagi qator kadrdan chiqib ketadi. */
+      var lift=it.height*.30*Math.sin(t*Math.PI)*(1-t);
+      pos.set(
+        u*it.wholePos.x+t*it.restX,
+        u*it.wholePos.y+t*it.restY+lift,
+        u*it.wholePos.z+t*it.restZ
+      );
+      m.position.copy(pos);
+      m.quaternion.copy(it.wholeQuaternion).slerp(
+        new T.Quaternion().setFromEuler(new T.Euler(DISPLAY[it.key].rot[0],DISPLAY[it.key].rot[1],DISPLAY[it.key].rot[2])),t);
+      m.scale.setScalar(it.wholeScale+(it.scale-it.wholeScale)*t);
+    });
+  };
+
+  /* Kirish: tovuq yaxlit holda paydo bo'ladi (fade), bir lahza turadi,
+     keyin bo'laklarga ajraladi. p 0..1 — butun sahna vaqti. */
+  C.showcaseIntro=function(p){
+    var info=C.showcaseInfo; if(!info) return;
+    p=clamp(p,0,1);
+    var fade=clamp(p/.14,0,1);
+    info.forEach(function(it){
+      it.group.traverse(function(o){
+        if(o.isMesh&&o.material){ o.material.transparent=fade<1; o.material.opacity=fade; }
+      });
+    });
+    C.showcaseSplit(beat(p,.26,1));
   };
 
   /* Vitrinani kadrga sig'diradigan kamera masofasi.

@@ -20,6 +20,14 @@ tayyorlaydi: 174 365 uchburchak, 4.18 MB, WebP teksturalar
 Yetti tugun: `torso · wingL · wingR · legL · legR · neck · tail`.
 Batafsil shartnoma va tuzoqlar — `HANDOFF.md`.
 
+## Bo'laklar suratlari — `assets/photos/cuts/`
+
+To'qqizta fon-shaffof PNG (`akorachka · file · qanot · golen · bedro ·
+drakon · teri · karkas · qanot-uchi`). Manba — `~/Desktop/toviqxona`
+loyihasining `site/assets/img/cut-*-alpha.png` fayllari (2026-09-12 da
+o'zgarishsiz ko'chirildi, taxminan 60-90 KB dan). 2025-2026 sahifasidagi
+halqada shular ko'rinadi (`assets/years.js` → `centre.wheel`).
+
 ## Fotosuratlar — `assets/photos/`
 
 Manba, muallif, litsenziya va tahrir tafsilotlari alohida faylda:
