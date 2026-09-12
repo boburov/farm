@@ -284,6 +284,9 @@
        sahifada jami ko'rsatilmaydi. */
     centre:{
       title:'Tovuq go‘shti bo‘laklari va mahsulotdagi ulushi',
+      /* 3D: tovuq bo'laklarga ajraladi va sekin aylanadi.
+         three.js va GLB faqat shu sahifada yuklanadi (assets/page.js). */
+      model:{length:1.2, radius:10.4, height:3.2, look:.4, spin:true},
       items:[
         {label:'Akorachka',  value:13.8},
         {label:'File',       value:35.6},

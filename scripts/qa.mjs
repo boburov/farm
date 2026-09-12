@@ -111,7 +111,12 @@ const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
 page.on('requestfailed', r => failedReq.push(r.url()));
-page.on('request', r => { if (!r.url().startsWith(URL) && !r.url().startsWith('data:')) external.push(r.url()); });
+/* `blob:` — GLTFLoader lokal GLB ichidagi teksturalardan yasagan manzil,
+   tarmoqqa chiqmaydi; `data:` ham shunday. Ikkalasi tashqi so'rov emas. */
+page.on('request', r => {
+  const u = r.url();
+  if (!u.startsWith(URL) && !u.startsWith('data:') && !u.startsWith('blob:')) external.push(u);
+});
 
 await page.goto(URL, { waitUntil: 'networkidle' });
 

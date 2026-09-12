@@ -172,11 +172,119 @@
     return li;
   }
 
+  /* ------------------------------------------------------------- 3D sahna */
+
+  /* Tovuqning bo'laklarga sochilishi — assets/chicken-parts.js moduli.
+     Skriptlar FAQAT shu kerak bo'lgan sahifada yuklanadi: boshqa sahifalar
+     three.js va 4 MB GLB ni behuda ko'tarmasin. Hammasi lokal — tashqi
+     so'rov yo'q, offline kafolati buzilmaydi. */
+  var MODEL_SRC=[
+    'assets/vendor/three.min.js',
+    'assets/vendor/GLTFLoader.js',
+    'assets/poultry-runtime.js',
+    'assets/chicken-parts.js'
+  ];
+  var modelScripts=null;
+  function loadModelScripts(){
+    if(modelScripts) return modelScripts;
+    modelScripts=MODEL_SRC.reduce(function(chain,src){
+      return chain.then(function(){
+        return new Promise(function(res,rej){
+          var t=document.createElement('script');
+          t.src=src; t.async=false;
+          t.onload=res; t.onerror=function(){ rej(new Error(src)); };
+          document.head.appendChild(t);
+        });
+      });
+    },Promise.resolve());
+    return modelScripts;
+  }
+
+  var scene3d=null;
+  function disposeScene(){
+    if(!scene3d) return;
+    cancelAnimationFrame(scene3d.raf);
+    removeEventListener('resize',scene3d.onResize);
+    if(window.ChickenParts&&ChickenParts.dispose) ChickenParts.dispose();
+    if(scene3d.renderer){
+      scene3d.renderer.dispose();
+      if(scene3d.renderer.domElement.parentNode)
+        scene3d.renderer.domElement.parentNode.removeChild(scene3d.renderer.domElement);
+    }
+    scene3d=null;
+  }
+
+  function buildScene(host,cfg){
+    var T=THREE;
+    var renderer=new T.WebGLRenderer({antialias:true,alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+    renderer.outputEncoding=T.sRGBEncoding;
+    renderer.toneMapping=T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.12;
+    host.appendChild(renderer.domElement);
+
+    var scene=new T.Scene();
+    var camera=new T.PerspectiveCamera(34,1,.1,120);
+
+    scene.add(new T.HemisphereLight(0xffffff,0xd7e6dd,1.05));
+    var key=new T.DirectionalLight(0xffffff,1.7); key.position.set(5,9,6); scene.add(key);
+    var fill=new T.DirectionalLight(0xcfe2d6,.6);
+    fill.position.set(-7,4,-5); scene.add(fill);
+
+    /* asoslarsiz: kichik oq panelda to'q yashil kursilar ortiqcha */
+    ChickenParts.showBases(false);
+    ChickenParts.mount(scene,{length:cfg.length||1.2,position:[0,0,0]});
+
+    var radius=cfg.radius||10.4, height=cfg.height||3.2, look=cfg.look||.4;
+    function resize(){
+      var w=host.clientWidth, h=host.clientHeight;
+      if(!w||!h) return;
+      renderer.setSize(w,h,false);
+      camera.aspect=w/h; camera.updateProjectionMatrix();
+    }
+    resize();
+
+    var t0=performance.now(), spin=cfg.spin!==false&&!REDUCED;
+    function frame(now){
+      scene3d.raf=requestAnimationFrame(frame);
+      var el=(now-t0)/1000;
+      /* avval sochiladi, keyin sekin aylanadi */
+      var spread=REDUCED?1:Math.min(1,Math.max(0,(el-.35)/2.2));
+      ChickenParts.setSpread(spread);
+      var a=(cfg.yaw||.7)+(spin?el*.16:0);
+      camera.position.set(Math.sin(a)*radius,height,Math.cos(a)*radius);
+      camera.lookAt(0,look,0);
+      renderer.render(scene,camera);
+    }
+    scene3d={renderer:renderer,onResize:resize,raf:0};
+    addEventListener('resize',resize);
+    scene3d.raf=requestAnimationFrame(frame);
+  }
+
+  function modelNode(cfg){
+    var host=el('div','model');
+    host.setAttribute('aria-label','Tovuqning bo\'laklarga ajralishi — 3D');
+    loadModelScripts()
+      .then(function(){ return ChickenParts.load(); })
+      .then(function(){
+        if(!host.isConnected) return;      /* sahifa almashib ketgan bo'lsa */
+        buildScene(host,cfg);
+        host.classList.add('is-ready');
+      })
+      .catch(function(e){
+        /* 3D yuklanmasa sahifa buzilmaydi — blok shunchaki bo'sh qoladi */
+        console.warn('3D yuklanmadi:',e.message);
+        host.classList.add('is-failed');
+      });
+    return host;
+  }
+
   /* Ustunlar orasidagi bo'sh joyga qo'yiladigan blok (masalan tovuq
      bo'laklarining mahsulotdagi ulushi). Ixtiyoriy. */
   function centreNode(c){
-    var box=el('aside','centre reveal');
+    var box=el('aside','centre reveal'+(c.model?' centre--model':''));
     if(c.title) box.appendChild(el('h2','centre-title',c.title));
+    if(c.model) box.appendChild(modelNode(c.model));
     var ul=el('ul','cuts');
     c.items.forEach(function(it){
       var li=el('li','cut');
@@ -392,6 +500,7 @@
 
   function render(y){
     var page=document.getElementById('page');
+    disposeScene();              /* oldingi sahifadagi 3D to'xtatiladi */
     page.innerHTML='';
     page.classList.remove('ready');
     page.dataset.layout=y.layout||'single';

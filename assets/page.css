@@ -446,6 +446,25 @@ html,body{
   padding-bottom:clamp(4px,.6vh,10px);
   border-bottom:1px solid var(--line-gold-soft);
 }
+/* 3D sahna uchun joy. Yuklanmasa blok yig'iladi — sahifa buzilmaydi. */
+.centre--model .cuts{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(3px,.4vw,8px);
+}
+.centre--model .cut{padding:clamp(3px,.45vh,8px) clamp(2px,.3vw,6px)}
+.centre--model .cut-share{font-size:clamp(10px,1.02vw,22px)}
+.centre--model .cut-name{font-size:clamp(7px,.62vw,13px)}
+
+.model{
+  position:relative;
+  width:100%;
+  height:0;                        /* yuklanmaguncha joy egallamaydi */
+  margin:0 auto;
+  transition:height .5s var(--ease-out);
+}
+.model.is-ready{height:clamp(120px,21vh,260px);margin-bottom:clamp(6px,1vh,16px)}
+.model canvas{display:block;width:100%;height:100%}
+
 .cuts{
   list-style:none;margin:0;padding:0;
   display:grid;

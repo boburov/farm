@@ -116,10 +116,14 @@
     return group;
   };
 
-  /* Asoslarni ko'rsatish/yashirish — sochilish boshlanganda staggered chiqadi. */
+  /* Asoslarni ko'rsatish/yashirish. Sahifa ichidagi kichik sahnada asoslar
+     ortiqcha — ular o'chirilsa bo'laklar havoda "suzib" turadi.
+     setSpread() bu bayroqni hurmat qiladi, aks holda har chaqiriqda qayta
+     ko'rinib qolardi. */
+  C.basesVisible=true;
   C.showBases=function(show){
-    if(!C.ring) return;
-    C.ring.visible=show!==false;
+    C.basesVisible=show!==false;
+    if(C.ring) C.ring.visible=C.basesVisible;
   };
 
   /* p 0 = butun tovuq, 1 = har bo'lak o'z asosida. Har bir bo'lak ko'tarilib,
@@ -143,10 +147,13 @@
       m.scale.setScalar(1+((m.userData.flyScale||PART_SCALE)-1)*t);
     });
     /* asoslar sochilish bilan birga ko'tariladi */
-    if(C.ring) C.ring.children.forEach(function(h,i){
-      var s=Math.max(.0001,easeInOut(beat(p,.06+i*.03,.29+i*.03)));
-      h.scale.setScalar(s); h.visible=s>.002;
-    });
+    if(C.ring){
+      C.ring.visible=C.basesVisible;
+      if(C.basesVisible) C.ring.children.forEach(function(h,i){
+        var s=Math.max(.0001,easeInOut(beat(p,.06+i*.03,.29+i*.03)));
+        h.scale.setScalar(s); h.visible=s>.002;
+      });
+    }
     root.userData.flight=p;
   };
 
