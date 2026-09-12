@@ -85,6 +85,19 @@
   /* Fon `cover` bilan chizilgani uchun surat ekrandan kengroq yoki balandroq
      bo'lib qirqiladi. Shu sababli suratdagi nuqta (0..1 ulush) piksel holatiga
      shu yerda, haqiqiy o'lchamlar bo'yicha qayta hisoblanadi — resize'da ham. */
+  /* Pastdagi zanjir qatori `position:fixed` — oqimdan chiqadi, shuning uchun
+     uning balandligi `--chain-h` orqali sahifaga qaytariladi (aks holda
+     taqqoslash ustunlari uning ostiga kirib ketardi). */
+  function measureChain(){
+    var page=document.getElementById('page');
+    if(!page) return;
+    var c=page.querySelector('.chain'),
+        h=(c&&getComputedStyle(c).position==='fixed')?c.offsetHeight:0;
+    page.style.setProperty('--chain-h',h+'px');
+  }
+  addEventListener('resize',measureChain);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(measureChain);
+
   var overlays=[];
   function placeOverlays(){
     if(!overlays.length) return;
@@ -128,21 +141,31 @@
 
   /* --------------------------------------------------- taqqoslash ustuni */
 
-  function rowNode(r){
-    var li=el('li','row reveal');
+  function rowNode(r,hasGrowthCol){
+    var known=r.value!=null;
+    var li=el('li','row reveal'+(known?'':' row--unknown'));
     li.appendChild(icon(r.icon,'row-icon'));
 
     var body=el('span','row-body');
     var v=el('span','row-value');
-    var num=el('span',null,'0');
-    num.dataset.to=String(r.value);
-    v.appendChild(num);
-    if(r.unit) v.appendChild(el('span','row-unit',r.unit));
+    if(known){
+      /* hisoblagich faqat haqiqiy raqamda ishlaydi */
+      var num=el('span',null,'0');
+      num.dataset.to=String(r.value);
+      v.appendChild(num);
+      if(r.unit) v.appendChild(el('span','row-unit',r.unit));
+    }else{
+      /* Hujjatda raqam yo'q — o'ylab topilmaydi, chiziqcha qo'yiladi.
+         Bu STEP_1 qoidasining ko'rinadigan tomoni. */
+      v.appendChild(el('span','row-dash','—'));
+    }
     body.appendChild(v);
     body.appendChild(el('span','row-label',r.label));
     li.appendChild(body);
 
-    if(r.growth!=null) li.appendChild(el('span','row-growth',r.growth));
+    /* ustunda o'sish bo'lsa, foizsiz qatorlar ham katak qoldiradi —
+       aks holda grid ustuni siljib ketadi */
+    if(hasGrowthCol) li.appendChild(el('span','row-growth',r.growth||''));
     return li;
   }
 
@@ -154,8 +177,9 @@
     if(c.growthHead) head.appendChild(el('span','col-growth-head',c.growthHead));
     sec.appendChild(head);
 
+    var hasGrowthCol=c.rows.some(function(r){ return r.growth!=null; });
     var ul=el('ul','rows');
-    c.rows.forEach(function(r){ ul.appendChild(rowNode(r)); });
+    c.rows.forEach(function(r){ ul.appendChild(rowNode(r,hasGrowthCol)); });
     sec.appendChild(ul);
     return sec;
   }
@@ -262,6 +286,7 @@
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         page.classList.add('ready');
+        measureChain();
         placeOverlays();
         runCounters(page);
       });
@@ -270,7 +295,7 @@
 
   /* ------------------------------------------------------- sahifalar orasi */
 
-  /* Manzil satridagi hash sahifani belgilaydi: /#2020-2021.
+  /* Manzil satridagi hash sahifani belgilaydi: /#2022-2023.
      Shunda to'g'ridan-to'g'ri ochish, yangilash va brauzerning orqaga/oldinga
      tugmalari ishlaydi; havolani birovga yuborsa ham o'sha sahifa ochiladi. */
   function pagerNode(years,at,go){
@@ -314,7 +339,6 @@
   function go(i){ show(i,true); }
 
   show(at,false);
-  /* birinchi ochilishda manzil tozalanmasin, lekin hash yo'q bo'lsa qo'shilsin */
   if(!location.hash) history.replaceState(null,'','#'+years[at].id);
 
   addEventListener('hashchange',function(){

@@ -31,7 +31,17 @@ const ALLOWED = {
      400 / 700 / 100 / 0 — o'sish foizi, shu ikki ustundan hisoblangan
        (2021-2020)/2020; 1 — "1 kg go'sht narxi"; 6 — "6 marta aylanma". */
   '2020-2021': ['2020', '2021', '4', '25', '50', '7.5', '375', '20000',
-                '20', '200', '100', '60', '3000', '400', '700', '0', '1', '6']
+                '20', '200', '100', '60', '3000', '400', '700', '0', '1', '6'],
+
+  /* docx 5-6-xatboshi + xlsx "Лист2" F3 (2022 bosh soni 220 000):
+       2022 — 2 500 so'm/kg subsidiya · 220 ming bosh · 66 mlrd aylanma
+              · 3 300 tonna · 3.7 mlrd soliq imtiyozi · 20 000 so'm/kg
+       2023 — 1 250 so'm/kg · 300 ming bosh · 200 ishchi · 90 mlrd
+              · 4 500 tonna · ichki yem hisobiga 6.9 mlrd (8%) · 20 000 so'm/kg
+     50 / 36 / 0 — o'sish foizi, shu ikki ustundan hisoblangan; 1 — "1 kg".
+     2022 uchun ishchi soni hujjatda YO'Q — ekranda "—" chiqadi. */
+  '2022-2023': ['2022', '2023', '2500', '220', '66', '3300', '3.7', '20000',
+                '1250', '300', '200', '90', '4500', '6.9', '8', '50', '36', '0', '1']
 };
 
 const SIZES = [[1920, 1080], [1600, 900], [1440, 900], [1280, 720], [1024, 768], [390, 844]];
@@ -163,14 +173,23 @@ for (const [i, info] of deck.entries()) {
       ? pass(`arrows-on-zone-edges@${tag}`, ar === 'skipped' ? 'foto yo\'q' : 'chetlanish < 2px')
       : fail(`arrows-on-zone-edges@${tag}`, JSON.stringify(ar));
   } else {
-    const c = await page.evaluate(() => ({
-      cols: document.querySelectorAll('.col').length,
-      rows: document.querySelectorAll('.row').length,
-      growth: document.querySelectorAll('.row-growth').length,
-      chain: document.querySelectorAll('.chain li:not(.arrow)').length
-    }));
-    c.cols === 2 && c.rows === 12 && c.growth === 6 && c.chain === 3
-      ? pass(`layout-shape@${tag}`, '2 ustun · 12 qator · 6 o\'sish · 3 bosqich')
+    /* Kutilgan sonlar ma'lumotdan olinadi — yangi yil qo'shilsa QA o'zi moslashadi. */
+    const c = await page.evaluate(id => {
+      const y = window.YEARS.find(v => v.id === id);
+      const per = y.columns.map(col => col.rows.length);
+      return {
+        cols: document.querySelectorAll('.col').length,
+        rows: document.querySelectorAll('.row').length,
+        growth: document.querySelectorAll('.row-growth').length,
+        chain: document.querySelectorAll('.chain li:not(.arrow)').length,
+        want: { cols: y.columns.length, rows: per.reduce((a, b) => a + b, 0),
+                growth: per[1], chain: y.chain.length }
+      };
+    }, tag);
+    c.cols === c.want.cols && c.rows === c.want.rows &&
+    c.growth === c.want.growth && c.chain === c.want.chain
+      ? pass(`layout-shape@${tag}`,
+             `${c.cols} ustun · ${c.rows} qator · ${c.growth} o'sish katagi · ${c.chain} bosqich`)
       : fail(`layout-shape@${tag}`, JSON.stringify(c));
 
     /* o'sish ustuni bir xil vertikal chiziqda */
@@ -183,18 +202,30 @@ for (const [i, info] of deck.entries()) {
 
     /* Har bir foiz ikki yil raqamidan kelib chiqishi shart — bu o'sish
        ustuni "o'ylab topilgan raqam"ga aylanib ketmasligining kafolati. */
-    const derived = await page.evaluate(() => {
-      const y = window.YEARS.find(v => v.layout === 'compare');
+    const derived = await page.evaluate(id => {
+      const y = window.YEARS.find(v => v.id === id);
       const [a, b] = y.columns;
-      return b.rows.map((r, k) => {
+      const checked = [];
+      const bad = b.rows.map((r, k) => {
         const from = a.rows[k].value, to = r.value;
+        /* Foiz faqat ikkala yilda ham raqam bo'lganda ko'rsatiladi.
+           Bittasi yo'q bo'lsa — foiz ham bo'lmasligi shart. */
+        if (from == null || to == null) {
+          return r.growth != null
+            ? { row: r.label, xato: 'raqami yo\'q qatorda foiz turibdi' } : null;
+        }
+        if (r.growth == null) return null;   /* ataylab ko'rsatilmagan */
         const want = Math.round((to - from) / from * 100);
-        return { shown: r.growth, want: (want > 0 ? '+' : '') + want + '%' };
-      }).filter(x => x.shown !== x.want);
-    });
-    derived.length
-      ? fail(`growth-matches-arithmetic@${tag}`, JSON.stringify(derived))
-      : pass(`growth-matches-arithmetic@${tag}`, 'har bir foiz ikki raqamdan chiqadi');
+        checked.push(r.growth);
+        return r.growth === (want > 0 ? '+' : '') + want + '%'
+          ? null : { row: r.label, shown: r.growth, want };
+      }).filter(Boolean);
+      return { bad, n: checked.length };
+    }, tag);
+    derived.bad.length
+      ? fail(`growth-matches-arithmetic@${tag}`, JSON.stringify(derived.bad))
+      : pass(`growth-matches-arithmetic@${tag}`,
+             `${derived.n} ta foiz ikki raqamdan chiqadi`);
   }
 }
 

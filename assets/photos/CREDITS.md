@@ -28,6 +28,18 @@ tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
 - Kadrdagi yagona yozuv o‘zbekcha va brendga tegishli; begona logotip,
   avtomobil raqami yoki anaxronistik sana yo‘q.
 
+## 2022.jpg
+
+- **Manba:** buyurtmachi bergan, Gemini bilan yaratilgan surat
+  (`Gemini_Generated_Image_uequo8uequo8uequ.jpg`, 2528x1684).
+- **Tahrir:** pastdagi tayyor zanjir paneli va tepadagi ortiqcha osmon kesildi
+  (`extract {top:60, bottom:384}`), eni 2400 px, JPEG q82 → 2400x1177
+  (2.04:1), 359 KB.
+  Zanjir paneli ataylab kesilgan: sahifa o'z zanjir qatorini chizadi, aks holda
+  ikkita bir xil qator ustma-ust tushardi.
+- **Kadr:** yem silosi va don uyumi, tovuqxonalar, so‘yish sexi va yuk mashinasi —
+  2022–2023 hikoyasiga (klaster boshlandi, ichki yem ishlab chiqarish) mos.
+
 ## Qanday almashtiriladi
 
 `assets/years.js` dagi yil obyektida `photo` maydoni. Fayl yo'q bo'lsa yoki

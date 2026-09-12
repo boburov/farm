@@ -71,6 +71,29 @@
             '<ellipse cx="8.6" cy="11.6" rx="2.8" ry="2" fill="#fff" opacity=".32" '+
               'transform="rotate(-15 8.6 11.6)"/>',
 
+    /* subsidiya — tanga ustuni ustida qo'shimcha belgisi */
+    subsidy:'<ellipse cx="10.4" cy="8.6" rx="6.8" ry="2.5"/>'+
+            '<path d="M3.6 11.1c0 1.4 3 2.5 6.8 2.5s6.8-1.1 6.8-2.5v2.4c0 1.4-3 2.5-6.8 2.5'+
+              'S3.6 14.9 3.6 13.5z"/>'+
+            '<path d="M3.6 15.8c0 1.4 3 2.5 6.8 2.5s6.8-1.1 6.8-2.5v2.2c0 1.4-3 2.5-6.8 2.5'+
+              'S3.6 19.7 3.6 18.3z"/>'+
+            '<circle cx="18.9" cy="5.1" r="4.3"/>'+
+            '<path d="M18.1 2.8h1.6v1.5h1.5v1.6h-1.5v1.5h-1.6V5.9h-1.5V4.3h1.5z" fill="#fff"/>',
+
+    /* soliq imtiyozi — hujjat va foiz belgisi */
+    tax:    '<path d="M4.1 1.9h10.2l5.6 5.6v14.6H4.1z"/>'+
+            '<path d="M14.3 1.9 19.9 7.5h-5.6z" fill="#fff" opacity=".55"/>'+
+            '<circle cx="9.4" cy="12.4" r="2" fill="#fff"/>'+
+            '<circle cx="14.6" cy="17.6" r="2" fill="#fff"/>'+
+            '<path d="M15.1 10.6 9.9 19.4" fill="none" stroke="#fff" stroke-width="1.8" '+
+              'stroke-linecap="round"/>',
+
+    /* ichki yem ishlab chiqarish — tishli g'ildirak */
+    gear:   '<path d="M9.8 1.6h4.4l.5 2.6 2.1 1.2 2.4-1.1 2.2 3.8-1.9 1.8v2.4l1.9 1.8-2.2 3.8'+
+              '-2.4-1.1-2.1 1.2-.5 2.6H9.8l-.5-2.6-2.1-1.2-2.4 1.1-2.2-3.8L4.5 12V9.6L2.6 7.8'+
+              'l2.2-3.8 2.4 1.1 2.1-1.2z"/>'+
+            '<circle cx="12" cy="10.8" r="3.4" fill="#fff" opacity=".62"/>',
+
     /* ishlab chiqaruvchi: ombor + tovuq belgisi */
     factory:'<path d="M2.2 21.4V9.1l5.3 3.1V9.1l5.3 3.1V5.4h8.9v16z"/>'+
             '<rect x="4.6" y="16.4" width="2.2" height="3" fill="#fff" opacity=".5"/>'+
@@ -130,8 +153,15 @@
 
   /* Fon suratidagi zonalar orasidagi qalin egri strelka — yaxlit, uchi keng
      uchburchak. Alohida viewBox, chunki u keng va past. */
+  /* Soya ishlatilmaydi: strelka suratdan oq kontur (hoshiya) bilan ajratiladi —
+     avval kengroq oq chiziq, ustidan yashil shakl. */
   var SWOOSH=
     '<svg viewBox="0 0 126 56" fill="none" aria-hidden="true" focusable="false">'+
+      '<g stroke="#fff" stroke-opacity=".9" stroke-linecap="round" '+
+        'stroke-linejoin="round" fill="none">'+
+        '<path d="M6 47C24 15 58 4 90 21" stroke-width="20"/>'+
+        '<path d="M118.9 38.2 86.2 40.1 102.2 10.1Z" stroke-width="7"/>'+
+      '</g>'+
       '<path d="M6 47C24 15 58 4 90 21" stroke="currentColor" stroke-width="13" '+
         'stroke-linecap="round"/>'+
       '<path d="M118.9 38.2 86.2 40.1 102.2 10.1Z" fill="currentColor"/>'+

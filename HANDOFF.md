@@ -1,6 +1,6 @@
 # Sokin Savdo — topshiriq hujjati
 
-**Holat:** 2010 va 2020–2021 sahifalari tayyor. QA 46/46 o'tadi.
+**Holat:** 2010, 2020–2021 va 2022–2023 sahifalari tayyor. QA 63/63 o'tadi.
 
 Sahifalar orasida uch xil yo'l bilan yurish mumkin, uchalasi bir holatni
 boshqaradi:
@@ -9,7 +9,7 @@ boshqaradi:
 |---|---|
 | Klaviatura | `←` `→` · `Home` `End` |
 | Sichqoncha | pastdagi nuqtalar |
-| Manzil | `http://127.0.0.1:5173/#2020-2021` |
+| Manzil | `http://127.0.0.1:5173/#2022-2023` |
 
 Hash tufayli sahifani to'g'ridan-to'g'ri ochish, yangilash va brauzerning
 orqaga/oldinga tugmalari ishlaydi; havolani yuborsa ham o'sha sahifa ochiladi.
@@ -29,6 +29,7 @@ Yillar bo'yicha infografika slaydlari. Hozir ikkitasi:
 |---|---|---|
 | `2010` | `single` | Bitta yil: tepada ikki statistika kartasi, suratda uch zona |
 | `2020-2021` | `compare` | Ikki yil yonma-yon + o'sish ustuni |
+| `2022-2023` | `compare` | Subsidiya va ichki yem — klaster boshlanishi |
 
 Sahifa turi `assets/years.js` dagi `layout` maydoni bilan tanlanadi;
 `assets/page.js` da har turga alohida render funksiyasi bor
@@ -159,16 +160,27 @@ Keyin: `scripts/qa.mjs` dagi `ALLOWED` ro'yxatiga yangi yilning raqamlarini
 qo'shish (har birining manbasini izohda ko'rsatib). `←/→` o'qlari avtomatik
 ishlaydi. Yangi panel sahnasi kerak bo'lsa — `assets/scenes.js` ga qo'shiladi.
 
+### Raqami yo'q ko'rsatkich
+
+Qator `value:null` bo'lsa ekranda **"—"** chiqadi va qator xiralashadi.
+Bu STEP_1 qoidasining ko'rinadigan tomoni: hujjatda raqam bo'lmasa, u
+o'ylab topilmaydi.
+
+Hozir bitta shunday joy bor: **2022-yil ishchi soni**. Buyurtmachi bergan
+referens rasmda "150+ ta" yozilgan, lekin bu raqam na `.docx`, na `.xlsx`
+da uchraydi. Raqam topilsa — `assets/years.js` da manbasi bilan qo'yiladi.
+
 ### O'sish foizlari (`compare`)
 
 `growth` maydoni — **o'ylab topilgan raqam emas**, ikki yilning o'z
 raqamlaridan hisoblangan: `(yangi - eski) / eski x 100`. Buni QA majburlaydi:
 `growth-matches-arithmetic` har bir foizni qaytadan hisoblab, ekrandagisi bilan
 solishtiradi. Ya'ni foizni qo'lda "tuzatib" qo'yib bo'lmaydi — yo raqamlar,
-yo foiz o'zgaradi.
+yo foiz o'zgaradi. Qo'shimcha: ikkala yilda ham raqam bo'lmagan qatorda foiz
+turib qolsa, QA shuni ham xato deb belgilaydi.
 
-Boshqa yillar uchun tayyor ma'lumot `docs/` ichida: 2022, 2023,
-2025, 2026, 2026–2027 va istiqboldagi loyihalar.
+Boshqa yillar uchun tayyor ma'lumot `docs/` ichida: 2025, 2026,
+2026–2027 va istiqboldagi loyihalar.
 **2024-yil ikkala hujjatda ham yo'q** — buyurtmachidan so'rash kerak.
 
 ---

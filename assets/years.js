@@ -121,5 +121,83 @@
       {icon:'blade',  label:'So‘yish'},
       {icon:'truck',  label:'Bozorga yetkazish'}
     ]
+  },
+
+  /* ====================================================== 2022–2023 ====== */
+  /* Manba — docs/Tovuqchilik_rivojlanish_tarixi.docx, 5-6-xatboshi:
+   *   "2022-yil har bir kg ga 2 500, 2023-yil 1 250 so'mdan subsidiya.
+   *    Yillik aylanma 66 mlrd. Ishlab chiqarish hajmi 3 300 tonna,
+   *    3.7 mlrd summa soliq imtiyoz. Bir kg go'sht narxi 20 000."
+   *   "2023-yil bir aylanmadagi tovuq soni 300 ming tovuq, 200 ta ishchi +
+   *    ozuqa yem ishlab chiqarish (klaster boshlanishi). Yillik aylanma
+   *    90 mlrd. Ishlab chiqarish hajmi 4 500 tonna. Ichki yem ishlab chiqarish
+   *    hisobiga 6.9 mlrd (8%) tannarx arzonladi."
+   * 2022 uchun bir aylanmadagi tovuq soni (220 ming) —
+   *   docs/Yaratilgan_qiymat_Sokin_savdo.xlsx "Лист2" F3.
+   *
+   * DIQQAT: 2022-yil uchun ISHCHI SONI ikkala hujjatda ham YO'Q.
+   * Buyurtmachi bergan referens rasmda "150+ ta" yozilgan, lekin u hujjatlarda
+   * uchramaydi — shuning uchun bu yerda `value:null`, ekranda "—" chiqadi.
+   * Agar raqam topilsa, shu joyga manbasi bilan qo'yiladi.
+   *
+   * `growth` — hisoblangan: (2023 - 2022) / 2022 x 100.
+   *   subsidiya 2 500 → 1 250  = -50%   (subsidiya kamaydi)
+   *   tovuq      220 → 300     = +36%
+   *   aylanma     66 → 90      = +36%
+   *   hajm     3 300 → 4 500   = +36%
+   *   narx    20 000 o'zgarmagan = 0%
+   * Ishchi soni va soliq/tannarx qatorlarida ikkala yilda bir xil ko'rsatkich
+   * yo'q — foiz ham ko'rsatilmaydi.
+   */
+  {
+    id:'2022-2023',
+    layout:'compare',
+    brand:'Sokin Savdo',
+    title:'Subsidiya va ichki yem ishlab chiqarish',
+    subtitle:'Klaster boshlandi — tannarx pasaydi, ishlab chiqarish oshdi',
+
+    photo:'assets/photos/2022.jpg',
+    photoAlt:'Yem zavodi, tovuqxonalar, so‘yish sexi va yuk mashinasi',
+
+    columns:[
+      {
+        year:'2022-yil', tone:'dark',
+        rows:[
+          {icon:'subsidy', value:2500,  unit:'so‘m',      label:'Har bir kg ga subsidiya'},
+          {icon:'hen',     value:220,   unit:'ming dona', label:'Bir aylanmadagi tovuq soni'},
+          {icon:'workers', value:null,                    label:'Ishchi soni (hujjatda yo‘q)'},
+          {icon:'chart',   value:66,    unit:'mlrd so‘m', label:'Yillik aylanma'},
+          {icon:'meat',    value:3300,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)'},
+          {icon:'tax',     value:3.7,   unit:'mlrd so‘m', label:'Soliq imtiyozi'},
+          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'}
+        ]
+      },
+      {
+        year:'2023-yil', tone:'green',
+        growthHead:'2022-ga nisbatan o‘sish',
+        rows:[
+          {icon:'subsidy', value:1250,  unit:'so‘m',      label:'Har bir kg ga subsidiya',
+           growth:'-50%'},
+          {icon:'hen',     value:300,   unit:'ming dona', label:'Bir aylanmadagi tovuq soni',
+           growth:'+36%'},
+          {icon:'workers', value:200,   unit:'ta',        label:'Ishchi soni'},
+          {icon:'chart',   value:90,    unit:'mlrd so‘m', label:'Yillik aylanma',
+           growth:'+36%'},
+          {icon:'meat',    value:4500,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)',
+           growth:'+36%'},
+          {icon:'gear',    value:6.9,   unit:'mlrd so‘m',
+           label:'Ichki yem hisobiga tannarx arzonladi (8%)'},
+          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi',
+           growth:'0%'}
+        ]
+      }
+    ],
+
+    chain:[
+      {icon:'gear',   label:'Yem ishlab chiqarish'},
+      {icon:'barn',   label:'Tovuq boqish'},
+      {icon:'blade',  label:'So‘yish'},
+      {icon:'truck',  label:'Bozorga yetkazish'}
+    ]
   }];
 })();

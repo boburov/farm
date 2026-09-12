@@ -24,10 +24,13 @@
   --gutter:clamp(12px,1.6vw,30px);
   --radius:clamp(12px,1.4vw,26px);
 
-  /* oq kartalar uchun bir xil ko'tarilish */
-  --lift:0 1px 2px rgba(14,58,32,.08),
-         0 6px 14px -8px rgba(14,58,32,.24),
-         0 26px 56px -34px rgba(14,58,32,.6);
+  /* SOYA YO'Q. Balandlik va ajralish faqat hoshiya bilan beriladi:
+     tashqi ingichka chiziq + ichkarida oltin ramka (passe-partout). */
+  --line:rgba(14,58,32,.36);        /* asosiy hoshiya */
+  --line-soft:rgba(14,58,32,.10);   /* ajratuvchi chiziq */
+  --line-gold:rgba(192,154,78,.62); /* oltin hoshiya */
+  --line-gold-soft:rgba(192,154,78,.42);
+  --frame:clamp(4px,.48vw,10px);    /* ichki ramka masofasi */
 }
 
 *{box-sizing:border-box}
@@ -44,16 +47,19 @@ html,body{
   text-rendering:optimizeLegibility;
 }
 
+/* Pastdagi zanjir qatori oynaga (viewport) mixlanadi — `--chain-h` esa
+   uning balandligini sahifada band qilib turadi (assets/page.js o'lchaydi). */
 .page{
   position:relative;
   height:100%;
   display:flex;flex-direction:column;
   gap:var(--gutter);
-  padding:var(--gutter) var(--gutter) 0;
+  padding:var(--gutter) var(--gutter) var(--chain-h,0px);
 }
 
 /* kontent fon ustida */
-.top,.overlay,.chain,.deck-head,.compare,.pager{position:relative;z-index:1}
+.top,.overlay,.chain,.deck-head,.compare{position:relative;z-index:1}
+
 
 /* ------------------------------------------------------------------- fon */
 
@@ -97,8 +103,8 @@ html,body{
 .backdrop::after{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(243,248,245,.62) 0%,rgba(243,248,245,.06) 22%,
-                    rgba(243,248,245,0) 44%,rgba(231,240,234,0) 66%,
+    linear-gradient(180deg,rgba(243,248,245,.70) 0%,rgba(243,248,245,.22) 15%,
+                    rgba(243,248,245,.02) 30%,rgba(231,240,234,0) 62%,
                     rgba(231,240,234,.6) 100%),
     radial-gradient(120% 86% at 50% 46%,rgba(10,40,24,0) 52%,rgba(10,40,24,.26) 100%);
 }
@@ -114,15 +120,22 @@ html,body{
 }
 
 .stat{
+  position:relative;
   display:flex;align-items:center;
   gap:clamp(10px,1.5vw,30px);
-  padding:clamp(10px,1.5vh,26px) clamp(16px,1.8vw,40px);
+  padding:clamp(12px,1.7vh,28px) clamp(18px,2vw,44px);
   min-width:clamp(200px,24vw,470px);
   border-radius:var(--radius);
   background:rgba(255,255,255,.9);
-  border:1px solid rgba(255,255,255,.7);
-  backdrop-filter:blur(14px) saturate(1.15);
-  box-shadow:var(--lift);
+  border:1px solid var(--line);
+  backdrop-filter:blur(16px) saturate(1.18);
+}
+/* ichki oltin ramka — soyasiz "qimmat" tuyg'u shu yerdan keladi */
+.stat::before{
+  content:"";position:absolute;inset:var(--frame);
+  border:1px solid var(--line-gold-soft);
+  border-radius:calc(var(--radius) - var(--frame));
+  pointer-events:none;
 }
 .stat--right{justify-self:end}
 .stat--left{justify-self:start}
@@ -162,7 +175,7 @@ html,body{
 .stat-note{
   margin-top:clamp(3px,.5vh,9px);
   padding-top:clamp(3px,.5vh,9px);
-  border-top:1px solid rgba(192,154,78,.42);
+  border-top:1px solid var(--line-gold-soft);
   font-size:clamp(11px,1.05vw,22px);
   font-weight:700;
   color:var(--forest-light);
@@ -183,14 +196,22 @@ html,body{
   letter-spacing:.42em;
   text-transform:uppercase;
   color:var(--gold-ink);
-  text-shadow:0 1px 3px rgba(255,255,255,.95),0 2px 14px rgba(255,255,255,.8);
+}
+
+/* brend satri ikki tomonidan ingichka oltin chiziq bilan ajratiladi */
+.brandline::before,.brandline::after{
+  content:"";display:inline-block;vertical-align:middle;
+  width:clamp(16px,2.4vw,54px);height:0;
+  margin:0 .9em;
+  border-top:1px solid var(--line-gold-soft);
 }
 
 .year-badge{
-  padding:clamp(6px,1.1vh,24px) clamp(24px,3.2vw,76px);
+  position:relative;
+  padding:clamp(7px,1.2vh,26px) clamp(26px,3.4vw,80px);
   border-radius:clamp(14px,1.9vw,36px);
-  background:linear-gradient(180deg,#1d6b3c 0%,#123f24 100%);
-  border:1px solid rgba(192,154,78,.5);
+  background:var(--forest);
+  border:1px solid rgba(192,154,78,.78);
   color:#fff;
   font-size:clamp(36px,5.6vw,116px);
   font-weight:800;
@@ -198,10 +219,9 @@ html,body{
   letter-spacing:-.035em;
   white-space:nowrap;
   font-variant-numeric:tabular-nums;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.2),
-    0 10px 24px -14px rgba(14,58,32,.9),
-    0 34px 64px -40px rgba(14,58,32,1);
+  /* tashqi ramka: soya emas, ikkinchi hoshiya */
+  outline:1px solid rgba(192,154,78,.42);
+  outline-offset:clamp(4px,.5vw,10px);
 }
 
 .subtitle{
@@ -210,7 +230,6 @@ html,body{
   font-weight:600;
   line-height:1.3;
   color:var(--forest-deep);
-  text-shadow:0 1px 12px rgba(255,255,255,.9);
 }
 
 /* ------------------------------------------- suratdagi yozuv va strelkalar */
@@ -228,18 +247,20 @@ html,body{
 }
 .zone-label{
   display:block;
-  padding:clamp(4px,.7vh,12px) clamp(10px,1.1vw,24px);
+  padding:clamp(5px,.8vh,13px) clamp(12px,1.3vw,28px);
   border-radius:999px;
   background:rgba(255,255,255,.94);
   backdrop-filter:blur(10px);
-  border:1px solid rgba(192,154,78,.55);
+  border:1px solid var(--line-gold);
   color:var(--forest);
   font-size:clamp(9px,.9vw,19px);
   font-weight:800;
   letter-spacing:.2em;
   text-transform:uppercase;
   white-space:nowrap;
-  box-shadow:0 2px 5px rgba(14,58,32,.14),0 16px 32px -20px rgba(14,58,32,.85);
+  /* tashqi oq halqa — rangi to'q suratda ham chetlari aniq ajralib turadi */
+  outline:1px solid rgba(255,255,255,.55);
+  outline-offset:3px;
 }
 
 /* zonalar orasidagi yaxlit egri strelka */
@@ -250,8 +271,7 @@ html,body{
   display:grid;place-items:center;
   color:var(--forest-glow);
   pointer-events:none;
-  filter:drop-shadow(0 2px 6px rgba(255,255,255,.6))
-         drop-shadow(0 10px 24px rgba(10,40,24,.45));
+  /* soya yo'q — strelkaning o'zi assets/icons.js da oq kontur bilan chiziladi */
 }
 .flow-arrow svg{width:100%;height:auto;display:block}
 
@@ -274,7 +294,6 @@ html,body{
   letter-spacing:-.028em;
   text-transform:uppercase;
   color:var(--forest-deep);
-  text-shadow:0 1px 3px rgba(255,255,255,.95),0 2px 18px rgba(255,255,255,.9);
 }
 
 .compare{
@@ -288,8 +307,9 @@ html,body{
   flex:0 1 clamp(230px,30vw,600px);
   border-radius:var(--radius);
   overflow:hidden;
-  box-shadow:var(--lift);
+  border:1px solid var(--line);
 }
+.col--green{border-color:rgba(192,154,78,.5)}
 .col--green{flex-basis:clamp(260px,35vw,720px)}
 
 .col-head{
@@ -299,8 +319,8 @@ html,body{
   padding:clamp(5px,1vh,18px) clamp(12px,1.4vw,30px);
   color:#fff;
 }
-.col--dark  .col-head{background:linear-gradient(180deg,#26312b 0%,#171d1a 100%)}
-.col--green .col-head{background:linear-gradient(180deg,#1d6b3c 0%,#123f24 100%)}
+.col--dark  .col-head{background:#1d2521;border-bottom:1px solid rgba(255,255,255,.14)}
+.col--green .col-head{background:var(--forest);border-bottom:1px solid rgba(192,154,78,.55)}
 
 .col-year{
   font-size:clamp(20px,2.9vw,62px);
@@ -338,7 +358,7 @@ html,body{
   align-items:center;
   gap:clamp(7px,.9vw,20px);
   padding:var(--row-pad-y) var(--row-pad-x);
-  border-top:1px solid rgba(14,58,32,.09);
+  border-top:1px solid var(--line-soft);
 }
 .col--green .row{grid-template-columns:auto minmax(0,1fr) var(--growth-w)}
 .row:first-child{border-top:0}
@@ -385,7 +405,7 @@ html,body{
   /* qator chekkalarigacha cho'ziladi, shunda ajratuvchi chiziq uzluksiz */
   margin:calc(var(--row-pad-y) * -1) calc(var(--row-pad-x) * -1)
          calc(var(--row-pad-y) * -1) 0;
-  border-left:1px solid rgba(14,58,32,.12);
+  border-left:1px solid var(--line-soft);
   font-size:clamp(11px,1.35vw,30px);
   font-weight:800;
   letter-spacing:-.02em;
@@ -396,27 +416,45 @@ html,body{
 /* ---------------------------------------------------------------- zanjir */
 
 /* Pastki qator och panel ustida turadi, chetlari sahifa chekkasigacha yetadi. */
+/* Zanjir qatori oynaning eng pastiga yopishadi (position:fixed) — brauzer
+   sahifa balandligini qanday hisoblashidan qat'i nazar pastda bo'shliq
+   qolmaydi. Kartalar pastki chekkaga ulanib ketadi: pastki burchaklari
+   to'g'ri, pastki hoshiyasi yo'q. */
 .chain{
+  position:fixed;left:0;right:0;bottom:0;z-index:2;
   flex:0 0 auto;
-  list-style:none;margin:0 calc(var(--gutter) * -1);
-  padding:clamp(8px,1.2vh,22px) var(--gutter) clamp(6px,.8vh,14px);
+  list-style:none;margin:0;
+  padding:clamp(10px,1.5vh,26px) var(--gutter) 0;
   display:flex;align-items:stretch;justify-content:center;
   gap:clamp(6px,1vw,24px);
-  background:linear-gradient(180deg,rgba(240,246,242,0) 0%,rgba(240,246,242,.9) 34%,#eff5f1 100%);
+  background:linear-gradient(180deg,rgba(240,246,242,0) 0%,rgba(240,246,242,.92) 30%,#eff5f1 100%);
 }
 .chain li{
+  position:relative;
   flex:1 1 0;min-width:0;
   display:flex;align-items:center;
   gap:clamp(9px,1.2vw,26px);
-  padding:clamp(9px,1.4vh,24px) clamp(14px,1.5vw,34px);
-  border-radius:var(--radius);
+  padding:clamp(10px,1.5vh,26px) clamp(16px,1.7vw,38px);
+  border-radius:var(--radius) var(--radius) 0 0;
   background:var(--surface);
+  border:1px solid var(--line);
+  border-bottom:0;
   color:var(--ink);
   font-size:clamp(12px,1.3vw,29px);
   font-weight:700;
   line-height:1.16;
   letter-spacing:-.012em;
-  box-shadow:var(--lift);
+}
+/* yuqoridagi kartalar bilan bir tizim: ichkarida oltin ramka.
+   Pastki chekka ochiq — karta ekran pastiga ulanib ketadi. */
+.chain li:not(.arrow)::before{
+  content:"";position:absolute;
+  inset:var(--frame) var(--frame) 0;
+  border:1px solid var(--line-gold-soft);
+  border-bottom:0;
+  border-radius:calc(var(--radius) - var(--frame))
+                calc(var(--radius) - var(--frame)) 0 0;
+  pointer-events:none;
 }
 .chain-icon{
   flex:0 0 auto;
@@ -427,7 +465,7 @@ html,body{
 .chain-icon svg{width:100%;height:100%;display:block}
 .chain .arrow{
   flex:0 0 auto;
-  background:none;box-shadow:none;padding:0;
+  background:none;border:0;padding:0;
   color:var(--forest-light);
   width:clamp(24px,2.4vw,52px);
   justify-content:center;
@@ -437,27 +475,36 @@ html,body{
 /* ------------------------------------------------------------- sahifalar */
 
 /* Pastdagi nuqtalar: sichqoncha bilan sahifa almashtirish. Klaviatura
-   (←/→, Home/End) va manzildagi hash (#2020-2021) ham shu holatni boshqaradi. */
+   (←/→, Home/End) va manzildagi hash (#2022-2023) ham shu holatni boshqaradi.
+   Soyasiz uslubga mos: ajralish faqat rang va hoshiya bilan. */
 .pager{
-  flex:0 0 auto;
-  display:flex;align-items:center;justify-content:center;
+  position:fixed;left:50%;
+  /* zanjir ekran chetiga yopishib turadi (pastki burchaklari tik) — nuqtalar
+     uni bo'lmasligi uchun ustida suzadi. `--chain-h` ni page.js o'lchaydi. */
+  bottom:calc(var(--chain-h,0px) + clamp(8px,1.2vh,20px));
+  transform:translateX(-50%);
+  z-index:3;
+  display:flex;align-items:center;
   gap:clamp(7px,.7vw,14px);
-  padding:clamp(6px,.9vh,14px) 0 clamp(8px,1.1vh,18px);
-  margin:calc(var(--gutter) * -1) calc(var(--gutter) * -1) 0;
-  background:#eff5f1;
+  padding:clamp(5px,.7vh,11px) clamp(10px,1vw,20px);
+  border-radius:999px;
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(10px);
+  border:1px solid var(--line-gold-soft);
 }
 .dot{
   -webkit-appearance:none;appearance:none;
   width:clamp(9px,.8vw,15px);
   height:clamp(9px,.8vw,15px);
-  padding:0;border:0;border-radius:50%;
-  background:rgba(20,83,45,.24);
+  padding:0;border:1px solid var(--line-soft);border-radius:50%;
+  background:rgba(20,83,45,.16);
   cursor:pointer;
   transition:background .25s var(--ease-out),transform .25s var(--ease-out);
 }
-.dot:hover{background:rgba(20,83,45,.5)}
+.dot:hover{background:rgba(20,83,45,.44)}
 .dot.is-current{
   background:var(--forest);
+  border-color:var(--line-gold);
   transform:scale(1.25);
 }
 .dot:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
@@ -485,8 +532,13 @@ html,body{
   .top{grid-template-columns:1fr;justify-items:stretch;gap:10px}
   .stat--left,.stat--right{justify-self:stretch}
   .title-block{order:-1}
-  .year-badge{align-self:stretch;text-align:center;font-size:clamp(38px,12vw,64px)}
+  /* tor ekranda tashqi halqa sahifa chekkasiga tegib ketmasin */
+  .year-badge{
+    align-self:stretch;text-align:center;font-size:clamp(38px,12vw,64px);
+    margin:5px;outline-offset:5px;
+  }
   .brandline{font-size:11px;letter-spacing:.32em}
+  .brandline::before,.brandline::after{width:22px;margin:0 .7em}
   .subtitle{font-size:14px;max-width:none}
   .stat-icon{width:52px;height:52px}
   .stat-label{font-size:16px}
@@ -511,8 +563,22 @@ html,body{
   .row-value{font-size:21px}
   .row-label{font-size:13px}
   .row-growth{flex-basis:78px;font-size:17px}
-  .chain{flex-direction:column}
-  .chain li{font-size:16px;padding:13px 16px}
+  /* Mobilda sahifa aylanadi — qator oynaga mixlanmaydi, oqim ichida qoladi:
+     kartalar yana to'liq yumaloq va pastda odatdagi bo'shliq bo'ladi. */
+  .page{padding-bottom:0}
+  .chain{
+    position:static;flex-direction:column;
+    margin:0 calc(var(--gutter) * -1);padding-bottom:16px;
+  }
+  .chain li{
+    font-size:16px;padding:13px 16px;
+    border-radius:var(--radius);border-bottom:1px solid var(--line);
+  }
+  .chain li:not(.arrow)::before{
+    inset:var(--frame);
+    border-bottom:1px solid var(--line-gold-soft);
+    border-radius:calc(var(--radius) - var(--frame));
+  }
   .chain-icon{width:34px;height:34px}
   .chain .arrow{transform:rotate(90deg);align-self:center;height:24px;width:24px}
 }
