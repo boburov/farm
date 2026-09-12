@@ -35,7 +35,7 @@
     photoAlt:'Sokin Savdo Servis — Ishlab chiqaruvchidan olingan tovuq go‘shti yuk mashinasiga '+
              'ortilib, bozorga yetkazilmoqda',
     brand:'Sokin Savdo Servis',
-    subtitle:'Faoliyatimizni bozorda faqat tovuq go‘shti ulgurchi savdosi va distribyutsiya bilan boshlagan edik.',
+    subtitle:'Faoliyatimizni bozorda faqat tovuq go‘shti ulgurji savdosi va distribyutsiya bilan boshlagan edik.',
 
     /* Suratdagi nuqtalar — surat kengligining ulushi sifatida (0..1), piksel
        emas. Fon `cover` bilan qirqilgani uchun ekran nisbati o'zgarsa piksel
