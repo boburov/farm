@@ -1,4 +1,4 @@
-/* Sokin Savdo — QA.
+/* Sokin Savdo Servis — QA.
  *
  * Asosiy kafolat (prompts/STEP_1.MD): ekranda buyurtmachi hujjatlarida yo'q
  * raqam ko'rinmasligi kerak. `no-fabricated-numbers` shuni tekshiradi va

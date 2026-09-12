@@ -1,4 +1,4 @@
-# Sokin Savdo — topshiriq hujjati
+# Sokin Savdo Servis — topshiriq hujjati
 
 **Holat:** 2010, 2020–2021, 2022–2023, 2025–2026, 2026–2027 va istiqboldagi
 loyihalar sahifalari
@@ -28,7 +28,7 @@ Uni tiklash kerak bo'lsa: `git show 3b09ac1` va undan oldingi commitlar.
 Taqdimot qobig'i har sahnada bir xil:
 
 ```
-SOKIN SAVDO                                             2026–2027
+Sokin Savdo Servis                                             2026–2027
 BOSQICH NOMI
 Yirik, chapga tekislangan sarlavha
 izoh satri

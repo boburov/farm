@@ -1,4 +1,4 @@
-/* Sokin Savdo — yillar ma'lumoti.
+/* Sokin Savdo Servis — yillar ma'lumoti.
  *
  * MANBA QOIDASI (prompts/STEP_1.MD): ekranda ko'rinadigan har bir raqam
  * buyurtmachi bergan hujjatdan olingan bo'lishi shart. O'ylab topilgan
@@ -32,19 +32,20 @@
     ],
 
     photo:'assets/photos/2010.jpg',
-    photoAlt:'Ishlab chiqaruvchidan olingan tovuq go‘shti yuk mashinasiga '+
+    photoAlt:'Sokin Savdo Servis — Ishlab chiqaruvchidan olingan tovuq go‘shti yuk mashinasiga '+
              'ortilib, bozorga yetkazilmoqda',
-    brand:'Sokin Savdo',
-    subtitle:'Bozorda tovuq go‘shti savdosi — qiymat zanjirining oxirgi bo‘g‘ini',
+    brand:'Sokin Savdo Servis',
+    subtitle:'Faoliyatimizni bozorda faqat tovuq go‘shti ulgurchi savdosi va distribyutsiya bilan boshlagan edik.',
 
     /* Suratdagi nuqtalar — surat kengligining ulushi sifatida (0..1), piksel
        emas. Fon `cover` bilan qirqilgani uchun ekran nisbati o'zgarsa piksel
        holati ham o'zgaradi; `assets/page.js: placeOverlays` uni har safar
        qayta hisoblaydi, shuning uchun yozuv joyidan siljimaydi. */
-    zones:[
-      {at:0.150, label:'Ishlab chiqaruvchi'},
-      {at:0.490, label:'Tashish'},
-      {at:0.825, label:'Bozor'}
+    /* Uch surat ketma-ket; o'rtadagi jarayon (tashish) kengroq ko'rsatiladi. */
+    strip:[
+      {photo:'assets/photos/2010-producer.jpg',  label:'Ishlab chiqaruvchi', grow:1},
+      {photo:'assets/photos/2010-transport.jpg', label:'Tashish',            grow:2.6},
+      {photo:'assets/photos/2010-bazaar.jpg',    label:'Bozor',              grow:1}
     ],
     panels:[
       {scene:'producer'},
@@ -84,9 +85,9 @@
     layout:'compare',
     period:'2020–2021',
     eyebrow:'Ikkinchi bosqich',
-    brand:'Sokin Savdo',
-    title:'Kredit hisobiga tovuq boqish va so‘yish boshlandi',
-    subtitle:'Zanjirga ikkita yangi bo‘g‘in qo‘shildi: boqish va so‘yish',
+    brand:'Sokin Savdo Servis',
+    title:"Kredit mablag`lari hisobidan tovuq boqish va go`sht mahsulotlarini ishlab chiqarish loyihalari start oldi.",
+    subtitle:'',
 
     photo:'assets/photos/2020.jpg',
     photoAlt:'Tovuqxona, so‘yish va qayta ishlash liniyasi hamda yuk mashinasi',
@@ -156,9 +157,9 @@
     layout:'compare',
     period:'2022–2023',
     eyebrow:'Klaster boshlandi',
-    brand:'Sokin Savdo',
-    title:'Subsidiya va ichki yem ishlab chiqarish',
-    subtitle:'Klaster boshlandi — tannarx pasaydi, ishlab chiqarish oshdi',
+    brand:'Sokin Savdo Servis',
+    title:'Davlat subsidiyasi hisobidan yem ishlab chiqarish majumuasi ishga tushurildi.',
+    subtitle:'Klaster tizimi boshlandi — tannarx pasaydi, ishlab chiqarish surati oshdi.',
 
     photo:'assets/photos/2022.jpg',
     photoAlt:'Yem zavodi, tovuqxonalar, so‘yish sexi va yuk mashinasi',
@@ -240,9 +241,9 @@
     layout:'compare',
     period:'2025–2026',
     eyebrow:'Qo‘shimcha qiymat',
-    brand:'Sokin Savdo',
-    title:'Klaster yanada kengaydi',
-    subtitle:'Sifatli nasl + qo‘shimcha qiymat = yanada katta imkoniyatlar',
+    brand:'Sokin Savdo Servis',
+    title:'Klaster tarmoqlari yanada kengaydi va tovuq go`shtini bo`laklarga ajratish tizimini tashil etish bilan ishlab chiqarish quvvati oshirildi.',
+    subtitle:'Sifatli nasl + qo‘shimcha qiymat = yanada katta imkoniyatlar.',
 
     photo:'assets/photos/2025.jpg',
     photoAlt:'Ona tovuq xo‘jaligi, bo‘laklarga bo‘lib ishlash sexi va qadoqlash',
@@ -292,12 +293,6 @@
        sahifada jami ko'rsatilmaydi. */
     centre:{
       title:'Tovuq go‘shti bo‘laklari va mahsulotdagi ulushi',
-      /* Bo'laklar halqasi: markazda 100% doirasi, atrofida to'qqiz bo'lak
-         surati (assets/photos/cuts/ — fon shaffof PNG). Har bo'lakning kattaligi
-         ulushiga bog'liq. 3D sahna o'rniga keldi: rasm har qurilmada bir xil
-         ko'rinadi, three.js va GLB yuklanmaydi.
-         `model` ma'lumoti kerak bo'lsa qaytarish mumkin — assets/page.js
-         ikkalasini ham qo'llaydi. */
       wheel:true,
       items:[
         {key:'akorachka',  label:'Akorachka',  value:13.8},
@@ -345,20 +340,16 @@
     layout:'project',
     period:'2026–2027',
     eyebrow:'Yangi bosqich',
-    brand:'Sokin Savdo',
-    title:'Parranda Investment va Marel majmuasi',
-    subtitle:'Yangi bosqich — yanada katta imkoniyatlar',
+    brand:'Sokin Savdo Servis',
+    title:'Yangi loyiha: "Parranda Invesment" va "Marel" hamkorligidagi texnologik transformatsiya.',
+    subtitle:'Yangi bosqich — yanada katta imkoniyatlar.',
 
     photo:'assets/photos/2026.jpg',
     photoAlt:'Yangi so‘yish va qadoqlash majmuasi — ko‘chadan ko‘rinishi',
 
     /* Uchinchi tomon nomlari hujjatdagidek matn bilan beriladi;
        logotiplar ishlatilmaydi. */
-    partners:{
-      a:'Parranda Investment',
-      b:'Marel',
-      note:'Gollandiya — so‘yish va qadoqlash yechimlari'
-    },
+   
 
     invest:{
       label:'Loyihaning umumiy qiymati',
@@ -414,21 +405,21 @@
     layout:'plans',
     period:'Istiqbol',
     eyebrow:'2027-yilgacha',
-    brand:'Sokin Savdo',
-    title:'Istiqboldagi loyihalar',
-    subtitle:'2027-yilgacha — yanada katta imkoniyatlar',
+    brand:'Sokin Savdo Servis',
+    title:'Kelajak sari qadam : Istiqbolli strategik loyihalar.',
+    subtitle:'2027-yilgacha yanada katta imkoniyatlar.',
     taglines:['Sifatli mahsulot','Kuchli iqtisodiyot','Barqaror kelajak'],
 
     items:[
-      {icon:'gear',   title:'Andijon viloyatida yem ozuqa zavodi ishlab chiqarish',
+      {icon:'gear',   title:'Ozuqa bazasini mustahkamlash : Andijon viloyatida yuqori texnologiyali zamonaviy yem - ozuqa zavodini barpo etish.',
        when:'2027-yil 4-chorak', value:10,  unit:'mln $', photo:'assets/photos/plans-1.jpg'},
-      {icon:'meat',   title:'Kalbasa maxsulotlari',
+      {icon:'meat',   title:'Chuqur qayta ishlash va assortiment : Yuqori sifatli kolbasa va go`sht mahsulotlarini ishlab chiqarishni yo`lga qo`yish.',
        when:'2027-yil 1-chorak', value:2.5, unit:'mln $', photo:'assets/photos/plans-2.jpg'},
-      {icon:'hen',    title:'Ona tovuq loyihasi',
+      {icon:'hen',    title:'Genetika va seleksiya (Ona tovuq loyihasi) : Naslli parrandachilikni rivojlantirish maqsadida maxsus "Ona tovuq" loyihasini tatbiq etish.',
        when:'2027-yil 2-chorak', value:7,   unit:'mln $', photo:'assets/photos/plans-3.jpg'},
-      {icon:'market', title:'12 ta viloyatda 500 ta savdo do‘konlari qurish',
+      {icon:'market', title:'Logistika va savdo tarmog`i : Respublikamizning barcha 12ta viloyatlarida 500 ta zamonaviy brendli klaster savdo do`konlarini qurish va xalqqa arzon mahsulot yetkazish.',
        when:'2027-yil 4-chorak', value:7.5, unit:'mln $', photo:'assets/photos/plans-4.jpg'},
-      {icon:'barn',   title:'Parranda va naslli chorva',
+      {icon:'barn',   title:'Naslchilik va parrandachilik majmuasi : Xalqaro standartlarga javob beradigan zamonaviy parranda va naslli chorva fermasini tashkil etish.',
        when:'2027-yil 4-chorak', value:9,   unit:'mln $', photo:'assets/photos/plans-5.jpg'}
     ],
 

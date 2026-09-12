@@ -1,6 +1,6 @@
 @import url("fonts.css");
 
-/* Sokin Savdo — taqdimot qobig'i.
+/* Sokin Savdo Servis — taqdimot qobig'i.
  *
  * Kompozitsiya: tepada kichik so'zbelgi va davr ko'rsatkichi, chapga
  * tekislangan yirik sarlavha, o'rtada asosiy kontent, pastda o'z joyidagi
@@ -57,15 +57,16 @@ html,body{
   display:flex;align-items:baseline;justify-content:space-between;
   gap:16px;position:relative;z-index:2;
 }
-/* so'zbelgi va bosqich nomi yonma-yon, orasida nozik ajratgich */
-.shell-left{display:flex;align-items:baseline;gap:clamp(10px,1.4vw,26px);flex-wrap:wrap}
+/* o'ngda bosqich nomi va davr yonma-yon, orasida nozik ajratgich */
+.shell-left,.shell-right{display:flex;align-items:baseline;gap:clamp(10px,1.4vw,26px);flex-wrap:wrap}
+.shell-right{justify-content:flex-end}
 .shell-eyebrow{
   font-size:clamp(10px,.78vw,15px);
   font-weight:700;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gold);position:relative;padding-left:clamp(10px,1.4vw,26px);
+  color:var(--gold);position:relative;padding-right:clamp(10px,1.4vw,26px);
 }
-.shell-eyebrow::before{
-  content:"";position:absolute;left:0;top:50%;translate:0 -50%;
+.shell-eyebrow::after{
+  content:"";position:absolute;right:0;top:50%;translate:0 -50%;
   width:1px;height:1em;background:var(--rule);
 }
 .wordmark{
@@ -162,6 +163,11 @@ html,body{
   background:linear-gradient(180deg,rgba(244,246,242,.14) 0%,rgba(244,246,242,0) 26%,
                              rgba(244,246,242,0) 64%,rgba(244,246,242,.86) 100%);
 }
+/* Ketma-ket uch surat: har biri o'z katagida, o'rtadagisi kengroq. */
+.visual--strip{display:flex;gap:clamp(4px,.5vw,10px)}
+.strip-cell{position:relative;flex:1 1 0;min-width:0;overflow:hidden}
+.visual--strip img{-webkit-mask-image:none;mask-image:none;object-position:center 60%}
+.strip-cell .zone{left:50%}
 .zone{position:absolute;top:clamp(6px,3vh,34px);transform:translateX(-50%);pointer-events:none}
 .zone-label{
   display:block;
@@ -263,7 +269,7 @@ html,body{
 .shares{margin-top:clamp(6px,1.2vh,18px);flex:0 0 auto}
 .shares-title{
   margin:0 0 clamp(4px,.7vh,10px);
-  font-size:clamp(8px,.64vw,13px);
+  font-size:clamp(18px,.74vw,19px);
   font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
 }
 .shares-list{

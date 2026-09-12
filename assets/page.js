@@ -1,4 +1,4 @@
-/* Sokin Savdo — taqdimotni YEARS ma'lumotidan quradi.
+/* Sokin Savdo Servis — taqdimotni YEARS ma'lumotidan quradi.
  *
  * Qobiq har sahnada bir xil: tepada so'zbelgi va davr, chapga tekislangan
  * sarlavha, o'rtada kontent, pastda vaqt chizig'i. Sahna turi `layout`
@@ -39,14 +39,16 @@
 
   /* ------------------------------------------------------------ qobiq --- */
 
-  /* Tepa qator: so'zbelgi, bosqich nomi va davr — uchalasi yonma-yon. */
+  /* Tepa qator: chapda so'zbelgi, o'ngda bosqich nomi va davr yonma-yon. */
   function shellTop(y){
     var top=el('header','shell-top');
     var left=el('div','shell-left');
-    left.appendChild(el('span','wordmark',y.brand||'Sokin Savdo'));
-    if(y.eyebrow) left.appendChild(el('span','shell-eyebrow',y.eyebrow));
+    left.appendChild(el('span','wordmark',y.brand||'Sokin Savdo Servis'));
     top.appendChild(left);
-    top.appendChild(el('span','period',y.period||y.title||y.id));
+    var right=el('div','shell-right');
+    if(y.eyebrow) right.appendChild(el('span','shell-eyebrow',y.eyebrow));
+    right.appendChild(el('span','period',y.period||y.title||y.id));
+    top.appendChild(right);
     return top;
   }
 
@@ -78,6 +80,25 @@
   /* Inshoot tasviri. Surat kelmasa maydon bo'sh qoladi — sahna buzilmaydi. */
   function visual(y){
     var fig=el('figure','visual reveal');
+    if(y.strip){
+      fig.classList.add('visual--strip');
+      y.strip.forEach(function(s){
+        var cell=el('div','strip-cell');
+        cell.style.flexGrow=String(s.grow||1);
+        var img=new Image();
+        img.alt=s.label||'';
+        img.decoding='async';
+        img.addEventListener('load',function(){ fig.classList.add('has-photo'); });
+        img.addEventListener('error',function(){ img.remove(); });
+        img.src=s.photo;
+        cell.appendChild(img);
+        var t=el('div','zone reveal');
+        t.appendChild(el('span','zone-label',s.label));
+        cell.appendChild(t);
+        fig.appendChild(cell);
+      });
+      return fig;
+    }
     if(y.photo){
       var img=new Image();
       img.alt=y.photoAlt||'';
@@ -816,7 +837,7 @@
 
     page.appendChild(timeline(years,at,go));
 
-    document.title=(y.period||y.title)+' — Sokin Savdo';
+    document.title=(y.period||y.title)+' — Sokin Savdo Servis';
 
     var order=Array.prototype.slice.call(page.querySelectorAll('.reveal'));
     order.forEach(function(n,i){ n.style.setProperty('--d',(REDUCED?0:i*45)+'ms'); });
