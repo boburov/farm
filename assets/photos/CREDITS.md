@@ -60,6 +60,25 @@ tegishli bo'lmagan sana yo'q — `no-fabricated-numbers` tekshiruvi buzilmaydi.
   gorizontal polosa (`.band`), balandligi 52vh dan oshmaydi.
 - Kadrda yozuv, logotip yoki avtomobil raqami yo'q.
 
+## plans-1.jpg … plans-5.jpg (istiqboldagi loyihalar)
+
+Buyurtmachi bergan, Gemini bilan yaratilgan beshta surat. Karta nisbati 4:5,
+shuning uchun har biri aynan 4:5 ga kesilib, eni 900 px ga keltirilgan
+(JPEG q82).
+
+| Fayl | Loyiha | Manba |
+|---|---|---|
+| `plans-1.jpg` | Andijon yem ozuqa zavodi | `Gemini_..._tusqzh...` |
+| `plans-2.jpg` | Kalbasa maxsulotlari | `Gemini_..._fysxnn...` |
+| `plans-3.jpg` | Ona tovuq loyihasi | `Gemini_..._c5txzm...` |
+| `plans-4.jpg` | 500 ta savdo do‘koni | `Gemini_..._7nso8j...` |
+| `plans-5.jpg` | Parranda va naslli chorva | `Gemini_..._qsliun...` |
+
+**`plans-1.jpg` — pastki 30% ataylab kesilgan.** Asl kadrda begona brend
+("ukrmara AGRO") va yuk mashinasidagi yozuv bor edi; taqdimotda boshqa
+kompaniya nomi turmasligi kerak. Kesilgandan keyin faqat silos va neytral
+yashil barg belgisi qoldi.
+
 ## Qanday almashtiriladi
 
 `assets/years.js` dagi yil obyektida `photo` maydoni. Fayl yo'q bo'lsa yoki

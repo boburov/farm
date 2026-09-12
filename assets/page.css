@@ -360,8 +360,11 @@ html,body{
   content:counter(prj,decimal-leading-zero);
   font-size:clamp(8px,.66vw,13px);font-weight:700;letter-spacing:.14em;color:var(--gold);
 }
+/* Sarlavha bir yoki ikki qatorga sig'adi — ikki qatorlik joy ajratiladi,
+   shunda barcha ustunlarda rasm va meta bir chiziqda boshlanadi. */
 .project-name{margin:0;font-size:clamp(10px,.92vw,19px);
-  font-weight:700;line-height:1.16;color:var(--ink)}
+  font-weight:700;line-height:1.16;color:var(--ink);
+  min-height:calc(1.16em * 2)}
 /* Bir xil nisbatdagi tasvir maydoni — surat kelmasa ham ustunlar tengligicha
    qoladi (brif: "consistent image proportions"). */
 .project-shot{
