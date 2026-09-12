@@ -92,9 +92,13 @@ async function resolveChromium() {
 /* Ko'rinadigan matndan raqamlarni ajratadi.
    Avval mingliklar orasidagi uzilmas probel olib tashlanadi ("20 000" → "20000"),
    keyin kasrli sonlar butun holda olinadi ("7.5" ikkiga bo'linib ketmasin). */
+/* Faqat sahna KONTENTIdan o'qiydi. Pastdagi vaqt chizig'i va tepadagi davr
+   ko'rsatkichi — navigatsiya: ular barcha yillarni ko'rsatadi va sahifaga xos
+   ruxsat ro'yxatiga aloqasi yo'q. */
 const NUMBERS = () => {
-  const text = document.getElementById('page').innerText
-    .replace(/(\d)[\s  ](?=\d)/g, '$1');
+  const host = document.querySelector('.scene');
+  const text = (host ? host.innerText : '')
+    .replace(/(\d)[\s  ](?=\d)/g, '$1');
   return [...text.matchAll(/\d+(?:[.,]\d+)?/g)].map(m => m[0].replace(',', '.'));
 };
 
@@ -192,10 +196,10 @@ for (const [i, info] of deck.entries()) {
   /* 4. sahifa turiga xos tuzilma */
   if (info.layout === 'single') {
     const c = await page.evaluate(() => ({
-      stats: document.querySelectorAll('.stat').length,
+      stats: document.querySelectorAll('.figure').length,
       zones: document.querySelectorAll('.zone').length,
       arrows: document.querySelectorAll('.flow-arrow').length,
-      chain: document.querySelectorAll('.chain li:not(.arrow)').length
+      chain: document.querySelectorAll('.flow li:not(.is-link)').length
     }));
     c.stats === 2 && c.zones === 3 && c.arrows === 2 && c.chain === 3
       ? pass(`layout-shape@${tag}`, '2 statistika · 3 zona · 2 strelka · 3 bosqich')
@@ -222,8 +226,8 @@ for (const [i, info] of deck.entries()) {
     const c = await page.evaluate(id => {
       const y = window.YEARS.find(v => v.id === id);
       return {
-        cards: document.querySelectorAll('.plan').length,
-        totals: document.querySelectorAll('.total-cells li').length,
+        cards: document.querySelectorAll('.project').length,
+        totals: document.querySelectorAll('.total').length,
         want: { cards: y.items.length, totals: y.total.cells.length },
         /* Jami hujjatda alohida berilgan — kartalar yig'indisi bilan mos
            kelishi shart. Mos kelmasa biror raqam noto'g'ri. */
@@ -241,21 +245,24 @@ for (const [i, info] of deck.entries()) {
     const c = await page.evaluate(id => {
       const y = window.YEARS.find(v => v.id === id);
       return {
-        band: document.querySelectorAll('.band').length,
-        bandPhoto: document.querySelector('.band').classList.contains('has-photo'),
-        kpis: document.querySelectorAll('.kpi').length,
-        tracks: document.querySelectorAll('.track').length,
-        want: { kpis: y.kpis.length, tracks: y.tracks.items.length }
+        band: document.querySelectorAll('.visual').length,
+        bandPhoto: document.querySelector('.visual').classList.contains('has-photo'),
+        kpis: document.querySelectorAll('.metric').length,
+        subs: document.querySelectorAll('.subcell').length,
+        tracks: document.querySelectorAll('.tracks li').length,
+        want: { kpis: Math.min(4, 1 + y.kpis.length),
+                subs: y.invest.cells.length, tracks: y.tracks.items.length }
       };
     }, tag);
-    c.band === 1 && c.bandPhoto && c.kpis === c.want.kpis && c.tracks === c.want.tracks
+    c.band === 1 && c.bandPhoto && c.kpis === c.want.kpis &&
+    c.subs === c.want.subs && c.tracks === c.want.tracks
       ? pass(`layout-shape@${tag}`,
-             `foto polosa · ${c.kpis} ko'rsatkich · ${c.tracks} yo'nalish`)
+             `foto · ${c.kpis} ko'rsatkich · ${c.subs} taqsimot · ${c.tracks} yo'nalish`)
       : fail(`layout-shape@${tag}`, JSON.stringify(c));
 
     /* Polosa fon emas: sahifa oqimida turishi va ekranni to'la qoplamasligi shart. */
     const band = await page.evaluate(() => {
-      const r = document.querySelector('.band').getBoundingClientRect();
+      const r = document.querySelector('.visual').getBoundingClientRect();
       return { h: Math.round(r.height), vh: innerHeight };
     });
     band.h < band.vh * 0.6
@@ -267,12 +274,11 @@ for (const [i, info] of deck.entries()) {
       const y = window.YEARS.find(v => v.id === id);
       const per = y.columns.map(col => col.rows.length);
       return {
-        cols: document.querySelectorAll('.col').length,
-        rows: document.querySelectorAll('.row').length,
-        growth: document.querySelectorAll('.row-growth').length,
-        chain: document.querySelectorAll('.chain li:not(.arrow)').length,
-        want: { cols: y.columns.length, rows: per.reduce((a, b) => a + b, 0),
-                growth: per[1], chain: y.chain.length }
+        cols: document.querySelectorAll('.ledger-head span').length - 2,  /* 2 yil ustuni */
+        rows: document.querySelectorAll('.ledger-row').length,
+        growth: document.querySelectorAll('.lr-delta').length,
+        chain: document.querySelectorAll('.flow li:not(.is-link)').length,
+        want: { cols: y.columns.length, rows: per[0], growth: per[0], chain: y.chain.length }
       };
     }, tag);
     c.cols === c.want.cols && c.rows === c.want.rows &&
@@ -283,8 +289,8 @@ for (const [i, info] of deck.entries()) {
 
     /* o'sish ustuni bir xil vertikal chiziqda */
     const xs = await page.evaluate(() =>
-      [...document.querySelectorAll('.row-growth')]
-        .map(n => Math.round(n.getBoundingClientRect().left)));
+      [...document.querySelectorAll('.lr-delta')]
+        .map(n => Math.round(n.getBoundingClientRect().right)));
     new Set(xs).size === 1
       ? pass(`growth-column-aligned@${tag}`, 'x = ' + xs[0])
       : fail(`growth-column-aligned@${tag}`, JSON.stringify(xs));
@@ -328,27 +334,41 @@ for (const [i, info] of deck.entries()) {
         const cv = host.querySelector('canvas');
         const info = window.ChickenParts && ChickenParts.showcaseInfo;
         if (!info) return { noInfo: true };
-        const sorted = [...info].sort((a, b) => a.center.x - b.center.x);
+        /* Bo'laklar IKKI QATORDA turadi — kesishishni har qator ichida
+           tekshirish kerak, aks holda turli qatordagi bo'laklar x bo'yicha
+           ustma-ust tushgandek ko'rinadi. Qator = bir xil pastki chegara. */
+        const bands = {};
+        info.forEach(it => {
+          const k = it.bottom.y.toFixed(3);
+          (bands[k] = bands[k] || []).push(it);
+        });
         let overlap = 0;
-        for (let i = 1; i < sorted.length; i++) {
-          const prev = sorted[i - 1], cur = sorted[i];
-          if (prev.center.x + prev.width / 2 > cur.center.x - cur.width / 2) overlap++;
-        }
-        /* hech bir bo'lak "yotib" qolmasligi uchun pastki nuqtasi umumiy asosda */
-        const offBase = info.filter(it => Math.abs(it.bottom.y) > 0.001).length;
+        Object.values(bands).forEach(band => {
+          const row = [...band].sort((a, b) => a.center.x - b.center.x);
+          for (let i = 1; i < row.length; i++) {
+            const prev = row[i - 1], cur = row[i];
+            if (prev.center.x + prev.width / 2 > cur.center.x - cur.width / 2) overlap++;
+          }
+        });
+        /* har qator ichida bo'laklar bitta asosda turishi shart */
+        const offBase = Object.values(bands).reduce((n, band) => {
+          const base = band[0].bottom.y;
+          return n + band.filter(it => Math.abs(it.bottom.y - base) > 0.001).length;
+        }, 0);
         return {
           canvas: !!cv && cv.width > 0 && cv.height > 0,
           parts: info.length,
           labels: host.querySelectorAll('.model-label').length,
           settled: host.classList.contains('is-settled'),
-          overlap, offBase,
+          overlap, offBase, rows: Object.keys(bands).length,
           basesHidden: ChickenParts.ring ? !ChickenParts.ring.visible : null,
           names: info.map(i => i.name)
         };
       });
       m3.canvas && m3.parts === 7 && m3.labels === 7 && m3.overlap === 0 &&
-      m3.offBase === 0 && m3.basesHidden
-        ? pass(`model-3d@${tag}`, `7 tik bo'lak, kesishmaydi: ${m3.names.join(' · ')}`)
+      m3.offBase === 0 && m3.basesHidden && m3.rows === 2
+        ? pass(`model-3d@${tag}`,
+               `7 tik bo'lak, ${m3.rows} qator, kesishmaydi: ${m3.names.join(' · ')}`)
         : fail(`model-3d@${tag}`, JSON.stringify(m3));
 
       /* har bo'lak yorlig'i kadr ichidami */
@@ -455,22 +475,22 @@ for (const [w, h] of SIZES) {
 
   /* 3. nuqtalar: soni, joriysi belgilangan, bosilganda o'tadi */
   const dots = await p.evaluate(() => ({
-    count: document.querySelectorAll('.pager .dot').length,
-    current: document.querySelectorAll('.pager .dot.is-current').length
+    count: document.querySelectorAll('.timeline .tl-step').length,
+    current: document.querySelectorAll('.timeline .tl-step.is-current').length
   }));
   dots.count === deck.length && dots.current === 1
-    ? pass('pager-dots', `${dots.count} ta nuqta, 1 tasi joriy`)
-    : fail('pager-dots', JSON.stringify(dots));
+    ? pass('timeline-steps', `${dots.count} ta bosqich, 1 tasi joriy`)
+    : fail('timeline-steps', JSON.stringify(dots));
 
-  await p.click('.pager .dot:last-child');
+  await p.click('.timeline .tl-step:last-child .tl-btn');
   await p.waitForSelector('.page.ready', { timeout: 15000 });
   const afterClick = await p.evaluate(() => ({
     hash: location.hash,
     layout: document.getElementById('page').dataset.layout
   }));
   afterClick.hash === '#' + last.id && afterClick.layout === last.layout
-    ? pass('pager-click-navigates', afterClick.hash)
-    : fail('pager-click-navigates', JSON.stringify(afterClick));
+    ? pass('timeline-click-navigates', afterClick.hash)
+    : fail('timeline-click-navigates', JSON.stringify(afterClick));
 
   /* 4. brauzerning orqaga tugmasi qaytaradi */
   await p.goBack();

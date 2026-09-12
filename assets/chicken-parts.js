@@ -240,25 +240,42 @@
       info.push({key:key,name:d.name,full:d.full||d.name,group:m,box:b2,size:s2,scale:sc});
     });
 
-    /* kenglik bo'yicha joylashtirish — markazi 0 da qoladi */
-    var total=info.reduce(function(a,it){ return a+it.size.x; },0)+gap*(info.length-1);
-    var base=opts.baseline||0, x=-total/2;
-    info.forEach(function(it){
-      var w=it.size.x, h=it.size.y, cx=x+w/2;
-      var c=it.box.getCenter(new T.Vector3());
-      /* o'lchangan quti markazini kerakli joyga surish; pastki qirrasi asosda */
-      it.restX=cx-c.x;
-      it.restY=base-it.box.min.y;
-      it.restZ=-c.z;
-      it.group.position.set(it.restX,it.restY,it.restZ);
-      it.width=w; it.height=h;
-      it.center=new T.Vector3(cx,base+h/2,0);
-      it.top=new T.Vector3(cx,base+h,0);
-      it.bottom=new T.Vector3(cx,base,0);
-      x+=w+gap;
+    /* Joylashtirish. `rows:2` bo'lsa bo'laklar ikki qatorga bo'linadi va
+       orqa qator TEPAGA ko'tariladi (chuqurlikka emas) — shunda old qator
+       hech qachon orqasini to'smaydi va kamera to'g'ri old tomondan turadi. */
+    var rows=Math.max(1,opts.rows||1);
+    var rowGap=opts.rowGap!==undefined?opts.rowGap:0.42;
+    var per=Math.ceil(info.length/rows);
+    var bands=[];
+    for(var r=0;r<rows;r++) bands.push(info.slice(r*per,(r+1)*per));
+
+    var base=opts.baseline||0;
+    var widest=0, yCursor=base;
+    /* pastdan yuqoriga: oxirgi band pastda turadi */
+    bands.slice().reverse().forEach(function(band){
+      var total=band.reduce(function(a,it){ return a+it.size.x; },0)+gap*(band.length-1);
+      widest=Math.max(widest,total);
+      var bandH=band.reduce(function(a,it){ return Math.max(a,it.size.y); },0);
+      var x=-total/2;
+      band.forEach(function(it){
+        var w=it.size.x, h=it.size.y, cx=x+w/2;
+        var c=it.box.getCenter(new T.Vector3());
+        it.restX=cx-c.x;
+        it.restY=yCursor-it.box.min.y;
+        it.restZ=-c.z;
+        it.group.position.set(it.restX,it.restY,it.restZ);
+        it.width=w; it.height=h;
+        it.center=new T.Vector3(cx,yCursor+h/2,0);
+        it.top=new T.Vector3(cx,yCursor+h,0);
+        it.bottom=new T.Vector3(cx,yCursor,0);
+        x+=w+gap;
+      });
+      yCursor+=bandH+rowGap;
     });
+
+    C.showcaseHeight=yCursor-base-rowGap;
     C.showcaseInfo=info;
-    C.showcaseWidth=total;
+    C.showcaseWidth=widest;
     return info;
   };
 
@@ -266,9 +283,8 @@
      Gorizontal yarim ko'rish burchagi: atan(tan(vfov/2) * aspect) —
      shuni hisobga olmasa qator kadrga sig'may qoladi. */
   C.showcaseDistance=function(fovDeg,aspect,margin){
-    var info=C.showcaseInfo||[];
     var w=(C.showcaseWidth||1)*(margin||1.12);
-    var h=info.reduce(function(a,it){ return Math.max(a,it.height); },1)*(margin||1.12);
+    var h=(C.showcaseHeight||1)*(margin||1.12);
     var vt=Math.tan(fovDeg*Math.PI/360);
     return Math.max(w/2/(vt*aspect), h/2/vt);
   };
@@ -277,15 +293,14 @@
      Juda past turса ufq bo'laklarni kesib o'tadi; juda tepadan esa tanish
      yuzlari ko'rinmay qoladi. */
   C.showcaseCamera=function(camera,margin,tilt){
-    var info=C.showcaseInfo||[];
-    var hMax=info.reduce(function(a,it){ return Math.max(a,it.height); },1);
+    var H=C.showcaseHeight||1;
     var d=C.showcaseDistance(camera.fov,camera.aspect,margin||1.16);
     var t=tilt===undefined?.26:tilt;          /* 0 = qat'iy old, 1 = tepadan */
-    var eyeY=hMax*(.48+t*.9);
-    camera.position.set(0,eyeY,d);
-    camera.lookAt(0,hMax*.46,0);
+    var mid=H*.5;
+    camera.position.set(0,mid+H*t*.42,d);
+    camera.lookAt(0,mid,0);
     camera.updateProjectionMatrix();
-    return {distance:d,eyeY:eyeY,maxHeight:hMax};
+    return {distance:d,eyeY:camera.position.y,height:H};
   };
 
   /* Vitrina kirish animatsiyasi: bo'laklar pastdan ko'tarilib, joyiga
@@ -306,5 +321,6 @@
   C.dispose=function(){
     if(C.group&&C.group.parent) C.group.parent.remove(C.group);
     C.group=C.root=C.ring=C.parts=C.showcaseInfo=null;
+    C.showcaseWidth=C.showcaseHeight=0;
   };
 })();

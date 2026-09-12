@@ -25,99 +25,49 @@ Uni tiklash kerak bo'lsa: `git show 3b09ac1` va undan oldingi commitlar.
 
 ## Nima qurilgan
 
-Yillar bo'yicha infografika slaydlari. Hozir ikkitasi:
+Taqdimot qobig'i har sahnada bir xil:
 
-| Sahifa | `layout` | Nima ko'rsatadi |
+```
+SOKIN SAVDO                                             2026–2027
+BOSQICH NOMI
+Yirik, chapga tekislangan sarlavha
+izoh satri
+
+   ┌──────────────────────┐   KO'RSATKICH   2022    2023   O'SISH
+   │  inshoot tasviri     │   ──────────────────────────────────
+   │  (chetlari fonga     │   Subsidiya    2 500   1 250    -50%
+   │   singiydi)          │   Tovuq soni     220     300    +36%
+   └──────────────────────┘   ...
+
+YEM ISHLAB CHIQARISH —— TOVUQ BOQISH —— SO'YISH —— BOZORGA
+──────────────────────────────────────────────────────────────
+2010   2020–2021   2022–2023   2025–2026   2026–2027   Istiqbol
+```
+
+Har sahna `100vw × 100dvh`. Sahna turi `assets/years.js` dagi `layout`
+maydoni bilan tanlanadi:
+
+| Sahifa | `layout` | Kompozitsiya |
 |---|---|---|
-| `2010` | `single` | Bitta yil: tepada ikki statistika kartasi, suratda uch zona |
-| `2020-2021` | `compare` | Ikki yil yonma-yon + o'sish ustuni |
-| `2022-2023` | `compare` | Subsidiya va ichki yem — klaster boshlanishi |
-| `2025-2026` | `compare` | Klaster kengaydi + markazda bo'laklar ulushi |
-| `2026-2027` | `project` | Marel majmuasi: foto polosa + ko'rsatkichlar + yo'nalishlar |
-| `istiqbol` | `plans` | 2027-gacha 5 ta loyiha + jami |
+| `2010` | `single` | Yirik yil + ikki asosiy raqam + uch bosqichli surat |
+| `2020-2021` | `compare` | 55% inshoot / 45% daftar |
+| `2022-2023` | `compare` | 55% inshoot / 45% daftar |
+| `2025-2026` | `compare` | 60% 3D vitrina / 40% daftar |
+| `2026-2027` | `project` | Keng inshoot + ko'rsatkichlar qatori |
+| `istiqbol` | `plans` | Besh ustun + jami |
 
-Sahifa turi `assets/years.js` dagi `layout` maydoni bilan tanlanadi;
-`assets/page.js` da har turga alohida render funksiyasi bor
-(`renderSingle` / `renderCompare`). Fon, zanjir va animatsiya umumiy.
+**Dizayn tizimi** (`assets/page.css`, `:root`):
+`--bg:#F4F6F2` · `--ink:#123E2B` · `--muted:#65736A` · `--rule:#D9E2D9` ·
+`--gold:#B59A65`.
 
-Bir ekran (scroll yo'q, mobilda ruxsat), to'liq offline, hech qanday CDN yoki
-tashqi so'rov yo'q. Kompozitsiya buyurtmachi bergan referens rasmga mos:
+Quti, qalin ramka, oltin kontur va har metrik yonidagi katta ikonka **yo'q** —
+ierarxiya oraliq, tipografika va ingichka ajratgichlar bilan beriladi.
+Suratlar butun ekran foni emas: aniq maydonda, chetlari radial niqob bilan
+fonga singiydi, binoning o'zi oqartirilmaydi.
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│ ┌──────────┐        ┌──────────┐          ┌────────────────┐ │
-│ │ 3 ta     │        │ 2010-yil │          │ Yillik aylanma:│ │
-│ │ ishchi   │        └──────────┘          │ 200 mln so'm   │ │
-│ └──────────┘                              │ 6 marta aylanma│ │
-│                                                              │
-│        butun ekran foni: bitta keng surat                    │
-│   ishlab chiqaruvchi  ↷  yuklash  ↷  bozor                   │
-│                                                              │
-│ ┌─ olish ─┐  →  ┌─ tashish ─┐  →  ┌─ bozorga sotish ─┐       │
-│ ══════════════════════════════════════════════════════       │
-└──────────────────────────────────────────────────────────────┘
-```
-
-Fon — buyurtmachi bergan bitta keng surat (`assets/photos/2010.jpg`), butun
-ekranni `cover` bilan qoplaydi: chapda ishlab chiqaruvchi, o'rtada yuklash,
-o'ngda bozor. Ikkita **jingalak strelka** zonalar chegarasiga qo'yiladi.
-
-Chegara nuqtalari `assets/years.js` da `arrowsAt` sifatida **surat kengligining
-ulushi** (0..1) bilan beriladi, piksel bilan emas. `assets/page.js: placeArrows`
-har resize'da `cover` matematikasini qayta hisoblab, strelkani suratdagi aynan
-o'sha nuqtaga qo'yadi — shuning uchun ekran nisbati o'zgarsa ham (4:3, 16:9,
-ultrawide) strelka joyidan siljimaydi.
-
-Surat yuklanmasa fon `assets/scenes.js` dagi uchta vektor sahnaga tushadi.
-Talablar va almashtirish tartibi — `assets/photos/CREDITS.md`.
-
-**Diqqat:** fon qatlami `z-index:0`, kontent `z-index:1`. Manfiy `z-index`
-ishlatilmaydi — `body` foni uni bekitib qo'yadi. QA shuni tekshiradi
-(`backdrop-fullscreen`, `bodyBg === 'none'`).
-
-### Ikonkalar — Lucide
-
-`assets/icons.js` — **Lucide** (https://lucide.dev, ISC) ikonkalari.
-Yo'llar `lucide-static@0.544.0` dan olinib faylga **joylashtirilgan**:
-sahifa tashqi so'rov qilmaydi va loyihada yangi bog'liqlik yo'q.
-`lucide-react` ishlatilmadi — bu loyihada React ham, build-qadam ham yo'q.
-
-Yangilash: o'sha paketdagi `icons/<nom>.svg` ichidagi markupni ko'chirish
-kifoya. Har yozuv ustidagi izohda Lucide'dagi nomi ko'rsatilgan
-(`lucide:drumstick` kabi).
-
-Moslashtirish: `workers→users`, `money→coins`, `cash→banknote`, `hen→bird`,
-`chart→trending-up`, `meat→drumstick`, `barn→warehouse`,
-`blade→utensils-crossed`, `market→store`, `subsidy→hand-coins`,
-`tax→badge-percent`, `gear→cog`, `cage→layers`, `pack→package`,
-`cuts→split`, `arrow→arrow-right`; `factory`, `truck`, `recycle` o'z nomi bilan.
-
-**Chiziq qalinligi.** Lucide 24x24 da `stroke-width:2` — kichik o'lchamda
-to'g'ri, lekin 132 px li statistika ikonkasida ~11 px bo'lib og'ir ko'rinadi.
-Shuning uchun CSS kontekst bo'yicha ingichkalashtiradi (`page.css` —
-"ikonka qalinligi"): katta 1.35, o'rtacha 1.6–1.7, kichik 1.85.
-
-Fondagi qalin egri strelka (`swoosh`) almashtirilmadi — u ikonka emas,
-kompozitsiya elementi.
-
-### Vizual uslub
-
-Buyurtmachi referensiga moslangan: **to'ldirilgan** (kontur emas) yashil
-piktogrammalar, yirik tipografika, shaffof oynasimon statistika kartalari,
-strelkalar doira ichida emas — yaxlit egri shakl. `assets/icons.js` da ikki
-oila bor: `FILL` (ishlatilayotgani) va `LINE` (zaxira). Pastdagi zanjir och
-panel ustida, sahifa chetigacha cho'ziladi.
-
-Suratning ustida uchta **zona yozuvi** (`zones` — `assets/years.js`) turadi:
-oq kapsula, oltin hoshiya, to'q yashil matn. Oq kapsula ataylab tanlangan —
-yozuvlar ham och bino ustiga, ham to'q tent ustiga tushadi, to'q fonli variant
-bozor tentida yo'qolib ketardi.
-
-Boshqa nozikliklar: yil belgisida gradient va oltin hoshiya; markazda brend
-qatori (`brand`) va izoh (`subtitle`); statistika izohi oltin chiziq bilan
-ajratilgan; fonda 34 soniyalik sekin yaqinlashuv (`@keyframes drift`) va
-ikki qatlamli parda (tepa/past tinchlantiriladi, chetlar qoraytiriladi).
-Barchasi `prefers-reduced-motion` bilan o'chadi.
+**Atmosfera** (`.ambient`): uchta yirik, assimetrik, xiralashgan shakl va
+pastki tuman. `z-index:0`, `pointer-events:none`, juda sekin siljiydi,
+`prefers-reduced-motion` da to'xtaydi.
 
 ---
 

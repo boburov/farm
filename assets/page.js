@@ -1,189 +1,152 @@
-/* Sokin Savdo — yil sahifasini YEARS ma'lumotidan quradi.
-   Hech qanday raqam bu yerda yozilmaydi: hammasi assets/years.js dan keladi. */
+/* Sokin Savdo — taqdimotni YEARS ma'lumotidan quradi.
+ *
+ * Qobiq har sahnada bir xil: tepada so'zbelgi va davr, chapga tekislangan
+ * sarlavha, o'rtada kontent, pastda vaqt chizig'i. Sahna turi `layout`
+ * maydoni bilan tanlanadi (single · compare · project · plans).
+ *
+ * Hech qanday raqam bu faylda yozilmaydi — hammasi assets/years.js dan.
+ */
 (function(){
   'use strict';
 
   var REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function el(tag,cls,html){
+  function el(tag,cls,text){
     var n=document.createElement(tag);
     if(cls) n.className=cls;
-    if(html!=null) n.innerHTML=html;
+    if(text!=null) n.textContent=text;
     return n;
   }
+
   /* 20000 → "20 000" (uzilmas probel), 7.5 → "7.5" */
   function fmt(v,dec){
     var r=dec?Math.round(v*10)/10:Math.round(v), p=String(r).split('.');
-    p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u00A0');
+    p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');
     return p.join('.');
   }
 
-  function icon(name,cls){
-    var s=el('span',cls||'stat-icon');
-    s.innerHTML=window.ICONS?ICONS(name):'';
-    return s;
+  /* Raqamli qiymat: hisoblagich + birlik. `suffix` — quyi chegara belgisi. */
+  function value(cls,v,unit,suffix){
+    var box=el('span',cls);
+    if(v==null){ box.appendChild(el('span','lr-dash','—')); return box; }
+    var n=el('span',null,'0');
+    n.dataset.to=String(v);
+    box.appendChild(n);
+    if(suffix) box.appendChild(el('span','lr-suffix',suffix));
+    if(unit) box.appendChild(el('em',null,unit));
+    return box;
   }
 
-  /* ------------------------------------------------------------ statistika */
+  /* ------------------------------------------------------------ qobiq --- */
 
-  function statNode(s){
-    var d=el('div','stat stat--'+s.side+' reveal');
-    d.appendChild(icon(s.icon));
-    var body=el('span','stat-body');
+  function shellTop(y){
+    var top=el('header','shell-top');
+    top.appendChild(el('span','wordmark',y.brand||'Sokin Savdo'));
+    top.appendChild(el('span','period',y.period||y.title||y.id));
+    return top;
+  }
 
-    /* chapda raqam tepada (3 ta / ishchi), o'ngda nom tepada (Yillik aylanma: / 200 mln so'm) */
-    var value=el('span','stat-value');
-    var num=el('span','stat-num','0');
-    num.dataset.to=String(s.value);
-    value.appendChild(num);
-    if(s.unit) value.appendChild(el('span','stat-unit',s.unit));
-
-    if(s.side==='right'){
-      body.appendChild(el('span','stat-label',s.label));
-      body.appendChild(value);
-    }else{
-      body.appendChild(value);
-      body.appendChild(el('span','stat-label',s.label));
-    }
-    if(s.note) body.appendChild(el('span','stat-note',s.note));
-
-    d.appendChild(body);
+  function lede(y){
+    var d=el('div','lede');
+    if(y.eyebrow) d.appendChild(el('span','lede-year reveal',y.eyebrow));
+    d.appendChild(el('h1','lede-title reveal',y.title));
+    if(y.subtitle) d.appendChild(el('p','lede-sub reveal',y.subtitle));
     return d;
   }
 
-  /* --------------------------------------------------------------- panellar */
-
-  /* Butun ekran foni: keng surat. Yuklanmasa orqasidagi uchta vektor sahna
-     ko'rinib qoladi, shuning uchun sahifa hech qachon bo'sh chiqmaydi. */
-  function backdropNode(y){
-    var d=el('div','backdrop');
-
-    var scenes=el('div','backdrop-scenes');
-    (y.panels||[]).forEach(function(p){
-      var s=el('div','backdrop-scene');
-      s.innerHTML=window.SCENES?SCENES(p.scene):'';
-      scenes.appendChild(s);
-    });
-    d.appendChild(scenes);
-
-    if(y.photo){
-      var img=new Image();
-      img.className='backdrop-photo';
-      img.alt=y.photoAlt||'';
-      img.decoding='async';
-      img.addEventListener('load',function(){
-        d.classList.add('has-photo');
-        placeOverlays();
-      });
-      img.addEventListener('error',function(){ img.remove(); });
-      img.src=y.photo;
-      d.appendChild(img);
-    }
-    return d;
-  }
-
-  /* Fon `cover` bilan chizilgani uchun surat ekrandan kengroq yoki balandroq
-     bo'lib qirqiladi. Shu sababli suratdagi nuqta (0..1 ulush) piksel holatiga
-     shu yerda, haqiqiy o'lchamlar bo'yicha qayta hisoblanadi — resize'da ham. */
-  /* Pastdagi zanjir qatori `position:fixed` — oqimdan chiqadi, shuning uchun
-     uning balandligi `--chain-h` orqali sahifaga qaytariladi (aks holda
-     taqqoslash ustunlari uning ostiga kirib ketardi). */
-  function measureChain(){
-    var page=document.getElementById('page');
-    if(!page) return;
-    var c=page.querySelector('.chain'),
-        h=(c&&getComputedStyle(c).position==='fixed')?c.offsetHeight:0;
-    page.style.setProperty('--chain-h',h+'px');
-  }
-  addEventListener('resize',measureChain);
-  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(measureChain);
-
+  /* Suratdagi nuqta (0..1 ulush) piksel holatiga aylantiriladi. Rasm `cover`
+     bilan chizilgani uchun qirqilish har o'lchamda boshqacha — shuning uchun
+     haqiqiy o'lchamlar bo'yicha qayta hisoblanadi. */
   var overlays=[];
   function placeOverlays(){
     if(!overlays.length) return;
-    var img=document.querySelector('.backdrop-photo'),
-        W=innerWidth, H=innerHeight,
+    var host=overlays[0].node.parentNode; if(!host) return;
+    var img=host.querySelector('img'),
+        W=host.clientWidth, H=host.clientHeight,
         nw=(img&&img.naturalWidth)||0, nh=(img&&img.naturalHeight)||0,
         scale=nw&&nh?Math.max(W/nw,H/nh):0,
-        rw=scale?nw*scale:0,
-        originX=scale?(W-rw)/2:0;
+        rw=scale?nw*scale:0, originX=scale?(W-rw)/2:0;
     overlays.forEach(function(o){
-      var host=o.node.parentNode; if(!host) return;
-      /* qatlam `.page` paddingi ichida turadi — oyna koordinatasidan siljish ayriladi */
-      var hostLeft=host.getBoundingClientRect().left,
-          x=scale?originX+o.at*rw:o.at*W;
-      o.node.style.left=(x-hostLeft)+'px';
+      o.node.style.left=(scale?originX+o.at*rw:o.at*W)+'px';
     });
   }
   addEventListener('resize',placeOverlays);
 
-  /* Suratdagi zonalar ustidagi yozuvlar + ular orasidagi strelkalar */
-  function overlayNode(y){
-    var host=el('div','overlay');
-    overlays=[];
-
+  /* Inshoot tasviri. Surat kelmasa maydon bo'sh qoladi — sahna buzilmaydi. */
+  function visual(y){
+    var fig=el('figure','visual reveal');
+    if(y.photo){
+      var img=new Image();
+      img.alt=y.photoAlt||'';
+      img.decoding='async';
+      img.addEventListener('load',function(){ fig.classList.add('has-photo'); placeOverlays(); });
+      img.addEventListener('error',function(){ img.remove(); });
+      img.src=y.photo;
+      fig.appendChild(img);
+    }
     (y.zones||[]).forEach(function(z){
       var t=el('div','zone reveal');
       t.appendChild(el('span','zone-label',z.label));
-      host.appendChild(t);
+      fig.appendChild(t);
       overlays.push({node:t,at:z.at});
     });
-
     (y.arrowsAt||[]).forEach(function(f){
       var a=el('div','flow-arrow reveal');
       a.innerHTML=window.ICONS?ICONS('swoosh'):'';
-      host.appendChild(a);
+      fig.appendChild(a);
       overlays.push({node:a,at:f});
     });
-
-    return host;
+    return fig;
   }
 
-  /* --------------------------------------------------- taqqoslash ustuni */
-
-  function rowNode(r,hasGrowthCol){
-    var known=r.value!=null;
-    var li=el('li','row reveal'+(known?'':' row--unknown'));
-    li.appendChild(icon(r.icon,'row-icon'));
-
-    var body=el('span','row-body');
-    var v=el('span','row-value');
-    if(known){
-      /* hisoblagich faqat haqiqiy raqamda ishlaydi */
-      var num=el('span',null,'0');
-      num.dataset.to=String(r.value);
-      v.appendChild(num);
-      /* "400 dan oshiq" — aniq raqam emas, quyi chegara. Shuning uchun
-         qiymat yoniga "+" qo'yiladi va bunday qatorda foiz ko'rsatilmaydi. */
-      if(r.suffix) v.appendChild(el('span','row-suffix',r.suffix));
-      if(r.unit) v.appendChild(el('span','row-unit',r.unit));
-    }else{
-      /* Hujjatda raqam yo'q — o'ylab topilmaydi, chiziqcha qo'yiladi.
-         Bu STEP_1 qoidasining ko'rinadigan tomoni. */
-      v.appendChild(el('span','row-dash','—'));
-    }
-    body.appendChild(v);
-    body.appendChild(el('span','row-label',r.label));
-    li.appendChild(body);
-
-    /* ustunda o'sish bo'lsa, foizsiz qatorlar ham katak qoldiradi —
-       aks holda grid ustuni siljib ketadi */
-    if(hasGrowthCol) li.appendChild(el('span','row-growth',r.growth||''));
-    return li;
+  /* Ishlab chiqarish zanjiri: kichik yozuvlar, orasida nozik bog'lovchi. */
+  function flow(steps){
+    if(!steps||!steps.length) return null;
+    var ul=el('ul','flow reveal');
+    steps.forEach(function(s,i){
+      if(i) ul.appendChild(el('li','is-link'));
+      ul.appendChild(el('li',null,s.label));
+    });
+    return ul;
   }
 
-  /* ------------------------------------------------------------- 3D sahna */
+  /* ----------------------------------------------------------- daftar --- */
 
-  /* Tovuqning bo'laklarga sochilishi — assets/chicken-parts.js moduli.
-     Skriptlar FAQAT shu kerak bo'lgan sahifada yuklanadi: boshqa sahifalar
-     three.js va 4 MB GLB ni behuda ko'tarmasin. Hammasi lokal — tashqi
-     so'rov yo'q, offline kafolati buzilmaydi. */
-  var MODEL_SRC=[
-    'assets/vendor/three.min.js',
-    'assets/vendor/GLTFLoader.js',
-    'assets/poultry-runtime.js',
-    'assets/chicken-parts.js'
-  ];
+  /* Ikki yil yonma-yon: ustun sarlavhalari, tekislangan qatorlar, ingichka
+     chiziqlar. O'sish foizi qiymat ostida kichik izoh. Quti yo'q. */
+  function ledger(y){
+    var wrap=el('div','ledger');
+    var a=y.columns[0], b=y.columns[1];
+
+    var head=el('div','ledger-head reveal');
+    head.appendChild(el('span','lh-metric','Ko‘rsatkich'));
+    head.appendChild(el('span',null,a.year));
+    head.appendChild(el('span',null,b.year));
+    head.appendChild(el('span','lh-metric',b.growthHead?'O‘sish':''));
+    wrap.appendChild(head);
+
+    var rows=el('ul','ledger-rows');
+    a.rows.forEach(function(ra,i){
+      var rb=b.rows[i]||{};
+      var li=el('li','ledger-row reveal'+(ra.lead||rb.lead?' is-lead':''));
+      li.appendChild(el('span','lr-metric',rb.label||ra.label));
+      li.appendChild(value('lr-val',ra.value,ra.unit,ra.suffix));
+
+      li.appendChild(value('lr-val',rb.value,rb.unit,rb.suffix));
+      /* o'sish foizi alohida tor ustunda — qatorlar bir xil balandlikda qoladi */
+      li.appendChild(el('span','lr-delta',rb.growth||''));
+
+      rows.appendChild(li);
+    });
+    wrap.appendChild(rows);
+    return wrap;
+  }
+
+  /* --------------------------------------------------------- 3D sahna --- */
+
+  /* three.js va GLB FAQAT kerak bo'lgan sahnada yuklanadi. Hammasi lokal. */
+  var MODEL_SRC=['assets/vendor/three.min.js','assets/vendor/GLTFLoader.js',
+                 'assets/poultry-runtime.js','assets/chicken-parts.js'];
   var modelScripts=null;
   function loadModelScripts(){
     if(modelScripts) return modelScripts;
@@ -209,8 +172,8 @@
     if(window.ChickenParts&&ChickenParts.dispose) ChickenParts.dispose();
     if(scene3d.renderer){
       scene3d.renderer.dispose();
-      if(scene3d.renderer.domElement.parentNode)
-        scene3d.renderer.domElement.parentNode.removeChild(scene3d.renderer.domElement);
+      var c=scene3d.renderer.domElement;
+      if(c.parentNode) c.parentNode.removeChild(c);
     }
     scene3d=null;
   }
@@ -221,51 +184,54 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));
     renderer.outputEncoding=T.sRGBEncoding;
     renderer.toneMapping=T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure=1.02;
+    renderer.toneMappingExposure=1.0;
     renderer.shadowMap.enabled=true;
     renderer.shadowMap.type=T.PCFSoftShadowMap;
     host.appendChild(renderer.domElement);
 
     var scene=new T.Scene();
-    var camera=new T.PerspectiveCamera(30,1,.1,120);
+    var camera=new T.PerspectiveCamera(28,1,.1,140);
 
-    /* yumshoq studiya yorug'ligi: asosiy + to'ldiruvchi + orqadan kontur.
-       envMap yo'q, shuning uchun qiymatlar past — aks holda go'sht oqarib ketadi. */
-    scene.add(new T.HemisphereLight(0xffffff,0xcfe0d6,.58));
-    var key=new T.DirectionalLight(0xfff8f0,1.05);
-    key.position.set(2.6,5.4,4.2);
-    key.castShadow=true;
+    /* Yumshoq studiya: asosiy + to'ldiruvchi + kontur. Qiymatlar past —
+       envMap yo'q, aks holda go'sht plastikdek yaltirab ketadi. */
+    scene.add(new T.HemisphereLight(0xffffff,0xd6e0d6,.60));
+    var key=new T.DirectionalLight(0xfffaf2,.98);
+    key.position.set(1.1,7.4,3.2); key.castShadow=true;
     key.shadow.mapSize.set(1024,1024);
-    key.shadow.camera.left=-6; key.shadow.camera.right=6;
-    key.shadow.camera.top=5; key.shadow.camera.bottom=-2;
-    key.shadow.camera.near=.5; key.shadow.camera.far=20;
+    key.shadow.camera.left=-7; key.shadow.camera.right=7;
+    key.shadow.camera.top=7;   key.shadow.camera.bottom=-3;
+    key.shadow.camera.near=.5; key.shadow.camera.far=26;
     key.shadow.bias=-.0012;
     scene.add(key);
-    var fill=new T.DirectionalLight(0xdcebe2,.42); fill.position.set(-4.2,2.4,3); scene.add(fill);
-    var rim=new T.DirectionalLight(0xffffff,.34);  rim.position.set(0,3.2,-5);   scene.add(rim);
+    var fill=new T.DirectionalLight(0xdfeae2,.44); fill.position.set(-4.6,2.6,3.4); scene.add(fill);
+    var rim=new T.DirectionalLight(0xffffff,.3);   rim.position.set(0,3.4,-5.4);    scene.add(rim);
 
-    /* kontakt soyasi uchun ko'rinmas yer — faqat soyani qabul qiladi */
-    var ground=new T.Mesh(new T.PlaneGeometry(40,40),
-      new T.ShadowMaterial({opacity:.16}));
+    /* ko'rinmas yer — faqat kontakt soyasini qabul qiladi */
+    var ground=new T.Mesh(new T.PlaneGeometry(60,60),new T.ShadowMaterial({opacity:.1}));
     ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
 
     ChickenParts.showBases(false);
     ChickenParts.mount(scene,{length:1,position:[0,0,0]});
-    var info=ChickenParts.showcase({gap:cfg.gap||.36,baseline:0});
+    var info=ChickenParts.showcase({
+      gap:cfg.gap||.30,
+      rows:cfg.rows||2,
+      rowGap:cfg.rowGap||.45,
+      baseline:0
+    });
 
     ChickenParts.root.traverse(function(o){
       if(!o.isMesh) return;
       o.castShadow=true;
       if(o.material&&o.material.color){
-        o.material.color.multiplyScalar(.95);
+        o.material.color.multiplyScalar(.96);
         if(o.material.roughness!==undefined)
-          o.material.roughness=Math.min(o.material.roughness,.62);
+          o.material.roughness=Math.max(Math.min(o.material.roughness,.72),.55);
+        if(o.material.metalness!==undefined) o.material.metalness=0;
       }
     });
 
-    /* HTML yorliqlar — matn rasm ichida emas, haqiqiy DOM */
-    var labels=[];
-    var layer=el('div','model-labels');
+    /* yorliqlar — haqiqiy HTML, rasm ichiga singdirilmagan */
+    var labels=[], layer=el('div','model-labels');
     info.forEach(function(it){
       var l=el('div','model-label');
       l.title=it.full||it.name;
@@ -277,21 +243,18 @@
 
     var proj=new T.Vector3();
     function placeLabels(){
-      var w=host.clientWidth, h=host.clientHeight;
-      var placed=[];
+      var w=host.clientWidth, h=host.clientHeight, placed=[];
       labels.forEach(function(l){
         proj.copy(l.info.bottom).project(camera);
-        var x=(proj.x*.5+.5)*w, y=(-proj.y*.5+.5)*h;
-        /* To'qnashuvni oldini olish: qo'shni yorliq bilan kesishsa, pastki
-           qatorga tushiriladi. Yo'l-yo'riq chizig'i shunda chiziladi. */
-        var half=l.node.offsetWidth/2||30, row=0;
+        var x=(proj.x*.5+.5)*w, yy=(-proj.y*.5+.5)*h;
+        var half=l.node.offsetWidth/2||26, row=0;
         for(var i=0;i<placed.length;i++){
           var q=placed[i];
-          if(q.row===row&&Math.abs(q.x-x)<half+q.half+6){ row=1; break; }
+          if(q.row===row&&Math.abs(q.y-yy)<18&&Math.abs(q.x-x)<half+q.half+6){ row=1; break; }
         }
-        placed.push({x:x,half:half,row:row});
+        placed.push({x:x,y:yy,half:half,row:row});
         l.node.classList.toggle('is-row2',row===1);
-        l.node.style.transform='translate(-50%,0) translate('+x+'px,'+y+'px)';
+        l.node.style.transform='translate(-50%,0) translate('+x+'px,'+yy+'px)';
       });
     }
 
@@ -300,308 +263,182 @@
       if(!w||!h) return;
       renderer.setSize(w,h,false);
       camera.aspect=w/h;
-      ChickenParts.showcaseCamera(camera,cfg.margin||1.2,cfg.tilt!==undefined?cfg.tilt:.24);
+      ChickenParts.showcaseCamera(camera,cfg.margin||1.1,cfg.tilt!==undefined?cfg.tilt:.2);
       placeLabels();
-      renderer.render(scene,camera);   /* rAF to'xtagan bo'lsa ham yangilanadi */
+      renderer.render(scene,camera);
     }
     resize();
 
     var t0=performance.now(), done=false;
     function frame(now){
       scene3d.raf=requestAnimationFrame(frame);
-      var el2=(now-t0)/1000;
-      /* qisqa, vazmin kirish: bo'laklar pastdan ko'tarilib joyiga o'tiradi.
-         Uzluksiz aylanish YO'Q — yorliqlar o'qilishi kerak. */
-      var p=REDUCED?1:Math.min(1,Math.max(0,(el2-.25)/1.5));
+      var t=(now-t0)/1000;
+      /* qisqa kirish, keyin mahsulotlar QIMIRLAMAYDI — yorliqlar o'qiladi */
+      var p=REDUCED?1:Math.min(1,Math.max(0,(t-.2)/1.4));
       ChickenParts.showcaseReveal(p);
       renderer.render(scene,camera);
       if(p>=1&&!done){ done=true; host.classList.add('is-settled'); placeLabels(); }
-      if(p>=1&&!cfg.idle){
+      if(p>=1){
         cancelAnimationFrame(scene3d.raf); scene3d.raf=0;
-        /* Sikl to'xtadi — uzluksiz aylanish yo'q, yorliqlar o'qiladi.
-           Belgini QA ham, foydalanuvchi ham tekshira oladi. */
         host.dataset.anim='stopped';
       }
     }
-    /* Blok balandligi CSS bilan beriladi va sahna qurilganda hali 0 bo'lishi
-       mumkin — o'sha payt kamera ham, canvas ham noto'g'ri o'lchamda qolardi.
-       ResizeObserver haqiqiy o'lcham paydo bo'lishi bilan qayta hisoblaydi. */
     var ro=null;
     if(window.ResizeObserver){ ro=new ResizeObserver(resize); ro.observe(host); }
-    scene3d={renderer:renderer,onResize:resize,raf:0,ro:ro,host:host};
+    scene3d={renderer:renderer,onResize:resize,raf:0,ro:ro};
     addEventListener('resize',resize);
     scene3d.raf=requestAnimationFrame(frame);
   }
 
   function modelNode(cfg){
     var host=el('div','model');
-    host.setAttribute('aria-label','Tovuqning bo\'laklarga ajralishi — 3D');
+    host.setAttribute('aria-label','Tovuq bo‘laklari — 3D ko‘rgazma');
     loadModelScripts()
       .then(function(){ return ChickenParts.load(); })
       .then(function(){
-        if(!host.isConnected) return;      /* sahifa almashib ketgan bo'lsa */
-        host.classList.add('is-ready');    /* avval balandlik, keyin sahna */
+        if(!host.isConnected) return;
         buildScene(host,cfg);
       })
       .catch(function(e){
-        /* 3D yuklanmasa sahifa buzilmaydi — blok shunchaki bo'sh qoladi */
         console.warn('3D yuklanmadi:',e.message);
         host.classList.add('is-failed');
       });
     return host;
   }
 
-  /* Ustunlar orasidagi bo'sh joyga qo'yiladigan blok (masalan tovuq
-     bo'laklarining mahsulotdagi ulushi). Ixtiyoriy. */
-  function centreNode(c){
-    var box=el('aside','centre reveal'+(c.model?' centre--model':''));
-    if(c.title) box.appendChild(el('h2','centre-title',c.title));
-    if(c.model) box.appendChild(modelNode(c.model));
-    var ul=el('ul','cuts');
-    c.items.forEach(function(it){
-      var li=el('li','cut');
-      li.appendChild(el('span','cut-share',it.value+'%'));
-      li.appendChild(el('span','cut-name',it.label));
-      ul.appendChild(li);
-    });
-    box.appendChild(ul);
-    if(c.note) box.appendChild(el('p','centre-note',c.note));
-    return box;
-  }
+  /* ---------------------------------------------------------- sahnalar --- */
 
-  function columnNode(c){
-    var sec=el('section','col col--'+(c.tone||'dark'));
-
-    var head=el('header','col-head reveal');
-    head.appendChild(el('span','col-year',c.year));
-    if(c.growthHead) head.appendChild(el('span','col-growth-head',c.growthHead));
-    sec.appendChild(head);
-
-    var hasGrowthCol=c.rows.some(function(r){ return r.growth!=null; });
-    var ul=el('ul','rows');
-    c.rows.forEach(function(r){ ul.appendChild(rowNode(r,hasGrowthCol)); });
-    sec.appendChild(ul);
-    return sec;
-  }
-
-  /* --------------------------------------------------------------- zanjir */
-
-  function chainNode(steps){
-    if(!steps||!steps.length) return null;
-    var ul=el('ul','chain reveal');
-    steps.forEach(function(step,i){
-      if(i){
-        var a=el('li','arrow');
-        a.innerHTML=window.ICONS?ICONS('arrow'):'';
-        ul.appendChild(a);
-      }
-      var li=el('li');
-      li.appendChild(icon(step.icon,'chain-icon'));
-      li.appendChild(el('span',null,step.label));
-      ul.appendChild(li);
-    });
-    return ul;
-  }
-
-  /* ---------------------------------------------------------- hisoblagich */
-
-  function runCounters(scope){
-    var nodes=scope.querySelectorAll('[data-to]');
-    Array.prototype.forEach.call(nodes,function(n,i){
-      var to=parseFloat(n.dataset.to);
-      if(!isFinite(to)) return;
-      var dec=to%1!==0;              /* 7.5 kasr qoladi, 3000 butun sanaladi */
-      if(REDUCED){ n.textContent=fmt(to,dec); return; }
-      var dur=760+i*40, start=null, delay=300+i*55;
-      function step(ts){
-        if(start===null) start=ts;
-        var t=(ts-start-delay)/dur;
-        if(t<0){ requestAnimationFrame(step); return; }
-        if(t>=1){ n.textContent=fmt(to,dec); return; }
-        var e=1-Math.pow(1-t,3);
-        n.textContent=fmt(to*e,dec);
-        requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    });
-  }
-
-  /* --------------------------------------------------------------- render */
-
-  /* Bitta yil: tepada ikki statistika kartasi va yil belgisi, suratda zona
-     yozuvlari va oqim strelkalari. */
+  /* 2010 — yirik yil, ikki asosiy raqam, uch bosqichli hikoya surati */
   function renderSingle(y,page){
-    var top=el('div','top');
-    var left=y.stats.filter(function(s){ return s.side!=='right'; });
-    var right=y.stats.filter(function(s){ return s.side==='right'; });
-    left.forEach(function(s){ top.appendChild(statNode(s)); });
+    var scene=el('div','scene');
+    scene.appendChild(lede(y));
 
-    var title=el('div','title-block');
-    if(y.brand) title.appendChild(el('p','brandline reveal',y.brand));
-    title.appendChild(el('div','year-badge reveal',y.title));
-    if(y.subtitle) title.appendChild(el('p','subtitle reveal',y.subtitle));
-    top.appendChild(title);
+    var story=el('div','story');
+    var figs=el('div','figures');
+    (y.stats||[]).forEach(function(s){
+      var f=el('div','figure reveal');
+      f.appendChild(value('figure-value',s.value,s.unit));
+      f.appendChild(el('span','figure-label',s.label));
+      if(s.note) f.appendChild(el('span','figure-note',s.note));
+      figs.appendChild(f);
+    });
+    story.appendChild(figs);
+    story.appendChild(visual(y));
+    scene.appendChild(story);
 
-    right.forEach(function(s){ top.appendChild(statNode(s)); });
-    page.appendChild(top);
-
-    page.appendChild(backdropNode(y));
-    page.appendChild(overlayNode(y));
-    var ch=chainNode(y.chain); if(ch) page.appendChild(ch);
+    var f=flow(y.chain); if(f) scene.appendChild(f);
+    page.appendChild(scene);
   }
 
-  /* Ikki yil yonma-yon: chapda o'tgan yil, o'ngda yangi yil va o'sish ustuni. */
+  /* Taqqoslash — chapda inshoot (yoki 3D sahna), o'ngda daftar */
   function renderCompare(y,page){
-    var head=el('div','deck-head');
-    if(y.brand) head.appendChild(el('p','brandline reveal',y.brand));
-    head.appendChild(el('h1','deck-title reveal',y.title));
-    if(y.subtitle) head.appendChild(el('p','subtitle reveal',y.subtitle));
-    page.appendChild(head);
+    var scene=el('div','scene');
+    scene.appendChild(lede(y));
 
-    page.appendChild(backdropNode(y));
+    var hasModel=!!(y.centre&&y.centre.model);
+    var split=el('div','split'+(hasModel?' split--model':''));
 
-    var wrap=el('div','compare');
-    var cols=y.columns||[];
-    if(cols[0]) wrap.appendChild(columnNode(cols[0]));
-    if(y.centre) wrap.appendChild(centreNode(y.centre));
-    cols.slice(1).forEach(function(c){ wrap.appendChild(columnNode(c)); });
-    page.appendChild(wrap);
+    if(hasModel){
+      var stage=el('div','stage reveal');
+      stage.appendChild(modelNode(y.centre.model));
+      if(y.centre.items&&y.centre.items.length){
+        var sh=el('div','shares');
+        sh.appendChild(el('p','shares-title',y.centre.title));
+        var ul=el('ul','shares-list');
+        y.centre.items.forEach(function(it){
+          var li=el('li');
+          li.appendChild(el('b',null,it.value+'%'));
+          li.appendChild(el('span',null,it.label));
+          ul.appendChild(li);
+        });
+        sh.appendChild(ul);
+        stage.appendChild(sh);
+      }
+      split.appendChild(stage);
+    }else{
+      split.appendChild(visual(y));
+    }
 
-    var ch=chainNode(y.chain); if(ch) page.appendChild(ch);
+    split.appendChild(ledger(y));
+    scene.appendChild(split);
+
+    var f=flow(y.chain); if(f) scene.appendChild(f);
+    page.appendChild(scene);
   }
 
-  /* Loyiha sahifasi: fon emas, gorizontal foto polosa. Tepada yil, hamkorlar
-     va investitsiya kartasi; polosadan keyin ko'rsatkichlar qatori va
-     majmuaning yo'nalishlari. */
+  /* Loyiha — keng inshoot tasviri, ochiq ko'rsatkichlar qatori */
   function renderProject(y,page){
-    var head=el('header','proj-head');
-
-    var yb=el('div','proj-year');
-    if(y.brand) yb.appendChild(el('p','brandline reveal',y.brand));
-    var badge=el('div','year-badge year-badge--wide reveal');
-    badge.innerHTML='<span>'+y.title+'</span>'+
-      (y.titleSuffix?'<span class="suffix">'+y.titleSuffix+'</span>':'');
-    yb.appendChild(badge);
-    if(y.subtitle) yb.appendChild(el('p','subtitle reveal',y.subtitle));
-    head.appendChild(yb);
+    var scene=el('div','scene');
+    scene.appendChild(lede(y));
 
     if(y.partners){
       var pr=el('div','partners reveal');
-      pr.appendChild(el('span','partner',y.partners.a));
-      pr.appendChild(el('span','partner-x','×'));
-      pr.appendChild(el('span','partner',y.partners.b));
-      if(y.partners.note) pr.appendChild(el('span','partner-note',y.partners.note));
-      head.appendChild(pr);
+      pr.appendChild(el('span',null,y.partners.a));
+      pr.appendChild(el('span','x','×'));
+      pr.appendChild(el('span',null,y.partners.b));
+      if(y.partners.note) pr.appendChild(el('span','note',y.partners.note));
+      scene.appendChild(pr);
     }
 
-    if(y.invest){
-      var inv=el('div','invest reveal');
-      inv.appendChild(el('p','invest-label',y.invest.label));
-      var iv=el('p','invest-value');
-      var n=el('span',null,'0'); n.dataset.to=String(y.invest.value);
-      iv.appendChild(n);
-      if(y.invest.unit) iv.appendChild(el('span','invest-unit',y.invest.unit));
-      inv.appendChild(iv);
-      var cells=el('ul','invest-cells');
-      (y.invest.cells||[]).forEach(function(c){
+    var hero=el('div','hero');
+    hero.appendChild(visual(y));
+
+    /* Asosiy qator: loyiha qiymati (urg'uli) + uchta ko'rsatkich.
+       Investitsiya taqsimoti ostidagi nozik qatorda. */
+    var strip=[];
+    if(y.invest) strip.push({label:y.invest.label,value:y.invest.value,
+                             unit:y.invest.unit,lead:true});
+    (y.kpis||[]).slice(0,3).forEach(function(k){ strip.push(k); });
+
+    var ms=el('div','metrics');
+    strip.forEach(function(c){
+      var m=el('div','metric reveal'+(c.lead?' is-lead':''));
+      m.appendChild(el('span','metric-label',c.label));
+      m.appendChild(value('metric-value',c.value,c.unit));
+      ms.appendChild(m);
+    });
+    hero.appendChild(ms);
+    scene.appendChild(hero);
+
+    if(y.invest&&y.invest.cells&&y.invest.cells.length){
+      var sub=el('div','substrip reveal');
+      y.invest.cells.forEach(function(c){
+        var it=el('div','subcell');
+        it.appendChild(el('span','sub-label',c.label));
+        it.appendChild(value('sub-value',c.value,c.unit));
+        sub.appendChild(it);
+      });
+      scene.appendChild(sub);
+    }
+
+    var tracks=(y.tracks&&y.tracks.items)||[];
+    if(tracks.length){
+      var tr=el('ul','tracks reveal');
+      tracks.forEach(function(t){
         var li=el('li');
-        li.appendChild(el('span','cell-label',c.label));
-        var cv=el('span','cell-value');
-        var cn=el('span',null,'0'); cn.dataset.to=String(c.value);
-        cv.appendChild(cn);
-        if(c.unit) cv.appendChild(el('span','cell-unit',c.unit));
-        li.appendChild(cv);
-        cells.appendChild(li);
+        li.appendChild(el('span','track-label',t.label));
+        if(t.note) li.appendChild(el('span','track-note',t.note));
+        tr.appendChild(li);
       });
-      inv.appendChild(cells);
-      head.appendChild(inv);
+      scene.appendChild(tr);
     }
-    page.appendChild(head);
-
-    /* gorizontal foto polosa */
-    var band=el('figure','band reveal');
-    if(y.photo){
-      var img=new Image();
-      img.className='band-photo';
-      img.alt=y.photoAlt||'';
-      img.decoding='async';
-      img.addEventListener('load',function(){ band.classList.add('has-photo'); });
-      img.addEventListener('error',function(){ img.remove(); });
-      img.src=y.photo;
-      band.appendChild(img);
-    }
-    page.appendChild(band);
-
-    if(y.kpis){
-      var ul=el('ul','kpis');
-      y.kpis.forEach(function(k){
-        var li=el('li','kpi reveal');
-        li.appendChild(icon(k.icon,'kpi-icon'));
-        var b=el('span','kpi-body');
-        b.appendChild(el('span','kpi-label',k.label));
-        var v=el('span','kpi-value');
-        var kn=el('span',null,'0'); kn.dataset.to=String(k.value);
-        v.appendChild(kn);
-        if(k.unit) v.appendChild(el('span','kpi-unit',k.unit));
-        b.appendChild(v);
-        li.appendChild(b);
-        ul.appendChild(li);
-      });
-      page.appendChild(ul);
-    }
-
-    if(y.tracks){
-      var sec=el('section','tracks');
-      sec.appendChild(el('h2','tracks-title reveal',y.tracks.title));
-      var ol=el('ol','track-list');
-      y.tracks.items.forEach(function(t){
-        var li=el('li','track reveal');
-        li.appendChild(icon(t.icon,'track-icon'));
-        var b=el('span','track-body');
-        b.appendChild(el('span','track-label',t.label));
-        if(t.note) b.appendChild(el('span','track-note',t.note));
-        li.appendChild(b);
-        ol.appendChild(li);
-      });
-      sec.appendChild(ol);
-      page.appendChild(sec);
-    }
-
-    var ch2=chainNode(y.chain); if(ch2) page.appendChild(ch2);
+    page.appendChild(scene);
   }
 
-  /* Istiqboldagi loyihalar: beshta karta bir qatorda, pastda jami. */
+  /* Rejalar — beshta ustun, pastda jami */
   function renderPlans(y,page){
-    var head=el('header','plans-head');
+    var scene=el('div','scene');
+    scene.appendChild(lede(y));
 
-    var left=el('div','plans-title-block');
-    if(y.brand) left.appendChild(el('p','brandline reveal',y.brand));
-    left.appendChild(el('h1','plans-title reveal',y.title));
-    if(y.subtitle) left.appendChild(el('p','subtitle reveal',y.subtitle));
-    head.appendChild(left);
-
-    if(y.taglines&&y.taglines.length){
-      var tl=el('ul','taglines reveal');
-      y.taglines.forEach(function(t){ tl.appendChild(el('li',null,t)); });
-      head.appendChild(tl);
-    }
-    page.appendChild(head);
-
-    var list=el('ol','plan-cards');
+    var ol=el('ol','projects');
     y.items.forEach(function(it){
-      var li=el('li','plan reveal');
+      var li=el('li','project reveal');
+      li.appendChild(el('h2','project-name',it.title));
 
-      var top=el('div','plan-top');
-      top.appendChild(icon(it.icon,'plan-icon'));
-      top.appendChild(el('h2','plan-name',it.title));
-      li.appendChild(top);
-
-      /* Foto bo'lmasa karta buzilmaydi — o'rni yashil maydon bo'lib qoladi. */
-      var shot=el('div','plan-shot');
+      var shot=el('div','project-shot');
       if(it.photo){
         var img=new Image();
-        img.alt=it.title;
-        img.decoding='async';
+        img.alt=it.title; img.decoding='async';
         img.addEventListener('load',function(){ shot.classList.add('has-photo'); });
         img.addEventListener('error',function(){ img.remove(); });
         img.src=it.photo;
@@ -609,154 +446,149 @@
       }
       li.appendChild(shot);
 
-      var meta=el('div','plan-meta');
-      meta.appendChild(el('span','plan-when',it.when));
-      var v=el('span','plan-value');
-      var n=el('span',null,'0'); n.dataset.to=String(it.value);
-      v.appendChild(n);
-      if(it.unit) v.appendChild(el('span','plan-unit',it.unit));
-      meta.appendChild(v);
+      var meta=el('div','project-meta');
+      meta.appendChild(el('span','project-when',it.when));
+      meta.appendChild(value('project-value',it.value,it.unit));
       li.appendChild(meta);
-
-      if(it.bullets&&it.bullets.length){
-        var ul=el('ul','plan-bullets');
-        it.bullets.forEach(function(b){ ul.appendChild(el('li',null,b)); });
-        li.appendChild(ul);
-      }
-      list.appendChild(li);
+      ol.appendChild(li);
     });
-    page.appendChild(list);
+    scene.appendChild(ol);
 
     if(y.total){
-      var bar=el('section','plans-total reveal');
-      bar.appendChild(el('p','plans-total-label',y.total.label));
-      var cells=el('ul','total-cells');
+      var t=el('section','totals reveal');
+      t.appendChild(el('p','totals-label',y.total.label));
       y.total.cells.forEach(function(c){
-        var li=el('li');
-        li.appendChild(icon(c.icon,'total-icon'));
-        var b=el('span','total-body');
-        var tv=el('span','total-value');
-        var tn=el('span',null,'0'); tn.dataset.to=String(c.value);
-        tv.appendChild(tn);
-        if(c.unit) tv.appendChild(el('span','total-unit',c.unit));
-        b.appendChild(tv);
-        b.appendChild(el('span','total-label',c.label));
-        li.appendChild(b);
-        cells.appendChild(li);
+        var cell=el('div','total');
+        cell.appendChild(value('total-value',c.value,c.unit));
+        cell.appendChild(el('span','total-label',c.label));
+        t.appendChild(cell);
       });
-      bar.appendChild(cells);
-      if(y.total.note){
-        var nt=el('p','plans-total-note');
-        nt.appendChild(icon('chart','total-icon'));
-        nt.appendChild(el('span',null,y.total.note));
-        bar.appendChild(nt);
-      }
-      page.appendChild(bar);
+      if(y.total.note) t.appendChild(el('span','totals-note',y.total.note));
+      scene.appendChild(t);
     }
+    page.appendChild(scene);
   }
 
-  /* Atmosfera qatlami bir marta quriladi va sahifalar almashganda qolaveradi. */
+  /* ------------------------------------------------------- hisoblagich --- */
+
+  function runCounters(scope){
+    var nodes=scope.querySelectorAll('[data-to]');
+    Array.prototype.forEach.call(nodes,function(n,i){
+      var to=parseFloat(n.dataset.to);
+      if(!isFinite(to)) return;
+      var dec=to%1!==0;
+      if(REDUCED){ n.textContent=fmt(to,dec); return; }
+      var dur=720+i*35, start=null, delay=260+i*45;
+      function step(ts){
+        if(start===null) start=ts;
+        var t=(ts-start-delay)/dur;
+        if(t<0){ requestAnimationFrame(step); return; }
+        if(t>=1){ n.textContent=fmt(to,dec); return; }
+        n.textContent=fmt(to*(1-Math.pow(1-t,3)),dec);
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  /* -------------------------------------------------- vaqt chizig'i / nav */
+
+  var ARROW_L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>';
+  var ARROW_R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+  var FS_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  var FS_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+
+  function toggleFullscreen(){
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+  }
+  function navButton(cls,label,glyph,onClick){
+    var b=el('button','navbtn '+cls);
+    b.type='button'; b.title=label;
+    b.setAttribute('aria-label',label);
+    b.innerHTML=glyph;
+    b.addEventListener('click',onClick);
+    return b;
+  }
+
+  function timeline(years,at,go){
+    var nav=el('nav','timeline');
+    nav.setAttribute('aria-label','Taqdimot bosqichlari');
+
+    var steps=el('ol','tl-steps');
+    years.forEach(function(y,i){
+      var li=el('li','tl-step'+(i===at?' is-current':''));
+      var b=el('button','tl-btn',y.period||y.title||y.id);
+      b.type='button';
+      if(i===at) b.setAttribute('aria-current','step');
+      b.addEventListener('click',function(){ go(i); });
+      li.appendChild(b);
+      steps.appendChild(li);
+    });
+    nav.appendChild(steps);
+
+    var ctl=el('div','tl-nav');
+    var prev=navButton('navbtn--prev','Oldingi bosqich',ARROW_L,function(){ go(at-1); });
+    var next=navButton('navbtn--next','Keyingi bosqich',ARROW_R,function(){ go(at+1); });
+    prev.disabled=at===0; next.disabled=at===years.length-1;
+    ctl.appendChild(prev); ctl.appendChild(next);
+    var fs=navButton('navbtn--fs','To‘liq ekran',
+      document.fullscreenElement?FS_OFF:FS_ON,toggleFullscreen);
+    ctl.appendChild(fs);
+    document.addEventListener('fullscreenchange',function(){
+      if(fs.isConnected) fs.innerHTML=document.fullscreenElement?FS_OFF:FS_ON;
+    });
+    nav.appendChild(ctl);
+    return nav;
+  }
+
+  /* ------------------------------------------------------------ render --- */
+
   function ensureAmbient(){
     if(document.querySelector('.ambient')) return;
     var a=el('div','ambient');
     a.setAttribute('aria-hidden','true');
-    a.innerHTML='<span></span><span></span><span></span>';
+    a.innerHTML='<i></i><i></i><i></i>';
     document.body.insertBefore(a,document.body.firstChild);
   }
 
-  function render(y){
+  function render(y,years,at,go){
     var page=document.getElementById('page');
     ensureAmbient();
-    disposeScene();              /* oldingi sahifadagi 3D to'xtatiladi */
+    disposeScene();
+    overlays=[];
     page.innerHTML='';
     page.classList.remove('ready');
     page.dataset.layout=y.layout||'single';
-    overlays=[];
+
+    page.appendChild(shellTop(y));
 
     if(y.layout==='compare') renderCompare(y,page);
     else if(y.layout==='project') renderProject(y,page);
     else if(y.layout==='plans') renderPlans(y,page);
     else renderSingle(y,page);
 
-    document.title=(y.layout==='single'||y.layout==='plans'
-                      ? y.title
-                      : y.id.replace('-','–')+'-yillar')+' — Sokin Savdo';
+    page.appendChild(timeline(years,at,go));
 
-    /* navbatma-navbat ochilish */
+    document.title=(y.period||y.title)+' — Sokin Savdo';
+
     var order=Array.prototype.slice.call(page.querySelectorAll('.reveal'));
-    order.forEach(function(n,i){ n.style.setProperty('--d',(REDUCED?0:i*70)+'ms'); });
+    order.forEach(function(n,i){ n.style.setProperty('--d',(REDUCED?0:i*45)+'ms'); });
 
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         page.classList.add('ready');
-        measureChain();
         placeOverlays();
         runCounters(page);
       });
     });
   }
 
-  /* ------------------------------------------------------- sahifalar orasi */
-
-  /* Manzil satridagi hash sahifani belgilaydi: /#2022-2023.
-     Shunda to'g'ridan-to'g'ri ochish, yangilash va brauzerning orqaga/oldinga
-     tugmalari ishlaydi; havolani birovga yuborsa ham o'sha sahifa ochiladi. */
-  function navButton(cls,label,glyph,onClick){
-    var b=el('button','navbtn '+cls);
-    b.type='button';
-    b.setAttribute('aria-label',label);
-    b.title=label;
-    b.innerHTML=glyph;
-    b.addEventListener('click',onClick);
-    return b;
-  }
-
-  var ARROW_L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>';
-  var ARROW_R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
-  var FS_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
-  var FS_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
-
-  function toggleFullscreen(){
-    if(document.fullscreenElement) document.exitFullscreen();
-    else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();
-  }
-
-  function pagerNode(years,at,go){
-    if(years.length<2) return null;
-    var nav=el('nav','pager');
-    nav.setAttribute('aria-label','Sahifalar');
-
-    nav.appendChild(navButton('navbtn--prev','Oldingi sahifa',ARROW_L,function(){ go(at-1); }));
-
-    var dots=el('div','dots');
-    years.forEach(function(y,i){
-      var b=el('button','dot'+(i===at?' is-current':''));
-      b.type='button';
-      b.title=y.title||y.id;
-      b.setAttribute('aria-label',(y.title||y.id)+' sahifasi');
-      if(i===at) b.setAttribute('aria-current','true');
-      b.addEventListener('click',function(){ go(i); });
-      dots.appendChild(b);
-    });
-    nav.appendChild(dots);
-
-    nav.appendChild(navButton('navbtn--next','Keyingi sahifa',ARROW_R,function(){ go(at+1); }));
-
-    var fs=navButton('navbtn--fs','To‘liq ekran',
-      document.fullscreenElement?FS_OFF:FS_ON,toggleFullscreen);
-    nav.appendChild(fs);
-    document.addEventListener('fullscreenchange',function(){
-      if(fs.isConnected) fs.innerHTML=document.fullscreenElement?FS_OFF:FS_ON;
-    });
-
-    nav.querySelector('.navbtn--prev').disabled=at===0;
-    nav.querySelector('.navbtn--next').disabled=at===years.length-1;
-    return nav;
-  }
+  /* ---------------------------------------------------- sahifalar orasi --- */
 
   var years=window.YEARS||[];
   if(!years.length){ console.error('YEARS bo\'sh'); return; }
@@ -766,15 +598,11 @@
     var i=years.findIndex(function(y){ return y.id===id; });
     return i<0?0:i;
   }
-
   var at=indexFromHash();
 
   function show(i,pushHash){
     at=Math.max(0,Math.min(years.length-1,i));
-    render(years[at]);
-    var page=document.getElementById('page'),
-        nav=pagerNode(years,at,go);
-    if(nav) page.appendChild(nav);
+    render(years[at],years,at,go);
     if(pushHash){
       var want='#'+years[at].id;
       if(location.hash!==want) location.hash=want;
@@ -791,7 +619,6 @@
   });
 
   addEventListener('keydown',function(e){
-    if(years.length<2) return;
     if(e.key==='ArrowRight'&&at<years.length-1) go(at+1);
     else if(e.key==='ArrowLeft'&&at>0) go(at-1);
     else if(e.key==='Home') go(0);

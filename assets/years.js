@@ -21,14 +21,14 @@
   window.YEARS=[{
     id:'2010',
     layout:'single',
-    year:'2010',
+    period:'2010',
+    eyebrow:'Boshlanish',
     title:'2010-yil',
 
     stats:[
-      {side:'left',  icon:'workers', value:3,   unit:'ta',
-       label:'ishchi'},
-      {side:'right', icon:'money',   value:200, unit:'mln so‘m',
-       label:'Yillik aylanma:', note:'yiliga 6 marta aylanma'}
+      {value:3,   unit:'ta',       label:'Ishchi'},
+      {value:200, unit:'mln so‘m', label:'Yillik aylanma',
+       note:'yiliga 6 marta aylanma'}
     ],
 
     photo:'assets/photos/2010.jpg',
@@ -83,6 +83,8 @@
   {
     id:'2020-2021',
     layout:'compare',
+    period:'2020–2021',
+    eyebrow:'Ikkinchi bosqich',
     brand:'Sokin Savdo',
     title:'Kredit hisobiga tovuq boqish va so‘yish boshlandi',
     subtitle:'Zanjirga ikkita yangi bo‘g‘in qo‘shildi: boqish va so‘yish',
@@ -97,8 +99,8 @@
           {icon:'cash',    value:4,     unit:'mlrd so‘m', label:'Kredit (olinib yopilgan)'},
           {icon:'hen',     value:25,    unit:'ming dona', label:'Bir aylanmadagi tovuq soni'},
           {icon:'workers', value:50,    unit:'ta',        label:'Ishchi soni'},
-          {icon:'chart',   value:7.5,   unit:'mlrd so‘m', label:'Yillik aylanma (6 marta aylanma)'},
-          {icon:'meat',    value:375,   unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)'},
+          {icon:'chart',   value:7.5,   unit:'mlrd so‘m', label:'Yillik aylanma (6 marta aylanma)', lead:true},
+          {icon:'meat',    value:375,   unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true},
           {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'}
         ]
       },
@@ -153,6 +155,8 @@
   {
     id:'2022-2023',
     layout:'compare',
+    period:'2022–2023',
+    eyebrow:'Klaster boshlandi',
     brand:'Sokin Savdo',
     title:'Subsidiya va ichki yem ishlab chiqarish',
     subtitle:'Klaster boshlandi — tannarx pasaydi, ishlab chiqarish oshdi',
@@ -168,8 +172,8 @@
           {icon:'hen',     value:220,   unit:'ming dona', label:'Bir aylanmadagi tovuq soni'},
           /* manbasi: buyurtmachi tasdig'i, hujjatda yo'q — yuqoridagi izohga qarang */
           {icon:'workers', value:150,   unit:'ta',        label:'Ishchi soni'},
-          {icon:'chart',   value:66,    unit:'mlrd so‘m', label:'Yillik aylanma'},
-          {icon:'meat',    value:3300,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)'},
+          {icon:'chart',   value:66,    unit:'mlrd so‘m', label:'Yillik aylanma', lead:true},
+          {icon:'meat',    value:3300,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true},
           {icon:'tax',     value:3.7,   unit:'mlrd so‘m', label:'Soliq imtiyozi'},
           {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'}
         ]
@@ -184,9 +188,9 @@
            growth:'+36%'},
           {icon:'workers', value:200,   unit:'ta',        label:'Ishchi soni',
            growth:'+33%'},
-          {icon:'chart',   value:90,    unit:'mlrd so‘m', label:'Yillik aylanma',
+          {icon:'chart',   value:90,    unit:'mlrd so‘m', label:'Yillik aylanma', lead:true,
            growth:'+36%'},
-          {icon:'meat',    value:4500,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)',
+          {icon:'meat',    value:4500,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true,
            growth:'+36%'},
           {icon:'gear',    value:6.9,   unit:'mlrd so‘m',
            label:'Ichki yem hisobiga tannarx arzonladi (8%)'},
@@ -235,6 +239,8 @@
   {
     id:'2025-2026',
     layout:'compare',
+    period:'2025–2026',
+    eyebrow:'Qo‘shimcha qiymat',
     brand:'Sokin Savdo',
     title:'Klaster yanada kengaydi',
     subtitle:'Sifatli nasl + qo‘shimcha qiymat = yanada katta imkoniyatlar',
@@ -252,8 +258,8 @@
           {icon:'hen',     value:800,   unit:'ming dona', abs:800000,
            label:'Bir aylanmadagi tovuq soni'},
           {icon:'workers', value:300,   unit:'ta',        label:'Ishchi soni'},
-          {icon:'chart',   value:240,   unit:'mlrd so‘m', label:'Yillik aylanma'},
-          {icon:'meat',    value:12000, unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)'},
+          {icon:'chart',   value:240,   unit:'mlrd so‘m', label:'Yillik aylanma', lead:true},
+          {icon:'meat',    value:12000, unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true},
           {icon:'tax',     value:8,     unit:'mlrd so‘m', label:'Soliq imtiyozi (2024–2025)'},
           {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'},
           {icon:'cuts',    value:null,  label:'Tovuqni bo‘laklarga bo‘lib sotish boshlandi'}
@@ -266,10 +272,10 @@
           {icon:'hen',     value:1.5,   unit:'mln dona',  abs:1500000,
            label:'Bir aylanmadagi tovuq soni', growth:'+88%'},
           {icon:'workers', value:400,   suffix:'+', unit:'ta',
-           label:'Ishchi soni (hujjatda «400 dan oshiq»)'},
-          {icon:'chart',   value:450,   unit:'mlrd so‘m', label:'Yillik aylanma',
+           label:'Ishchi soni'},   /* hujjatda "400 dan oshiq" — shuning uchun "+" */
+          {icon:'chart',   value:450,   unit:'mlrd so‘m', label:'Yillik aylanma', lead:true,
            growth:'+88%'},
-          {icon:'meat',    value:22500, unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)',
+          {icon:'meat',    value:22500, unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true,
            growth:'+88%'},
           {icon:'tax',     value:31.4,  unit:'mlrd so‘m', label:'Soliq imtiyozi',
            growth:'+293%'},
@@ -334,9 +340,10 @@
   {
     id:'2026-2027',
     layout:'project',
+    period:'2026–2027',
+    eyebrow:'Yangi bosqich',
     brand:'Sokin Savdo',
-    title:'2026–2027',
-    titleSuffix:'yil',
+    title:'Parranda Investment va Marel majmuasi',
     subtitle:'Yangi bosqich — yanada katta imkoniyatlar',
 
     photo:'assets/photos/2026.jpg',
@@ -362,8 +369,8 @@
     kpis:[
       {icon:'hen',   label:'Yillik parranda soni',    value:24,  unit:'mln bosh'},
       {icon:'meat',  label:'Go‘sht ishlab chiqarish', value:60,  unit:'ming tonna'},
-      {icon:'chart', label:'Yillik aylanma (prognoz)',value:1.5, unit:'trln so‘m'},
-      {icon:'tax',   label:'Soliq imtiyoz (kutilayotgan)', value:180, unit:'mlrd so‘m'}
+      {icon:'chart', label:'Yillik aylanma (prognoz)',value:1.5, unit:'trln so‘m'}
+      /* soliq imtiyozi (180 mlrd) `invest.cells` da — takrorlanmaydi */
     ],
 
     tracks:{
@@ -402,6 +409,8 @@
   {
     id:'istiqbol',
     layout:'plans',
+    period:'Istiqbol',
+    eyebrow:'2027-yilgacha',
     brand:'Sokin Savdo',
     title:'Istiqboldagi loyihalar',
     subtitle:'2027-yilgacha — yanada katta imkoniyatlar',
