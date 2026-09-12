@@ -1,6 +1,6 @@
 # Sokin Savdo — topshiriq hujjati
 
-**Holat:** 2010-yil sahifasi tayyor. QA 24/24 o'tadi.
+**Holat:** 2010-yil sahifasi tayyor. QA 25/25 o'tadi.
 
 Loyiha 2026-09-12 da to'liq qayta qurildi. Oldingi variant — 6 bob / 13 sahnadan
 iborat kinematik 3D prezentatsiya (`index.html` 7373 satr) — olib tashlandi.
@@ -21,23 +21,31 @@ tashqi so'rov yo'q. Kompozitsiya buyurtmachi bergan referens rasmga mos:
 │ │ 3 ta     │        │ 2010-yil │          │ Yillik aylanma:│ │
 │ │ ishchi   │        └──────────┘          │ 200 mln so'm   │ │
 │ └──────────┘                              │ 6 marta aylanma│ │
-│                                           └────────────────┘ │
-│ ┌────────────┐ →  ┌────────────┐  →  ┌────────────┐          │
-│ │ ishlab     │    │  tashish   │     │   bozor    │          │
-│ │ chiqaruvchi│    │            │     │            │          │
-│ └────────────┘    └────────────┘     └────────────┘          │
+│                                                              │
+│        butun ekran foni: bitta keng surat                    │
+│   ishlab chiqaruvchi  ↷  yuklash  ↷  bozor                   │
 │                                                              │
 │ ┌─ olish ─┐  →  ┌─ tashish ─┐  →  ┌─ bozorga sotish ─┐       │
 │ ══════════════════════════════════════════════════════       │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-Panel bandi — 2010-yilgi qiymat zanjirining uchta bo'g'ini. Ustida
-buyurtmachi bergan keng surat (`assets/photos/2010.jpg`) turadi: chapda ishlab
-chiqaruvchi, o'rtada yuklash, o'ngda bozor — yashil strelkalar aynan zonalar
-chegarasiga tushadi. Surat yuklanmasa sahifa `assets/scenes.js` dagi uchta
-vektor sahnaga tushadi. Talablar va almashtirish tartibi —
-`assets/photos/CREDITS.md`.
+Fon — buyurtmachi bergan bitta keng surat (`assets/photos/2010.jpg`), butun
+ekranni `cover` bilan qoplaydi: chapda ishlab chiqaruvchi, o'rtada yuklash,
+o'ngda bozor. Ikkita **jingalak strelka** zonalar chegarasiga qo'yiladi.
+
+Chegara nuqtalari `assets/years.js` da `arrowsAt` sifatida **surat kengligining
+ulushi** (0..1) bilan beriladi, piksel bilan emas. `assets/page.js: placeArrows`
+har resize'da `cover` matematikasini qayta hisoblab, strelkani suratdagi aynan
+o'sha nuqtaga qo'yadi — shuning uchun ekran nisbati o'zgarsa ham (4:3, 16:9,
+ultrawide) strelka joyidan siljimaydi.
+
+Surat yuklanmasa fon `assets/scenes.js` dagi uchta vektor sahnaga tushadi.
+Talablar va almashtirish tartibi — `assets/photos/CREDITS.md`.
+
+**Diqqat:** fon qatlami `z-index:0`, kontent `z-index:1`. Manfiy `z-index`
+ishlatilmaydi — `body` foni uni bekitib qo'yadi. QA shuni tekshiradi
+(`backdrop-fullscreen`, `bodyBg === 'none'`).
 
 ---
 
@@ -74,7 +82,7 @@ manbasini `assets/years.js` izohiga yozish kerak.
 | `assets/page.js` | YEARS dan DOM quradi, hisoblagich, staggered ochilish |
 | `assets/page.css` | dizayn tokenlari, layout, statistika, panellar, mobil |
 | `assets/icons.js` | inline SVG ikonkalar (tarmoq so'rovi yo'q) |
-| `assets/scenes.js` | uch panel uchun vektor sahnalar (foto zaxirasi) |
+| `assets/scenes.js` | fon uchun uchta vektor sahna (foto zaxirasi) |
 | `assets/photos/` | `2010.jpg` (keng surat) + `CREDITS.md` (manba, talablar) |
 | `assets/chicken-parts.js` | **parchalanish animatsiyasi moduli** — pastga qarang |
 | `assets/poultry-runtime.js` | GLB adapter, faqat `chicken-parts.glb` uchun |
@@ -100,6 +108,7 @@ manbasini `assets/years.js` izohiga yozish kerak.
      label:'Yillik aylanma:', note:'…'}
   ],
   photo:'assets/photos/2020.jpg', photoAlt:'…',
+  arrowsAt:[0.335, 0.645],   // zona chegaralari, surat kengligining ulushi
   panels:[ {scene:'producer'}, {scene:'transport'}, {scene:'bazaar'} ],
   chain: [ {icon,label}, … ]
 }

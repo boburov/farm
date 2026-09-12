@@ -81,11 +81,11 @@ await page.waitForTimeout(2500);   /* hisoblagichlar tugashini kutamiz */
 {
   const c = await page.evaluate(() => ({
     stats: document.querySelectorAll('.stat').length,
-    panels: document.querySelectorAll('.panel').length,
+    scenes: document.querySelectorAll('.backdrop-scene').length,
     arrows: document.querySelectorAll('.panel-arrow').length
   }));
-  c.stats === 2 && c.panels === 3 && c.arrows === 2
-    ? pass('layout-shape', '2 statistika · 3 panel · 2 strelka')
+  c.stats === 2 && c.scenes === 3 && c.arrows === 2
+    ? pass('layout-shape', '2 statistika · 3 fon sahnasi · 2 strelka')
     : fail('layout-shape', JSON.stringify(c));
 }
 
@@ -114,18 +114,51 @@ await page.waitForTimeout(2500);   /* hisoblagichlar tugashini kutamiz */
   n === 3 ? pass('chain-three-steps') : fail('chain-three-steps', `${n} ta bosqich`);
 }
 
-/* 6. panel bandida vizual bor — keng foto yoki vektor sahnalar */
+/* 6. fon bor — butun ekranni qoplaydigan foto yoki vektor sahnalar */
 {
   const st = await page.evaluate(() => {
-    const host = document.querySelector('.panels');
+    const host = document.querySelector('.backdrop');
+    const img = host.querySelector('.backdrop-photo');
+    const r = host.getBoundingClientRect();
     return {
       photo: host.classList.contains('has-photo'),
-      scenes: host.querySelectorAll('svg.scene').length
+      scenes: host.querySelectorAll('svg.scene').length,
+      full: Math.round(r.width) >= innerWidth && Math.round(r.height) >= innerHeight,
+      natural: img ? [img.naturalWidth, img.naturalHeight] : null,
+      /* body foni fon qatlamini bekitib qo'ymasin (avval shu xato bo'lgan) */
+      bodyBg: getComputedStyle(document.body).backgroundImage
     };
   });
-  st.photo || st.scenes === 3
-    ? pass('panels-have-visual', st.photo ? 'keng foto' : '3 vektor sahna')
-    : fail('panels-have-visual', JSON.stringify(st));
+  (st.photo || st.scenes === 3) && st.full && st.bodyBg === 'none'
+    ? pass('backdrop-fullscreen', st.photo ? 'foto ' + st.natural.join('x') : '3 vektor sahna')
+    : fail('backdrop-fullscreen', JSON.stringify(st));
+}
+
+/* 6b. jingalak strelkalar suratdagi zona chegaralarida turibdi */
+{
+  const st = await page.evaluate(() => {
+    const img = document.querySelector('.backdrop-photo');
+    const at = (window.YEARS[0].arrowsAt) || [];
+    const nodes = [...document.querySelectorAll('.panel-arrow')];
+    if (!img || !img.naturalWidth) return { skipped: true };
+    const scale = Math.max(innerWidth / img.naturalWidth, innerHeight / img.naturalHeight);
+    const rw = img.naturalWidth * scale, off = (innerWidth - rw) / 2;
+    return {
+      diffs: nodes.map((n, i) => {
+        const want = off + at[i] * rw;
+        const got = n.getBoundingClientRect().left + n.getBoundingClientRect().width / 2;
+        return Math.abs(want - got);
+      }),
+      onScreen: nodes.every(n => {
+        const r = n.getBoundingClientRect();
+        return r.left >= 0 && r.right <= innerWidth;
+      })
+    };
+  });
+  if (st.skipped) pass('arrows-on-zone-edges', 'foto yo\'q — o\'tkazib yuborildi');
+  else st.diffs.every(d => d < 2) && st.onScreen
+    ? pass('arrows-on-zone-edges', 'chetlanish < 2px')
+    : fail('arrows-on-zone-edges', JSON.stringify(st));
 }
 
 /* 7. hech qanday tashqi so'rov yo'q (offline kafolati) */

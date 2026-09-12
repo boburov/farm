@@ -86,7 +86,11 @@
         host=document.querySelector('.arrows');
     if(!host) return;
     var W=innerWidth, H=innerHeight,
-        nw=(img&&img.naturalWidth)||0, nh=(img&&img.naturalHeight)||0;
+        nw=(img&&img.naturalWidth)||0, nh=(img&&img.naturalHeight)||0,
+        /* fon butun oynani qoplaydi, strelkalar esa `.page` paddingi ichidagi
+           qatlamda turadi — shuning uchun oyna koordinatasidan shu siljish
+           ayriladi */
+        hostLeft=host.getBoundingClientRect().left;
     arrowState.nodes.forEach(function(node,i){
       var f=arrowState.at[i], left;
       if(nw&&nh){
@@ -95,7 +99,7 @@
       }else{
         left=f*W;                            /* zaxira: vektor sahnalar */
       }
-      node.style.left=left+'px';
+      node.style.left=(left-hostLeft)+'px';
     });
   }
   addEventListener('resize',placeArrows);
@@ -186,6 +190,7 @@
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         page.classList.add('ready');
+        placeArrows();
         runCounters(page);
       });
     });
