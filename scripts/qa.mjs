@@ -82,11 +82,12 @@ await page.waitForTimeout(2500);   /* hisoblagichlar tugashini kutamiz */
   const c = await page.evaluate(() => ({
     stats: document.querySelectorAll('.stat').length,
     scenes: document.querySelectorAll('.backdrop-scene').length,
-    arrows: document.querySelectorAll('.panel-arrow').length
+    arrows: document.querySelectorAll('.flow-arrow').length
   }));
-  c.stats === 2 && c.scenes === 3 && c.arrows === 2
-    ? pass('layout-shape', '2 statistika · 3 fon sahnasi · 2 strelka')
-    : fail('layout-shape', JSON.stringify(c));
+  const z = await page.evaluate(() => document.querySelectorAll('.zone').length);
+  c.stats === 2 && c.scenes === 3 && c.arrows === 2 && z === 3
+    ? pass('layout-shape', '2 statistika · 3 fon sahnasi · 3 zona yozuvi · 2 strelka')
+    : fail('layout-shape', JSON.stringify({ ...c, zones: z }));
 }
 
 /* 3. yil belgisi ko'rinadi */
@@ -139,7 +140,7 @@ await page.waitForTimeout(2500);   /* hisoblagichlar tugashini kutamiz */
   const st = await page.evaluate(() => {
     const img = document.querySelector('.backdrop-photo');
     const at = (window.YEARS[0].arrowsAt) || [];
-    const nodes = [...document.querySelectorAll('.panel-arrow')];
+    const nodes = [...document.querySelectorAll('.flow-arrow')];
     if (!img || !img.naturalWidth) return { skipped: true };
     const scale = Math.max(innerWidth / img.naturalWidth, innerHeight / img.naturalHeight);
     const rw = img.naturalWidth * scale, off = (innerWidth - rw) / 2;

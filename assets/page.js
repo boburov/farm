@@ -66,7 +66,7 @@
       img.decoding='async';
       img.addEventListener('load',function(){
         d.classList.add('has-photo');
-        placeArrows();
+        placeOverlays();
       });
       img.addEventListener('error',function(){ img.remove(); });
       img.src=y.photo;
@@ -75,46 +75,47 @@
     return d;
   }
 
-  /* Strelkalarni suratdagi zona chegaralariga qo'yadi.
-     Fon `cover` bilan chizilgani uchun surat ekrandan kengroq yoki balandroq
-     bo'lib qirqiladi — shu sababli chegara ulushi (0..1) piksel holatiga
-     shu yerda, haqiqiy o'lchamlar bo'yicha qayta hisoblanadi. */
-  var arrowState=null;
-  function placeArrows(){
-    if(!arrowState) return;
+  /* Fon `cover` bilan chizilgani uchun surat ekrandan kengroq yoki balandroq
+     bo'lib qirqiladi. Shu sababli suratdagi nuqta (0..1 ulush) piksel holatiga
+     shu yerda, haqiqiy o'lchamlar bo'yicha qayta hisoblanadi — resize'da ham. */
+  var overlays=[];
+  function placeOverlays(){
+    if(!overlays.length) return;
     var img=document.querySelector('.backdrop-photo'),
-        host=document.querySelector('.arrows');
-    if(!host) return;
-    var W=innerWidth, H=innerHeight,
+        W=innerWidth, H=innerHeight,
         nw=(img&&img.naturalWidth)||0, nh=(img&&img.naturalHeight)||0,
-        /* fon butun oynani qoplaydi, strelkalar esa `.page` paddingi ichidagi
-           qatlamda turadi — shuning uchun oyna koordinatasidan shu siljish
-           ayriladi */
-        hostLeft=host.getBoundingClientRect().left;
-    arrowState.nodes.forEach(function(node,i){
-      var f=arrowState.at[i], left;
-      if(nw&&nh){
-        var scale=Math.max(W/nw,H/nh), rw=nw*scale;
-        left=(W-rw)/2 + f*rw;               /* surat ichidagi aniq nuqta */
-      }else{
-        left=f*W;                            /* zaxira: vektor sahnalar */
-      }
-      node.style.left=(left-hostLeft)+'px';
+        scale=nw&&nh?Math.max(W/nw,H/nh):0,
+        rw=scale?nw*scale:0,
+        originX=scale?(W-rw)/2:0;
+    overlays.forEach(function(o){
+      var host=o.node.parentNode; if(!host) return;
+      /* qatlam `.page` paddingi ichida turadi — oyna koordinatasidan siljish ayriladi */
+      var hostLeft=host.getBoundingClientRect().left,
+          x=scale?originX+o.at*rw:o.at*W;
+      o.node.style.left=(x-hostLeft)+'px';
     });
   }
-  addEventListener('resize',placeArrows);
+  addEventListener('resize',placeOverlays);
 
-  function arrowsNode(y){
-    var host=el('div','arrows'),
-        at=y.arrowsAt||[1/3,2/3],
-        nodes=[];
-    at.forEach(function(f,i){
-      var a=el('div','panel-arrow reveal');
+  /* Suratdagi zonalar ustidagi yozuvlar + ular orasidagi strelkalar */
+  function overlayNode(y){
+    var host=el('div','overlay');
+    overlays=[];
+
+    (y.zones||[]).forEach(function(z){
+      var t=el('div','zone reveal');
+      t.appendChild(el('span','zone-label',z.label));
+      host.appendChild(t);
+      overlays.push({node:t,at:z.at});
+    });
+
+    (y.arrowsAt||[]).forEach(function(f){
+      var a=el('div','flow-arrow reveal');
       a.innerHTML=window.ICONS?ICONS('swoosh'):'';
       host.appendChild(a);
-      nodes.push(a);
+      overlays.push({node:a,at:f});
     });
-    arrowState={at:at,nodes:nodes};
+
     return host;
   }
 
@@ -170,13 +171,19 @@
     var left=y.stats.filter(function(s){ return s.side!=='right'; });
     var right=y.stats.filter(function(s){ return s.side==='right'; });
     left.forEach(function(s){ top.appendChild(statNode(s)); });
-    top.appendChild(el('div','year-badge reveal',y.title));
+
+    var title=el('div','title-block');
+    if(y.brand) title.appendChild(el('p','brandline reveal',y.brand));
+    title.appendChild(el('div','year-badge reveal',y.title));
+    if(y.subtitle) title.appendChild(el('p','subtitle reveal',y.subtitle));
+    top.appendChild(title);
+
     right.forEach(function(s){ top.appendChild(statNode(s)); });
     page.appendChild(top);
 
-    /* butun ekran foni + zonalar orasidagi jingalak strelkalar */
+    /* butun ekran foni + ustidagi zona yozuvlari va oqim strelkalari */
     page.appendChild(backdropNode(y));
-    page.appendChild(arrowsNode(y));
+    page.appendChild(overlayNode(y));
 
     page.appendChild(chainNode(y.chain));
 
@@ -189,7 +196,7 @@
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         page.classList.add('ready');
-        placeArrows();
+        placeOverlays();
         runCounters(page);
       });
     });

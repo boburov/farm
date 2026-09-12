@@ -33,10 +33,19 @@
     photo:'assets/photos/2010.jpg',
     photoAlt:'Ishlab chiqaruvchidan olingan tovuq go‘shti yuk mashinasiga '+
              'ortilib, bozorga yetkazilmoqda',
-    /* Suratdagi zonalar chegarasi — surat kengligining ulushi sifatida.
-       Strelkalar aynan shu nuqtalarga qo'yiladi, ekran nisbati o'zgarsa ham
-       (fon `cover` bilan qirqiladi) joyida qoladi — assets/page.js: placeArrows. */
+    brand:'Sokin Savdo',
+    subtitle:'Bozorda tovuq go‘shti savdosi — qiymat zanjirining oxirgi bo‘g‘ini',
+
+    /* Suratdagi nuqtalar — surat kengligining ulushi sifatida (0..1), piksel
+       emas. Fon `cover` bilan qirqilgani uchun ekran nisbati o'zgarsa piksel
+       holati ham o'zgaradi; `assets/page.js: placeOverlays` uni har safar
+       qayta hisoblaydi, shuning uchun yozuv ham, strelka ham joyidan siljimaydi. */
     arrowsAt:[0.335, 0.645],
+    zones:[
+      {at:0.150, label:'Ishlab chiqaruvchi'},
+      {at:0.490, label:'Tashish'},
+      {at:0.825, label:'Bozor'}
+    ],
     panels:[
       {scene:'producer'},
       {scene:'transport'},

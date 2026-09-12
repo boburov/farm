@@ -55,6 +55,17 @@ strelkalar doira ichida emas — yaxlit egri shakl. `assets/icons.js` da ikki
 oila bor: `FILL` (ishlatilayotgani) va `LINE` (zaxira). Pastdagi zanjir och
 panel ustida, sahifa chetigacha cho'ziladi.
 
+Suratning ustida uchta **zona yozuvi** (`zones` — `assets/years.js`) turadi:
+oq kapsula, oltin hoshiya, to'q yashil matn. Oq kapsula ataylab tanlangan —
+yozuvlar ham och bino ustiga, ham to'q tent ustiga tushadi, to'q fonli variant
+bozor tentida yo'qolib ketardi.
+
+Boshqa nozikliklar: yil belgisida gradient va oltin hoshiya; markazda brend
+qatori (`brand`) va izoh (`subtitle`); statistika izohi oltin chiziq bilan
+ajratilgan; fonda 34 soniyalik sekin yaqinlashuv (`@keyframes drift`) va
+ikki qatlamli parda (tepa/past tinchlantiriladi, chetlar qoraytiriladi).
+Barchasi `prefers-reduced-motion` bilan o'chadi.
+
 ---
 
 ## ENG MUHIM QOIDA
