@@ -355,7 +355,7 @@
       value:35, unit:'mln $',
       cells:[
         {label:'Parranda Investment hisobidan', value:20,  unit:'mln $'},
-        {label:'Soliq imtiyoz (kutilayotgan)',  value:180, unit:'mlrd so‘m'}
+        {label:'Soliq imtiyoz (kutilayotgan)',  value:100, unit:'mlrd so‘m'}
       ]
     },
 
