@@ -90,13 +90,20 @@ html,body{
 }
 
 /* chapga tekislangan yirik sarlavha */
-.lede{flex:0 0 auto;max-width:min(1150px,100%)}
+.lede{flex:0 0 auto;max-width:none;width:100%}
 .lede-title{
   margin:0;
   font-size:clamp(24px,3.5vw,68px);
   font-weight:300;line-height:1.02;letter-spacing:-.02em;
   color:var(--head);
 }
+.lede-year{
+  font-family:"Onest",var(--font);
+  font-size:clamp(24px,3.5vw,68px);
+  font-weight:900;line-height:1.02;letter-spacing:-.02em;
+  color:var(--head);
+}
+.page[data-layout="project"] .lede-year{font-size:clamp(22px,2.9vw,54px)}
 .lede-sub{
   margin:clamp(4px,.8vh,12px) 0 0;
   font-size:clamp(28px,1.05vw,38px);
@@ -135,19 +142,19 @@ html,body{
    Nisbat brifdagidek 55 / 45; 3D sahnada 60 / 40. */
 .split{
   flex:1 1 auto;min-height:0;
-  display:grid;grid-template-columns:55fr 45fr;
+  display:grid;grid-template-columns:1fr 1fr;
   gap:clamp(18px,3vw,64px);align-items:stretch;
 }
-.split--model{grid-template-columns:60fr 40fr}
-/* 2020–2021: surat 30% kengroq (55 → 71.5) */
-.page[data-id="2020-2021"] .split{grid-template-columns:71.5fr 28.5fr}
-/* Loyiha sahnasi: surat kengroq — bino aniq ko'rinadi, raqamlar o'ngda. */
-.split--project{grid-template-columns:61fr 39fr}
+.split--model{grid-template-columns:1fr 1fr}
+/* Loyiha sahnasi: surat kengroq — bino aniq ko'rinadi, raqamlar o'ngda.
+   Ixcham: surat bo'yi cheklangan, pastdagi jadval va zanjirga joy qoladi. */
+.split--project{grid-template-columns:61fr 39fr;flex:0 1 auto;height:44vh}
+.page[data-layout="project"] .flow{margin-top:auto}
 /* Loyiha sahnasida sarlavha bloki ixcham — bo'shliq suratga beriladi. */
 .page[data-layout="project"] .scene{gap:clamp(7px,1.3vh,18px)}
 /* 2010: sarlavha ostidagi matn boshqa sahifalardagi sarlavha o'lchamida */
 .page[data-layout="single"] .lede{max-width:none}
-.page[data-id="2010"] .lede-title{font-weight:800}
+.page[data-id="2010"] .lede-title{font-weight:900;font-family:"Onest",var(--font)}
 /* 2025–2026: uzun sarlavha — butun kenglikda, kamroq qatorga bo'linadi */
 .page[data-id="2025-2026"] .lede{max-width:none}
 .page[data-layout="single"] .lede-sub{font-size:clamp(24px,3.5vw,68px);font-weight:300;letter-spacing:-.02em;line-height:1.05;color:var(--head);max-width:none}
@@ -177,6 +184,8 @@ html,body{
 /* Ketma-ket uch surat: har biri o'z katagida, o'rtadagisi kengroq. */
 .visual--strip{display:flex;gap:clamp(4px,.5vw,10px)}
 .strip-cell{position:relative;flex:1 1 0;min-width:0;overflow:hidden}
+/* chetdagi ikki surat pastroq (bo'yiga 80%), o'rtadagisi to'liq balandlikda */
+.strip-cell:first-child,.strip-cell:last-child{align-self:center;height:80%}
 .visual--strip img{-webkit-mask-image:none;mask-image:none;object-position:center 60%}
 .strip-cell .zone{left:50%}
 .zone{position:absolute;top:clamp(6px,3vh,34px);transform:translateX(-50%);pointer-events:none}
@@ -217,6 +226,13 @@ html,body{
   font-size:clamp(8px,.64vw,13px);
   font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
 }
+/* Barcha jadvallar: yillar yashil; "Кўрсаткич" va "Ўсиш" yil yozuvi
+   o'lchami va qalinligida, yashil */
+.ledger-head span{color:var(--head)}
+.page .ledger-head .lh-metric{
+  font-size:clamp(13px,1.5vw,30px);font-weight:800;letter-spacing:-.01em;
+  color:var(--head);white-space:nowrap;
+}
 .ledger-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .ledger-row{padding:clamp(5px,1.1vh,16px) 0;border-bottom:1px solid var(--rule)}
 .ledger-row:last-child{border-bottom:0}
@@ -229,16 +245,18 @@ html,body{
   font-variant-numeric:tabular-nums;
 }
 .lr-val em{font-style:normal;font-size:.48em;font-weight:600;letter-spacing:normal;color:var(--muted)}
-/* eng muhim ko'rsatkichlar kattaroq */
-.ledger-row.is-lead .lr-val{font-size:clamp(17px,1.95vw,42px)}
-.ledger-row.is-lead .lr-metric{color:var(--ink);font-weight:600}
 /* o'sish foizi — o'z ustunida, kichik izoh sifatida */
 .lr-delta{
   justify-self:end;text-align:right;
   font-size:clamp(8px,.68vw,14px);
-  font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;
+  font-weight:700;color:var(--num);font-variant-numeric:tabular-nums;
   white-space:nowrap;
 }
+.lr-note{font-size:1em;font-weight:inherit;color:var(--num)}
+.lr-note::before{content:"/";margin-right:.28em;color:var(--num)}
+/* `noteBelow` — izoh qiymat ostida, alohida qatorda, "/" belgisiz */
+.lr-note.is-below{flex-basis:100%}
+.lr-note.is-below::before{content:none}
 .lr-suffix{margin-left:-.16em;font-weight:700;color:var(--num)}
 .lr-dash{color:var(--muted);font-weight:600}
 
@@ -254,6 +272,7 @@ html,body{
   font-size:clamp(8.5px,.72vw,14px);
   font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
 }
+.flow li.is-own{color:var(--head)}
 .flow li.is-link{color:var(--rule);letter-spacing:0}
 .flow li.is-link::before{content:"——"}
 
@@ -335,7 +354,7 @@ html,body{
    3 barobar katta (1.5x, keyin yana 2x). */
 .cuts-model{
   position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);
-  width:min(49%,clamp(214px,30.6vh,400px));aspect-ratio:1;
+  width:min(44.1%,clamp(193px,27.5vh,360px));aspect-ratio:1; /* 10% kichraytirilgan */
   pointer-events:none;opacity:0;transition:opacity .8s var(--ease) .25s;
 }
 .cuts-model.is-in{opacity:1}
@@ -387,7 +406,7 @@ html,body{
 .cut-pct-wrap i{font-style:normal;font-size:.72em;font-weight:700;color:var(--num)}
 
 .cut-img{
-  display:block;width:100%;height:auto;
+  display:block;width:90%;height:auto; /* bo'lak suratlari 10% kichikroq */
   opacity:0;transition:opacity .7s var(--ease);
   filter:drop-shadow(0 6px 14px rgba(18,62,43,.14));
 }
@@ -448,12 +467,12 @@ html,body{
   grid-template-columns:1fr;gap:0;padding-top:0;border-top:none;
 }
 .split--project .metric{
-  padding:clamp(6px,1.1vh,15px) 0;border-top:1px solid var(--rule);gap:3px;
+  padding:clamp(4px,.7vh,10px) 0;border-top:1px solid var(--rule);gap:1px;
 }
 .split--project .metric:first-child{border-top:none;padding-top:0}
 .split--project .metric-label{font-size:clamp(9px,.72vw,15px);letter-spacing:.14em}
-.split--project .metric-value{font-size:clamp(26px,2.7vw,58px)}
-.split--project .metric.is-lead .metric-value{font-size:clamp(32px,3.6vw,76px)}
+.split--project .metric-value{font-size:clamp(20px,2vw,42px);color:var(--head)}
+.split--project .metric.is-lead .metric-value{font-size:clamp(24px,2.6vw,54px)}
 .split--project .substrip{gap:clamp(8px,1.4vw,26px)}
 .split--project .sub-label{font-size:clamp(8.5px,.7vw,14px)}
 .split--project .sub-value{font-size:clamp(14px,1.3vw,28px)}
@@ -500,19 +519,22 @@ html,body{
 .partners .x{color:var(--gold);font-weight:600}
 .partners .note{flex:1 0 100%;font-size:clamp(8.5px,.68vw,14px);font-weight:500;color:var(--muted)}
 
-.tracks{
-  list-style:none;margin:0;padding:clamp(6px,1.2vh,18px) 0 0;
-  border-top:1px solid var(--rule);
-  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:clamp(10px,2vw,40px);counter-reset:trk;
+/* eni surat ustuni bilan bir xil (split--project: 61fr 39fr), chapda surat ostida */
+.tracks{flex:0 0 auto;display:flex;flex-direction:column;width:calc((100% - clamp(18px,3vw,64px)) * .61)}
+.tracks-head,.tracks-row{
+  display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);
+  align-items:baseline;gap:clamp(6px,1vw,20px);
 }
-.tracks li{counter-increment:trk;display:flex;flex-direction:column;gap:2px}
-.tracks li::before{
-  content:counter(trk,decimal-leading-zero);
-  font-size:clamp(8px,.66vw,13px);font-weight:700;letter-spacing:.14em;color:var(--gold);
-}
-.track-label{font-size:clamp(9.5px,.84vw,17px);font-weight:600;line-height:1.2;color:var(--ink)}
-.track-note{font-size:clamp(16px,1.75vw,25px);line-height:1.3;font-weight:100;color:black;white-space:pre-line}
+/* sarlavha — oldingi sahifalardagi jadval sarlavhasi kabi yashil va qalin */
+.tracks-head{padding-bottom:clamp(3px,.5vh,7px);border-bottom:1px solid var(--ink)}
+.tracks-head span{font-size:clamp(10px,.95vw,19px);font-weight:800;letter-spacing:-.01em;color:var(--head)}
+.tracks-row{padding:clamp(3px,.5vh,8px) 0;border-bottom:1px solid var(--rule)}
+.tracks .lr-val{font-size:clamp(12px,1.1vw,22px)}
+.tracks-row:last-child{border-bottom:0}
+/* qiymat ustunlari (sarlavha va raqamlar) markazda */
+.tracks-head span:not(:first-child){text-align:center}
+.tracks-row .lr-val{justify-content:center}
+.track-label{font-size:clamp(8.5px,.74vw,15px);font-weight:500;line-height:1.2;color:var(--muted)}
 
 /* ------------------------------------------------------------ rejalar --- */
 
@@ -638,13 +660,14 @@ html,body{
   .page{height:auto;min-height:100dvh;grid-template-rows:auto auto auto;
     padding-bottom:var(--pad-y)}
   .lede{max-width:none}
-  .split,.split--model,.split--project,
-  .page[data-id="2020-2021"] .split{grid-template-columns:1fr;gap:16px}
+  .split,.split--model,.split--project{grid-template-columns:1fr;gap:16px}
   .visual{height:min(34vh,260px)}
   .ledger-head,.ledger-row{grid-template-columns:minmax(0,1fr) minmax(0,.8fr) minmax(0,.8fr)}
   .figures{gap:22px}
   .figure-value{font-size:clamp(40px,15vw,84px)}
-  .metrics,.tracks{grid-template-columns:1fr 1fr}
+  .metrics{grid-template-columns:1fr 1fr}
+  .tracks{width:100%}
+  .split--project{height:auto}
   .projects{grid-template-columns:1fr;grid-template-rows:none;row-gap:24px}
   .project-shot{min-height:140px}
   .totals{gap:20px}

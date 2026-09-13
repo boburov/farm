@@ -21,7 +21,7 @@
   window.YEARS = [{
     id: '2010',
     layout: 'single',
-    period: '2010',
+    period: ' ',
     eyebrow: '',
     title: '2010-йил',
 
@@ -37,7 +37,7 @@
     photoAlt: 'Сокин Савдо Сервис — Ишлаб чиқарувчидан олинган товуқ гўшти юк машинасига ' +
       'ортилиб, бозорга етказилмоқда',
     brand: 'Сокин Савдо Сервис',
-    subtitle: 'Фаолиятни бозорда товуқ гўшти улгуржи савдоси ва дистрбюция билан бошлаш',
+    subtitle: 'Фаолиятни бозорда товуқ гўшти улгуржи савдоси ва дистрибуция билан бошлаш',
 
     /* Suratdagi nuqtalar — surat kengligining ulushi sifatida (0..1), piksel
        emas. Fon `cover` bilan qirqilgani uchun ekran nisbati o'zgarsa piksel
@@ -46,7 +46,7 @@
     /* Uch surat ketma-ket; o'rtadagi jarayon (tashish) kengroq ko'rsatiladi. */
     strip: [
       { photo: 'assets/photos/2010-producer.jpg', label: 'Ишлаб чиқарувчи', grow: 1 },
-      { photo: 'assets/photos/2010-transport.jpg', label: 'Ташиш', grow: 2.6 },
+      { photo: 'assets/photos/2010-transport.jpg', label: 'Ташиш', grow: 3.2 },
       { photo: 'assets/photos/2010-bazaar.jpg', label: 'Бозор', grow: 1 }
     ],
     panels: [
@@ -84,10 +84,10 @@
   {
     id: '2020-2021',
     layout: 'compare',
-    period: '2020–2021',
+    period: ' ',
     eyebrow: '',
     brand: 'Сокин Савдо Сервис',
-    title: "Кредит маблағлари ҳисобидан товуқ боқиш ва гўшт маҳсулотларини ишлаб чиқариш лойиҳалари старт олди.",
+    title: "Лойиҳалар старти - кредит маблағлари ҳисобидан товуқ боқиш ва гўшт маҳсулотларини ишлаб чиқариш",
     subtitle: '',
 
     photo: 'assets/photos/2020.jpg',
@@ -95,32 +95,30 @@
 
     columns: [
       {
-        year: '2020-йил', tone: 'dark',
+        year: '2020', tone: 'dark',
         rows: [
-          { icon: 'cash', value: 4, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)' },
+          { icon: 'cash', value: 4, unit: 'млрд сўм', label: 'Кредит (ўзлаштирилган)' },
           { icon: 'hen', value: 25, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
-          { icon: 'workers', value: 50, unit: 'та', label: 'Ишчи сони' },
+          { icon: 'workers', value: 50, unit: 'та', label: 'Ишчилар сони' },
           { icon: 'chart', value: 8, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
-          { icon: 'meat', value: 375, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
+          { icon: 'meat', value: 375, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true },
         ]
       },
       {
-        year: '2021-йил', tone: 'green',
+        year: '2021', tone: 'green',
         growthHead: '2020-га нисбатан ўсиш',
         rows: [
-          { icon: 'cash', value: 20, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)', growth: '+500%' },
+          { icon: 'cash', value: 20, unit: 'млрд сўм', label: 'Кредит (ўзлаштирилган)', growth: '+500%' },
           { icon: 'hen', value: 200, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони', growth: '+800%' },
-          { icon: 'workers', value: 100, unit: 'та', label: 'Ишчи сони', growth: '+200%' },
+          { icon: 'workers', value: 100, unit: 'та', label: 'Ишчилар сони', growth: '+200%' },
           { icon: 'chart', value: 60, unit: 'млрд сўм', label: 'Йиллик айланма', growth: '+750%' },
-          { icon: 'meat', value: 3000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', growth: '+800%' },
+          { icon: 'meat', value: 3000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', growth: '+800%' },
         ]
       }
     ],
 
     chain: [
-      { icon: 'barn', label: 'Боқиш' },
-      { icon: 'blade', label: 'Сўйиш' },
-      { icon: 'truck', label: 'Бозорга етказиш' }
+      { icon: 'barn', label: 'боқиш ва cўйиш' },
     ]
   },
 
@@ -154,30 +152,30 @@
   {
     id: '2022-2023',
     layout: 'compare',
-    period: '2022–2023',
+    period: ' ',
     eyebrow: '',
     brand: 'Сокин Савдо Сервис',
-    title: 'Давлат субсидияси ҳисобидан ем ишлаб чиқариш мажмуаси ишга тушурилди.',
-    subtitle: 'Кластер тизими бошланди — таннарх пасайди, ишлаб чиқариш сурати ошди.',
+    title: 'Кластер тизимига қадам - Давлат субсидияси ҳисобидан озуқа ем ишлаб чиқариш мажмуасини ишга тушуриш',
+    subtitle: '',
 
     photo: 'assets/photos/2022.jpg',
     photoAlt: 'Ем заводи, товуқхоналар, сўйиш сехи ва юк машинаси',
 
     columns: [
       {
-        year: '2022-йил', tone: 'dark',
+        year: '2022', tone: 'dark',
         rows: [
           { icon: 'subsidy', value: 2500, unit: 'сўм', label: 'Ҳар бир кг га субсидия' },
           { icon: 'hen', value: 220, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
-          { icon: 'workers', value: 150, unit: 'та', label: 'Ишчи сони' },
+          { icon: 'workers', value: 150, unit: 'та', label: 'Ишчилар сони' },
           { icon: 'chart', value: 66, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
-          { icon: 'meat', value: 3300, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
+          { icon: 'meat', value: 3300, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true },
           { icon: 'gear', value: null, label: 'Ички ем ҳисобига таннарх арзонлади (10,4%)' },
 
         ]
       },
       {
-        year: '2023-йил', tone: 'green',
+        year: '2023', tone: 'green',
         growthHead: '2022-га нисбатан ўсиш',
         rows: [
           {
@@ -189,7 +187,7 @@
             growth: '+36%'
           },
           {
-            icon: 'workers', value: 200, unit: 'та', label: 'Ишчи сони',
+            icon: 'workers', value: 200, unit: 'та', label: 'Ишчилар сони',
             growth: '+33%'
           },
           {
@@ -197,12 +195,13 @@
             growth: '+36%'
           },
           {
-            icon: 'meat', value: 4500, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true,
+            icon: 'meat', value: 4500, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true,
             growth: '+36%'
           },
           {
-            icon: 'gear', value: 10.4, unit: 'млрд сўм',
-            label: 'Ички ем ҳисобига таннарх арзонлади (11,5%)'
+            icon: 'gear', value: 10, unit: 'млрд сўм',
+            label: 'Таннархни камайтириш хисобига эришилган иқтисод',
+            note: '12%', growth: ''
           },
           { icon: 'money', value: 20000, unit: 'сўм', label: '1 кг гўшт нархи' }
         ]
@@ -210,10 +209,7 @@
     ],
 
     chain: [
-      { icon: 'gear', label: 'Ем ишлаб чиқариш' },
-      { icon: 'barn', label: 'Товуқ боқиш' },
-      { icon: 'blade', label: 'Сўйиш' },
-      { icon: 'truck', label: 'Бозорга етказиш' }
+      { icon: 'gear', label: 'Кластер тизимига қадам' },
     ]
   },
 
@@ -248,18 +244,18 @@
   {
     id: '2025-2026',
     layout: 'compare',
-    period: '2025–2026',
+    period: ' ',
     eyebrow: '',
     brand: 'Сокин Савдо Сервис',
-    title: 'Кластер тармоқлари янада кенгайди ва товуқ гўштини бўлакларга ажратиш тизимини ташкил этиш билан ишлаб чиқариш қуввати оширилди.',
-    subtitle: '2025-йилда : Бутун товуқни қисимларга ажратиш\n2026-йилда : Наслли "Она товуқ" лойиҳасининг бошланиши',
+    title: 'Қўшилган қиймат яратиш - товуқ гўштини қисмларга ажратиш ва наслли она товуқ лойиҳасини ишга тушириш',
+    subtitle: '',
 
     photo: 'assets/photos/2025.jpg',
     photoAlt: 'Она товуқ хўжалиги, бўлакларга бўлиб ишлаш сехи ва қадоқлаш',
 
     columns: [
       {
-        year: '2025-йил', tone: 'dark',
+        year: '2025', tone: 'dark',
         rows: [
           /* `abs` — asl kattalik (dona). Ekranda "800 ming" ko'rinadi, lekin
              o'sish foizini tekshirish shu maydondan hisoblanadi: ikki yilda
@@ -268,9 +264,9 @@
             icon: 'hen', value: 800, unit: 'минг дона', abs: 800000,
             label: 'Бир айланмадаги товуқ сони'
           },
-          { icon: 'workers', value: 300, unit: 'та', label: 'Ишчи сони' },
+          { icon: 'workers', value: 300, unit: 'та', label: 'Ишчилар сони' },
           { icon: 'chart', value: 242, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
-          { icon: 'meat', value: 11000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
+          { icon: 'meat', value: 11000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true },
           { icon: 'tax', value: null, unit: 'млрд сўм', label: 'Солиқ имтиёзи (2024–2025)' },
           { icon: 'chart', value: 19, unit: 'млрд сўм', label: 'Қўшилган қиймат' },
           { icon: 'gear', value: null, label: 'Таннархни камайтириш (8%)' },
@@ -279,7 +275,7 @@
         ]
       },
       {
-        year: '2026-йил', yearNote: '(Кутилма)', tone: 'green',
+        year: '2026', yearNote: '(Кутилма)', tone: 'green',
         growthHead: '2025-га нисбатан ўсиш',
         rows: [
           {
@@ -288,25 +284,25 @@
           },
           {
             icon: 'workers', value: 400, suffix: '+', unit: 'та',
-            label: 'Ишчи сони', growth: "133%"
+            label: 'Ишчилар сони', growth: "133%"
           },   /* hujjatda "400 dan oshiq" — shuning uchun "+" */
           {
             icon: 'chart', value: 315, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true,
             growth: '+130%'
           },
           {
-            icon: 'meat', value: 13100, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true,
+            icon: 'meat', value: 13100, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true,
             growth: '+119%'
           },
+          { icon: 'gear', value: 14, unit: 'млрд сўм', label: 'Таннархни камайтириш хисобига эришилган иқтисод', note: '5%' },
+          { icon: 'chart', value: null, label: 'Лойиҳа хисобига қўшилган қиймат' },
           {
             icon: 'tax', value: 15, unit: 'млрд сўм', label: 'Солиқ имтиёзи',
-            growth: '+293%'
+            growth: ''
           },
-          { icon: 'chart', value: null, label: 'Қўшилган қиймат' },
-          { icon: 'gear', value: 14, unit: 'млрд сўм', label: 'Таннархни камайтириш (5%)' },
           {
             icon: 'hen', value: 75, unit: 'минг бош',
-            label: 'Венгрия Авиаген компаниясидан она товуқ'
+            label: 'Авиаген (Венгрия) компаниясидан наслли она товуқ импорти'
           }
         ]
       }
@@ -332,11 +328,7 @@
     },
 
     chain: [
-      { icon: 'hen', label: 'Она товуқ хўжалиги' },
-      { icon: 'gear', label: 'Ем ишлаб чиқариш' },
-      { icon: 'barn', label: 'Товуқ боқиш' },
-      { icon: 'blade', label: 'Сўйиш ва қайта ишлаш' },
-      { icon: 'cuts', label: 'Бўлакларга бўлиб сотиш' }
+      { icon: 'hen', label: 'қиймат яратиш' },
     ]
   },
 
@@ -362,11 +354,11 @@
   {
     id: '2026-2027',
     layout: 'project',
-    period: '2026–2027',
+    period: ' ',
     eyebrow: '',
     brand: 'Сокин Савдо Сервис',
     title: 'Янги лойиҳа: "Парранда инвестмент" МЧЖ ҳамкорлигидаги технологик трансформация',
-    subtitle: 'Янги босқич — янада катта имкониятлар',
+    subtitle: '',
 
     photo: 'assets/photos/2026.jpg',
     photoAlt: 'Янги сўйиш ва қадоқлаш мажмуаси — кўчадан кўриниши',
@@ -390,15 +382,21 @@
       { icon: 'chart', label: 'Кутилаётган солиқ имтиёзи', value: 100, unit: 'млрд сўм' }
     ],
 
+    chain: [
+      { icon: 'gear', label: 'Технологик трансформация' }
+    ],
+
     tracks: {
       title: 'Мажмуанинг асосий йўналишлари',
       items: [
-        { icon: 'cage', label: 'Кўп қаватли катакларда товуқ боқиш тизими', note: 'Таннархни камайтириш\n14 млрд сўм (1.2%) ' },
-        { icon: 'pack', label: 'Парранда сўйиш, қайта ишлаш, сақлаш ва қадоқлаш', note: 'Қўшилган қиймат\n915 млрд сўм\nТаннархни камайтириш\n36 млрд сўм (3%)' },
-        {
-          icon: 'recycle', label: 'Рендеринг линияси',
-          note: 'Қўшилган қиймат\n50 млрд сўм'
-        }
+        /* jadval: `added` — Қўшилган қиймат, `cost` — Таннархни камайтириш */
+        { icon: 'cage', label: 'Кўп қаватли катакларда товуқ боқиш тизими',
+          cost: { value: 14, unit: 'млрд сўм', note: '1.2%' } },
+        { icon: 'pack', label: 'Парранда сўйиш, қайта ишлаш, сақлаш ва қадоқлаш',
+          added: { value: 915, unit: 'млрд сўм' },
+          cost: { value: 36, unit: 'млрд сўм', note: '3%' } },
+        { icon: 'recycle', label: 'Рендеринг линияси',
+          added: { value: 50, unit: 'млрд сўм' } }
       ]
     }
   },

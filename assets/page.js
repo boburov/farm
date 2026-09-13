@@ -18,6 +18,11 @@
     return n;
   }
 
+  /* Vaqt chizig'i va sahifa nomi uchun yil nomi: `period` bo'sh bo'lsa id'dan olinadi. */
+  function yearName(y){
+    return (y.period||'').trim()||y.id.replace('-','–');
+  }
+
   /* 20000 → "20 000" (uzilmas probel), 7.5 → "7.5" */
   function fmt(v,dec){
     var r=dec?Math.round(v*10)/10:Math.round(v), p=String(r).split('.');
@@ -54,6 +59,13 @@
 
   function lede(y){
     var d=el('div','lede');
+    /* Har sahifa tepasida o'z yili. Sarlavhaning o'zi yil bo'lsa (2010) — takrorlanmaydi. */
+    if(String(y.title||'').indexOf(y.id)!==0){
+      var n=yearName(y);
+      if(/^\d{4}$/.test(n)) n+='-йил';
+      else if(/^\d{4}–\d{4}$/.test(n)) n+='-йиллар';
+      d.appendChild(el('div','lede-year reveal',n));
+    }
     d.appendChild(el('h1','lede-title reveal',y.title));
     if(y.subtitle) d.appendChild(el('p','lede-sub reveal',y.subtitle));
     return d;
@@ -124,12 +136,14 @@
   }
 
   /* Ishlab chiqarish zanjiri: kichik yozuvlar, orasida nozik bog'lovchi. */
-  function flow(steps){
+  /* `own` — shu sahifaning o'z bosqichlari (kichik harfdagi nomlar); ular yashil. */
+  function flow(steps,own){
     if(!steps||!steps.length) return null;
     var ul=el('ul','flow reveal');
     steps.forEach(function(s,i){
       if(i) ul.appendChild(el('li','is-link'));
-      ul.appendChild(el('li',null,s.label));
+      var mine=own&&own.indexOf(String(s.label).trim().toLowerCase())>=0;
+      ul.appendChild(el('li',mine?'is-own':null,s.label));
     });
     return ul;
   }
@@ -157,9 +171,12 @@
       var rb=b.rows[i]||{};
       var li=el('li','ledger-row reveal'+(ra.lead||rb.lead?' is-lead':''));
       li.appendChild(el('span','lr-metric',rb.label||ra.label));
-      li.appendChild(value('lr-val',ra.value,ra.unit,ra.suffix));
-
-      li.appendChild(value('lr-val',rb.value,rb.unit,rb.suffix));
+      [ra,rb].forEach(function(r){
+        var v=value('lr-val',r.value,r.unit,r.suffix);
+        /* `note` — qiymat ostida kichik izoh (masalan, "12%") */
+        if(r.note) v.appendChild(el('small','lr-note'+(r.noteBelow?' is-below':''),r.note));
+        li.appendChild(v);
+      });
       /* o'sish foizi alohida tor ustunda — qatorlar bir xil balandlikda qoladi */
       li.appendChild(el('span','lr-delta',rb.growth||''));
 
@@ -581,7 +598,7 @@
     story.appendChild(visual(y));
     scene.appendChild(story);
 
-    var f=flow(y.chain); if(f) scene.appendChild(f);
+    var f=flow(y.chain,y.chainOwn); if(f) scene.appendChild(f);
     page.appendChild(scene);
   }
 
@@ -622,7 +639,7 @@
     split.appendChild(ledger(y));
     scene.appendChild(split);
 
-    var f=flow(y.chain); if(f) scene.appendChild(f);
+    var f=flow(y.chain,y.chainOwn); if(f) scene.appendChild(f);
     page.appendChild(scene);
   }
 
@@ -679,15 +696,25 @@
 
     var tracks=(y.tracks&&y.tracks.items)||[];
     if(tracks.length){
-      var tr=el('ul','tracks reveal');
+      /* Jadval: chapda yo'nalish nomi, o'ngda qiymatlar ustunlari */
+      var tr=el('div','tracks reveal');
+      var th=el('div','tracks-head');
+      ['Лойиҳа номи','Лойиҳа хисобига қўшилган қиймат','Таннархни камайтириш хисобига эришилган иқтисод'].forEach(function(t){ th.appendChild(el('span',null,t)); });
+      tr.appendChild(th);
       tracks.forEach(function(t){
-        var li=el('li');
-        li.appendChild(el('span','track-label',t.label));
-        if(t.note) li.appendChild(el('span','track-note',t.note));
-        tr.appendChild(li);
+        var row=el('div','tracks-row');
+        row.appendChild(el('span','track-label',t.label));
+        [t.added,t.cost].forEach(function(c){
+          var v=value('lr-val',c?c.value:null,c&&c.unit);
+          if(c&&c.note) v.appendChild(el('small','lr-note',c.note));
+          row.appendChild(v);
+        });
+        tr.appendChild(row);
       });
       scene.appendChild(tr);
     }
+    /* oldingi sahifalardagidek bosqichlar zanjiri — pastda */
+    var f=flow(y.chain,y.chainOwn); if(f) scene.appendChild(f);
     page.appendChild(scene);
   }
 
@@ -788,7 +815,7 @@
     var steps=el('ol','tl-steps');
     years.forEach(function(y,i){
       var li=el('li','tl-step'+(i===at?' is-current':''));
-      var b=el('button','tl-btn',y.period||y.title||y.id);
+      var b=el('button','tl-btn',yearName(y));
       b.type='button';
       if(i===at) b.setAttribute('aria-current','step');
       b.addEventListener('click',function(){ go(i); });
@@ -841,7 +868,7 @@
 
     page.appendChild(timeline(years,at,go));
 
-    document.title=(y.period||y.title)+' — Сокин Савдо Сервис';
+    document.title=yearName(y)+' — Сокин Савдо Сервис';
 
     var order=Array.prototype.slice.call(page.querySelectorAll('.reveal'));
     order.forEach(function(n,i){ n.style.setProperty('--d',(REDUCED?0:i*45)+'ms'); });
@@ -861,6 +888,20 @@
 
   var years=window.YEARS||[];
   if(!years.length){ console.error('YEARS bo\'sh'); return; }
+
+  /* Zanjir yig'ilib boradi: har sahifada oldingi sahifalarning `chain` bosqichlari,
+     keyin o'zinikilar. Bir xil nomli bosqich qaytarilmaydi. */
+  (function(){
+    var acc=[];
+    years.forEach(function(y){
+      if(y.chain) y.chainOwn=y.chain.map(function(s){ return String(s.label).trim().toLowerCase(); });
+      (y.chain||[]).forEach(function(s){
+        var key=String(s.label).trim().toLowerCase();
+        if(!acc.some(function(a){ return String(a.label).trim().toLowerCase()===key; })) acc.push(s);
+      });
+      if(y.chain) y.chain=acc.slice();
+    });
+  })();
 
   function indexFromHash(){
     var id=decodeURIComponent((location.hash||'').replace(/^#/,''));
