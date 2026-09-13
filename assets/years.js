@@ -462,7 +462,7 @@
     ],
 
     total: {
-      label: 'Жами лойиҳалар',
+      label: ' ',
       cells: [
         { icon: 'money', value: 36, unit: 'млн $', label: 'инвестиция' },
         { icon: 'workers', value: 2230, unit: 'та', label: 'иш ўрни ' },
