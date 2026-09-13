@@ -61,7 +61,7 @@ html,body{
 }
 /* o'ngda bosqich nomi va davr yonma-yon, orasida nozik ajratgich */
 .shell-left,.shell-right{display:flex;align-items:baseline;gap:clamp(10px,1.4vw,26px);flex-wrap:wrap}
-.shell-right{justify-content:flex-end}
+.shell-right{justify-content:flex-end;padding-right:calc(clamp(29px,2.7vw,54px) * 1.65 + 16px)} /* logo uchun joy */
 .shell-eyebrow{
   font-size:clamp(10px,.78vw,15px);
   font-weight:700;letter-spacing:.2em;text-transform:uppercase;
@@ -71,6 +71,8 @@ html,body{
   content:"";position:absolute;right:0;top:50%;translate:0 -50%;
   width:1px;height:1em;background:var(--rule);
 }
+/* logo — o'ng yuqori burchakda, СОКИН САВДО СЕРВИС bilan bir chiziqda; qator balandligini o'zgartirmaydi */
+.brand-logo{position:absolute;right:0;top:50%;transform:translateY(-50%);height:clamp(29px,2.7vw,54px);width:auto;display:block}
 .wordmark{
   font-size:clamp(10px,.78vw,15px);
   font-weight:700;letter-spacing:.36em;text-transform:uppercase;
@@ -97,6 +99,7 @@ html,body{
   font-weight:300;line-height:1.02;letter-spacing:-.02em;
   color:var(--head);
 }
+.lede-bold{font-weight:900;font-family:"Onest",var(--font)}
 .lede-year{
   font-family:"Onest",var(--font);
   font-size:clamp(24px,3.5vw,68px);
@@ -472,6 +475,8 @@ html,body{
 .split--project .metric:first-child{border-top:none;padding-top:0}
 .split--project .metric-label{font-size:clamp(9px,.72vw,15px);letter-spacing:.14em}
 .split--project .metric-value{font-size:clamp(20px,2vw,42px);color:var(--head)}
+/* bosh ko'rsatkich nomi — yirik va qalin */
+.split--project .metric.is-lead .metric-label{font-size:28px;font-weight:800;color:var(--num);letter-spacing:-.01em;text-transform:none;line-height:1.15}
 .split--project .metric.is-lead .metric-value{font-size:clamp(24px,2.6vw,54px)}
 .split--project .substrip{gap:clamp(8px,1.4vw,26px)}
 .split--project .sub-label{font-size:clamp(8.5px,.7vw,14px)}
@@ -532,7 +537,7 @@ html,body{
 .tracks .lr-val{font-size:clamp(12px,1.1vw,22px)}
 .tracks-row:last-child{border-bottom:0}
 /* qiymat ustunlari (sarlavha va raqamlar) markazda */
-.tracks-head span:not(:first-child){text-align:center}
+.tracks-head span{text-align:center}
 .tracks-row .lr-val{justify-content:center}
 .track-label{font-size:clamp(8.5px,.74vw,15px);font-weight:500;line-height:1.2;color:var(--muted)}
 
@@ -587,11 +592,12 @@ html,body{
   font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
   align-self:center;
 }
-.total{display:flex;flex-direction:column}
+/* uchta jami qiymat butun kenglik bo'ylab teng taqsimlanadi */
+.total{display:flex;flex-direction:column;flex:1 1 0;min-width:0}
 .total-value{
   display:flex;align-items:baseline;gap:.22em;
   font-size:clamp(24px,3.4vw,72px);font-weight:800;line-height:.96;
-  letter-spacing:-.04em;color:var(--num);font-variant-numeric:tabular-nums;
+  letter-spacing:-.04em;color:var(--head);font-variant-numeric:tabular-nums;
 }
 .total-value em{font-style:normal;font-size:.3em;font-weight:700;letter-spacing:normal;color:var(--ink)}
 .total-label{

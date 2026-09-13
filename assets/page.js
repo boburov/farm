@@ -20,7 +20,7 @@
 
   /* Vaqt chizig'i va sahifa nomi uchun yil nomi: `period` bo'sh bo'lsa id'dan olinadi. */
   function yearName(y){
-    return (y.period||'').trim()||y.id.replace('-','–');
+    return (y.period||'').trim()||y.navLabel||y.id.replace('-','–');
   }
 
   /* 20000 → "20 000" (uzilmas probel), 7.5 → "7.5" */
@@ -53,20 +53,32 @@
     var right=el('div','shell-right');
     if(y.eyebrow) right.appendChild(el('span','shell-eyebrow',y.eyebrow));
     right.appendChild(el('span','period',y.period||y.title||y.id));
+    /* logo — o'ng yuqori burchakda */
+    var logo=new Image();
+    logo.className='brand-logo'; logo.src='assets/logo.png'; logo.alt='';
     top.appendChild(right);
+    top.appendChild(logo);
     return top;
   }
 
   function lede(y){
     var d=el('div','lede');
     /* Har sahifa tepasida o'z yili. Sarlavhaning o'zi yil bo'lsa (2010) — takrorlanmaydi. */
-    if(String(y.title||'').indexOf(y.id)!==0){
+    /* yil bo'lmagan sahifada (Истиқбол) yil sarlavhasi chiqmaydi */
+    if(/^\d{4}/.test(y.id)&&String(y.title||'').indexOf(y.id)!==0){
       var n=yearName(y);
       if(/^\d{4}$/.test(n)) n+='-йил';
       else if(/^\d{4}–\d{4}$/.test(n)) n+='-йиллар';
       d.appendChild(el('div','lede-year reveal',n));
     }
-    d.appendChild(el('h1','lede-title reveal',y.title));
+    var h=el('h1','lede-title reveal');
+    /* `titleBold` — sarlavha boshidagi shu qism qalin yoziladi */
+    var t=String(y.title||'');
+    if(y.titleBold&&t.indexOf(y.titleBold)===0){
+      h.appendChild(el('strong','lede-bold',y.titleBold));
+      h.appendChild(document.createTextNode(t.slice(y.titleBold.length)));
+    } else h.textContent=t;
+    d.appendChild(h);
     if(y.subtitle) d.appendChild(el('p','lede-sub reveal',y.subtitle));
     return d;
   }
@@ -759,6 +771,7 @@
       if(y.total.note) t.appendChild(el('span','totals-note',y.total.note));
       scene.appendChild(t);
     }
+    var f=flow(y.chain,y.chainOwn); if(f) scene.appendChild(f);
     page.appendChild(scene);
   }
 
