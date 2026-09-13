@@ -100,7 +100,7 @@
           { icon: 'cash', value: 0.4, unit: 'млн $', label: 'Кредит (ўзлаштирилган)' },
           { icon: 'hen', value: 25, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
           { icon: 'workers', value: 50, unit: 'та', label: 'Ишчилар сони' },
-          { icon: 'chart', value: 0.8, unit: 'млн $', label: 'Йиллик айланма', lead: true },
+          { icon: 'chart', value: 1, unit: 'млн $', label: 'Йиллик айланма', lead: true },
           { icon: 'meat', value: 375, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true },
         ]
       },
@@ -279,12 +279,12 @@
         growthHead: '2025-га нисбатан ўсиш',
         rows: [
           {
-            icon: 'hen', value: 1.5, unit: 'млн дона', abs: 1500000,
+            icon: 'hen', value: 1500, unit: 'минг дона', abs: 1500000,
             label: 'Бир айланмадаги товуқ сони', growth: '+88%'
           },
           {
-            icon: 'workers', value: 400, suffix: '+', unit: 'та',
-            label: 'Ишчилар сони', growth: "33%"
+            icon: 'workers', value: 400, suffix: ' ', unit: 'нафар',
+            label: 'Ишчилар сони', growth: "+33%"
           },   /* hujjatda "400 dan oshiq" — shuning uchun "+" */
           {
             icon: 'chart', value: 26, unit: 'млн $', label: 'Йиллик айланма', lead: true,
