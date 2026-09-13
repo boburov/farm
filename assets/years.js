@@ -101,7 +101,7 @@
           { icon: 'cash', value: 4, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)' },
           { icon: 'hen', value: 25, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
           { icon: 'workers', value: 50, unit: 'та', label: 'Ишчи сони' },
-          { icon: 'chart', value: 7.5, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
+          { icon: 'chart', value: 8, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
           { icon: 'meat', value: 375, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
         ]
       },
@@ -109,11 +109,11 @@
         year: '2021-йил', tone: 'green',
         growthHead: '2020-га нисбатан ўсиш',
         rows: [
-          { icon: 'cash', value: 20, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)', growth: '+400%' },
-          { icon: 'hen', value: 200, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони', growth: '+700%' },
-          { icon: 'workers', value: 100, unit: 'та', label: 'Ишчи сони', growth: '+100%' },
-          { icon: 'chart', value: 60, unit: 'млрд сўм', label: 'Йиллик айланма', growth: '+700%' },
-          { icon: 'meat', value: 3000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', growth: '+700%' },
+          { icon: 'cash', value: 20, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)', growth: '+500%' },
+          { icon: 'hen', value: 200, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони', growth: '+800%' },
+          { icon: 'workers', value: 100, unit: 'та', label: 'Ишчи сони', growth: '+200%' },
+          { icon: 'chart', value: 60, unit: 'млрд сўм', label: 'Йиллик айланма', growth: '+750%' },
+          { icon: 'meat', value: 3000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', growth: '+800%' },
         ]
       }
     ],
@@ -285,19 +285,19 @@
         rows: [
           {
             icon: 'hen', value: 1.5, unit: 'млн дона', abs: 1500000,
-            label: 'Бир айланмадаги товуқ сони', growth: '+88%'
+            label: 'Бир айланмадаги товуқ сони', growth: '+188%'
           },
           {
             icon: 'workers', value: 400, suffix: '+', unit: 'та',
-            label: 'Ишчи сони', growth: "33%"
+            label: 'Ишчи сони', growth: "133%"
           },   /* hujjatda "400 dan oshiq" — shuning uchun "+" */
           {
             icon: 'chart', value: 315, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true,
-            growth: '+30%'
+            growth: '+130%'
           },
           {
             icon: 'meat', value: 13100, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true,
-            growth: '+19%'
+            growth: '+119%'
           },
           {
             icon: 'tax', value: 15, unit: 'млрд сўм', label: 'Солиқ имтиёзи',
