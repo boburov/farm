@@ -43,7 +43,7 @@
   function shellTop(y){
     var top=el('header','shell-top');
     var left=el('div','shell-left');
-    left.appendChild(el('span','wordmark',y.brand||'Sokin Savdo Servis'));
+    left.appendChild(el('span','wordmark',y.brand||'Сокин Савдо Сервис'));
     top.appendChild(left);
     var right=el('div','shell-right');
     if(y.eyebrow) right.appendChild(el('span','shell-eyebrow',y.eyebrow));
@@ -143,13 +143,13 @@
     var a=y.columns[0], b=y.columns[1];
 
     var head=el('div','ledger-head reveal');
-    head.appendChild(el('span','lh-metric','Ko‘rsatkich'));
+    head.appendChild(el('span','lh-metric','Кўрсаткич'));
     [a,b].forEach(function(c){
       var s=el('span',null,c.year);
       if(c.yearNote) s.appendChild(el('small','lh-note',c.yearNote));
       head.appendChild(s);
     });
-    head.appendChild(el('span','lh-metric',b.growthHead?'O‘sish':''));
+    head.appendChild(el('span','lh-metric',b.growthHead?'Ўсиш':''));
     wrap.appendChild(head);
 
     var rows=el('ul','ledger-rows');
@@ -397,7 +397,7 @@
         host.classList.add('is-in');
       })
       .catch(function(e){
-        console.warn('3D yuklanmadi:',e.message);
+        console.warn('3D юкланмади:',e.message);
         host.remove();                          /* halqa 3D siz ham to'liq ishlaydi */
       });
     return host;
@@ -405,7 +405,7 @@
 
   function modelNode(cfg){
     var host=el('div','model');
-    host.setAttribute('aria-label','Tovuq bo‘laklari — 3D ko‘rgazma');
+    host.setAttribute('aria-label','Товуқ бўлаклари — 3D кўргазма');
     loadModelScripts()
       .then(function(){ return ChickenParts.load(); })
       .then(function(){
@@ -413,7 +413,7 @@
         buildScene(host,cfg);
       })
       .catch(function(e){
-        console.warn('3D yuklanmadi:',e.message);
+        console.warn('3D юкланмади:',e.message);
         host.classList.add('is-failed');
       });
     return host;
@@ -522,7 +522,7 @@
       top.appendChild(num);
       top.appendChild(el('i',null,'%'));
       core.appendChild(top);
-      core.appendChild(el('em','cuts-core-lbl',items.length+' bo‘lak'));
+      core.appendChild(el('em','cuts-core-lbl',items.length+' бўлак'));
       host.appendChild(core);
     }
 
@@ -783,7 +783,7 @@
 
   function timeline(years,at,go){
     var nav=el('nav','timeline');
-    nav.setAttribute('aria-label','Taqdimot bosqichlari');
+    nav.setAttribute('aria-label','Тақдимот босқичлари');
 
     var steps=el('ol','tl-steps');
     years.forEach(function(y,i){
@@ -798,11 +798,11 @@
     nav.appendChild(steps);
 
     var ctl=el('div','tl-nav');
-    var prev=navButton('navbtn--prev','Oldingi bosqich',ARROW_L,function(){ go(at-1); });
-    var next=navButton('navbtn--next','Keyingi bosqich',ARROW_R,function(){ go(at+1); });
+    var prev=navButton('navbtn--prev','Олдинги босқич',ARROW_L,function(){ go(at-1); });
+    var next=navButton('navbtn--next','Кейинги босқич',ARROW_R,function(){ go(at+1); });
     prev.disabled=at===0; next.disabled=at===years.length-1;
     ctl.appendChild(prev); ctl.appendChild(next);
-    var fs=navButton('navbtn--fs','To‘liq ekran',
+    var fs=navButton('navbtn--fs','Тўлиқ экран',
       document.fullscreenElement?FS_OFF:FS_ON,toggleFullscreen);
     ctl.appendChild(fs);
     document.addEventListener('fullscreenchange',function(){
@@ -841,7 +841,7 @@
 
     page.appendChild(timeline(years,at,go));
 
-    document.title=(y.period||y.title)+' — Sokin Savdo Servis';
+    document.title=(y.period||y.title)+' — Сокин Савдо Сервис';
 
     var order=Array.prototype.slice.call(page.querySelectorAll('.reveal'));
     order.forEach(function(n,i){ n.style.setProperty('--d',(REDUCED?0:i*45)+'ms'); });

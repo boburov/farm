@@ -22,22 +22,22 @@
     id: '2010',
     layout: 'single',
     period: '2010',
-    eyebrow: 'Boshlanish',
-    title: '2010-yil',
+    eyebrow: 'Бошланиш',
+    title: '2010-йил',
 
     stats: [
-      { value: 3, unit: 'ta', label: 'Ishchi' },
+      { value: 3, unit: 'та', label: 'Ишчи' },
       {
-        value: 200, unit: 'mln so‘m', label: 'Yillik aylanma',
+        value: 200, unit: 'млн сўм', label: 'Йиллик айланма',
         note: ''
       }
     ],
 
     photo: 'assets/photos/2010.jpg',
-    photoAlt: 'Sokin Savdo Servis — Ishlab chiqaruvchidan olingan tovuq go‘shti yuk mashinasiga ' +
-      'ortilib, bozorga yetkazilmoqda',
-    brand: 'Sokin Savdo Servis',
-    subtitle: 'Faoliyatimizni bozorda faqat tovuq go‘shti ulgurji savdosi va distribyutsiya bilan boshlagan edik.',
+    photoAlt: 'Сокин Савдо Сервис — Ишлаб чиқарувчидан олинган товуқ гўшти юк машинасига ' +
+      'ортилиб, бозорга етказилмоқда',
+    brand: 'Сокин Савдо Сервис',
+    subtitle: 'Фаолиятимизни бозорда фақат товуқ гўшти улгуржи савдоси ва дистрибуция билан бошлаган эдик.',
 
     /* Suratdagi nuqtalar — surat kengligining ulushi sifatida (0..1), piksel
        emas. Fon `cover` bilan qirqilgani uchun ekran nisbati o'zgarsa piksel
@@ -45,9 +45,9 @@
        qayta hisoblaydi, shuning uchun yozuv joyidan siljimaydi. */
     /* Uch surat ketma-ket; o'rtadagi jarayon (tashish) kengroq ko'rsatiladi. */
     strip: [
-      { photo: 'assets/photos/2010-producer.jpg', label: 'Ishlab chiqaruvchi', grow: 1 },
-      { photo: 'assets/photos/2010-transport.jpg', label: 'Tashish', grow: 2.6 },
-      { photo: 'assets/photos/2010-bazaar.jpg', label: 'Bozor', grow: 1 }
+      { photo: 'assets/photos/2010-producer.jpg', label: 'Ишлаб чиқарувчи', grow: 1 },
+      { photo: 'assets/photos/2010-transport.jpg', label: 'Ташиш', grow: 2.6 },
+      { photo: 'assets/photos/2010-bazaar.jpg', label: 'Бозор', grow: 1 }
     ],
     panels: [
       { scene: 'producer' },
@@ -56,9 +56,9 @@
     ],
 
     chain: [
-      { icon: 'factory', label: 'Ishlab chiqaruvchidan olish' },
-      { icon: 'truck', label: 'Tashish' },
-      { icon: 'market', label: 'Bozorga yetkazib sotish' }
+      { icon: 'factory', label: 'Ишлаб чиқарувчидан олиш' },
+      { icon: 'truck', label: 'Ташиш' },
+      { icon: 'market', label: 'Бозорга етказиб сотиш' }
     ]
   },
 
@@ -86,42 +86,42 @@
     id: '2020-2021',
     layout: 'compare',
     period: '2020–2021',
-    eyebrow: 'Ikkinchi bosqich',
-    brand: 'Sokin Savdo Servis',
-    title: "Kredit mablag`lari hisobidan tovuq boqish va go`sht mahsulotlarini ishlab chiqarish loyihalari start oldi.",
+    eyebrow: 'Иккинчи босқич',
+    brand: 'Сокин Савдо Сервис',
+    title: "Кредит маблағлари ҳисобидан товуқ боқиш ва гўшт маҳсулотларини ишлаб чиқариш лойиҳалари старт олди.",
     subtitle: '',
 
     photo: 'assets/photos/2020.jpg',
-    photoAlt: 'Tovuqxona, so‘yish va qayta ishlash liniyasi hamda yuk mashinasi',
+    photoAlt: 'Товуқхона, сўйиш ва қайта ишлаш линияси ҳамда юк машинаси',
 
     columns: [
       {
-        year: '2020-yil', tone: 'dark',
+        year: '2020-йил', tone: 'dark',
         rows: [
-          { icon: 'cash', value: 4, unit: 'mlrd so‘m', label: 'Kredit (olinib yopilgan)' },
-          { icon: 'hen', value: 25, unit: 'ming dona', label: 'Bir aylanmadagi tovuq soni' },
-          { icon: 'workers', value: 50, unit: 'ta', label: 'Ishchi soni' },
-          { icon: 'chart', value: 7.5, unit: 'mlrd so‘m', label: 'Yillik aylanma (6 marta aylanma)', lead: true },
-          { icon: 'meat', value: 375, unit: 'tonna', label: 'Ishlab chiqarish hajmi (yiliga)', lead: true },
+          { icon: 'cash', value: 4, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)' },
+          { icon: 'hen', value: 25, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
+          { icon: 'workers', value: 50, unit: 'та', label: 'Ишчи сони' },
+          { icon: 'chart', value: 7.5, unit: 'млрд сўм', label: 'Йиллик айланма (6 марта айланма)', lead: true },
+          { icon: 'meat', value: 375, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
         ]
       },
       {
-        year: '2021-yil', tone: 'green',
-        growthHead: '2020-ga nisbatan o‘sish',
+        year: '2021-йил', tone: 'green',
+        growthHead: '2020-га нисбатан ўсиш',
         rows: [
-          { icon: 'cash', value: 20, unit: 'mlrd so‘m', label: 'Kredit (olinib yopilgan)', growth: '+400%' },
-          { icon: 'hen', value: 200, unit: 'ming dona', label: 'Bir aylanmadagi tovuq soni', growth: '+700%' },
-          { icon: 'workers', value: 100, unit: 'ta', label: 'Ishchi soni', growth: '+100%' },
-          { icon: 'chart', value: 60, unit: 'mlrd so‘m', label: 'Yillik aylanma (6 marta aylanma)', growth: '+700%' },
-          { icon: 'meat', value: 3000, unit: 'tonna', label: 'Ishlab chiqarish hajmi (yiliga)', growth: '+700%' },
+          { icon: 'cash', value: 20, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)', growth: '+400%' },
+          { icon: 'hen', value: 200, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони', growth: '+700%' },
+          { icon: 'workers', value: 100, unit: 'та', label: 'Ишчи сони', growth: '+100%' },
+          { icon: 'chart', value: 60, unit: 'млрд сўм', label: 'Йиллик айланма (6 марта айланма)', growth: '+700%' },
+          { icon: 'meat', value: 3000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', growth: '+700%' },
         ]
       }
     ],
 
     chain: [
-      { icon: 'barn', label: 'Boqish' },
-      { icon: 'blade', label: 'So‘yish' },
-      { icon: 'truck', label: 'Bozorga yetkazish' }
+      { icon: 'barn', label: 'Боқиш' },
+      { icon: 'blade', label: 'Сўйиш' },
+      { icon: 'truck', label: 'Бозорга етказиш' }
     ]
   },
 
@@ -156,65 +156,65 @@
     id: '2022-2023',
     layout: 'compare',
     period: '2022–2023',
-    eyebrow: 'Klaster boshlandi',
-    brand: 'Sokin Savdo Servis',
-    title: 'Davlat subsidiyasi hisobidan yem ishlab chiqarish majumuasi ishga tushurildi.',
-    subtitle: 'Klaster tizimi boshlandi — tannarx pasaydi, ishlab chiqarish surati oshdi.',
+    eyebrow: 'Кластер бошланди',
+    brand: 'Сокин Савдо Сервис',
+    title: 'Давлат субсидияси ҳисобидан ем ишлаб чиқариш мажмуаси ишга тушурилди.',
+    subtitle: 'Кластер тизими бошланди — таннарх пасайди, ишлаб чиқариш сурати ошди.',
 
     photo: 'assets/photos/2022.jpg',
-    photoAlt: 'Yem zavodi, tovuqxonalar, so‘yish sexi va yuk mashinasi',
+    photoAlt: 'Ем заводи, товуқхоналар, сўйиш сехи ва юк машинаси',
 
     columns: [
       {
-        year: '2022-yil', tone: 'dark',
+        year: '2022-йил', tone: 'dark',
         rows: [
-          { icon: 'subsidy', value: 2500, unit: 'so‘m', label: 'Har bir kg ga subsidiya' },
-          { icon: 'hen', value: 220, unit: 'ming dona', label: 'Bir aylanmadagi tovuq soni' },
-          { icon: 'workers', value: 150, unit: 'ta', label: 'Ishchi soni' },
-          { icon: 'chart', value: 66, unit: 'mlrd so‘m', label: 'Yillik aylanma', lead: true },
-          { icon: 'meat', value: 3300, unit: 'tonna', label: 'Ishlab chiqarish hajmi (yiliga)', lead: true },
-          { icon: 'gear', value: null, label: 'Ichki yem hisobiga tannarx arzonladi (10,4%)' },
+          { icon: 'subsidy', value: 2500, unit: 'сўм', label: 'Ҳар бир кг га субсидия' },
+          { icon: 'hen', value: 220, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
+          { icon: 'workers', value: 150, unit: 'та', label: 'Ишчи сони' },
+          { icon: 'chart', value: 66, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
+          { icon: 'meat', value: 3300, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
+          { icon: 'gear', value: null, label: 'Ички ем ҳисобига таннарх арзонлади (10,4%)' },
 
         ]
       },
       {
-        year: '2023-yil', tone: 'green',
-        growthHead: '2022-ga nisbatan o‘sish',
+        year: '2023-йил', tone: 'green',
+        growthHead: '2022-га нисбатан ўсиш',
         rows: [
           {
-            icon: 'subsidy', value: 1250, unit: 'so‘m', label: 'Har bir kg ga subsidiya',
+            icon: 'subsidy', value: 1250, unit: 'сўм', label: 'Ҳар бир кг га субсидия',
             growth: '-50%'
           },
           {
-            icon: 'hen', value: 300, unit: 'ming dona', label: 'Bir aylanmadagi tovuq soni',
+            icon: 'hen', value: 300, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони',
             growth: '+36%'
           },
           {
-            icon: 'workers', value: 200, unit: 'ta', label: 'Ishchi soni',
+            icon: 'workers', value: 200, unit: 'та', label: 'Ишчи сони',
             growth: '+33%'
           },
           {
-            icon: 'chart', value: 90, unit: 'mlrd so‘m', label: 'Yillik aylanma', lead: true,
+            icon: 'chart', value: 90, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true,
             growth: '+36%'
           },
           {
-            icon: 'meat', value: 4500, unit: 'tonna', label: 'Ishlab chiqarish hajmi (yiliga)', lead: true,
+            icon: 'meat', value: 4500, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true,
             growth: '+36%'
           },
           {
-            icon: 'gear', value: 10.4, unit: 'mlrd so‘m',
-            label: 'Ichki yem hisobiga tannarx arzonladi (11,5%)'
+            icon: 'gear', value: 10.4, unit: 'млрд сўм',
+            label: 'Ички ем ҳисобига таннарх арзонлади (11,5%)'
           },
-          { icon: 'money', value: 20000, unit: 'so‘m', label: '1 kg go‘sht narxi' }
+          { icon: 'money', value: 20000, unit: 'сўм', label: '1 кг гўшт нархи' }
         ]
       }
     ],
 
     chain: [
-      { icon: 'gear', label: 'Yem ishlab chiqarish' },
-      { icon: 'barn', label: 'Tovuq boqish' },
-      { icon: 'blade', label: 'So‘yish' },
-      { icon: 'truck', label: 'Bozorga yetkazish' }
+      { icon: 'gear', label: 'Ем ишлаб чиқариш' },
+      { icon: 'barn', label: 'Товуқ боқиш' },
+      { icon: 'blade', label: 'Сўйиш' },
+      { icon: 'truck', label: 'Бозорга етказиш' }
     ]
   },
 
@@ -250,64 +250,64 @@
     id: '2025-2026',
     layout: 'compare',
     period: '2025–2026',
-    eyebrow: 'Qo‘shimcha qiymat',
-    brand: 'Sokin Savdo Servis',
-    title: 'Klaster tarmoqlari yanada kengaydi va tovuq go`shtini bo`laklarga ajratish tizimini tashil etish bilan ishlab chiqarish quvvati oshirildi.',
-    subtitle: '2025-yilda : Butun tovuqni qisimlarga ajratish\n2026-yilda : Naslli "Ona tovuq" loyihasining boshlanishi',
+    eyebrow: 'Қўшимча қиймат',
+    brand: 'Сокин Савдо Сервис',
+    title: 'Кластер тармоқлари янада кенгайди ва товуқ гўштини бўлакларга ажратиш тизимини ташкил этиш билан ишлаб чиқариш қуввати оширилди.',
+    subtitle: '2025-йилда : Бутун товуқни қисимларга ажратиш\n2026-йилда : Наслли "Она товуқ" лойиҳасининг бошланиши',
 
     photo: 'assets/photos/2025.jpg',
-    photoAlt: 'Ona tovuq xo‘jaligi, bo‘laklarga bo‘lib ishlash sexi va qadoqlash',
+    photoAlt: 'Она товуқ хўжалиги, бўлакларга бўлиб ишлаш сехи ва қадоқлаш',
 
     columns: [
       {
-        year: '2025-yil', tone: 'dark',
+        year: '2025-йил', tone: 'dark',
         rows: [
           /* `abs` — asl kattalik (dona). Ekranda "800 ming" ko'rinadi, lekin
              o'sish foizini tekshirish shu maydondan hisoblanadi: ikki yilda
              birlik har xil (ming / mln), xom raqamni solishtirish noto'g'ri. */
           {
-            icon: 'hen', value: 800, unit: 'ming dona', abs: 800000,
-            label: 'Bir aylanmadagi tovuq soni'
+            icon: 'hen', value: 800, unit: 'минг дона', abs: 800000,
+            label: 'Бир айланмадаги товуқ сони'
           },
-          { icon: 'workers', value: 300, unit: 'ta', label: 'Ishchi soni' },
-          { icon: 'chart', value: 242, unit: 'mlrd so‘m', label: 'Yillik aylanma', lead: true },
-          { icon: 'meat', value: 11000, unit: 'tonna', label: 'Ishlab chiqarish hajmi (yiliga)', lead: true },
-          { icon: 'tax', value: null, unit: 'mlrd so‘m', label: 'Soliq imtiyozi (2024–2025)' },
-          { icon: 'chart', value: 19, unit: 'mlrd so‘m', label: 'Qo‘shilgan qiymat' },
-          { icon: 'gear', value: null, label: 'Tannarxni kamaytirish (8%)' },
-          { icon: 'cuts', value: null, label: 'Tovuqni bo‘laklarga bo‘lib sotish boshlandi' }
+          { icon: 'workers', value: 300, unit: 'та', label: 'Ишчи сони' },
+          { icon: 'chart', value: 242, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
+          { icon: 'meat', value: 11000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
+          { icon: 'tax', value: null, unit: 'млрд сўм', label: 'Солиқ имтиёзи (2024–2025)' },
+          { icon: 'chart', value: 19, unit: 'млрд сўм', label: 'Қўшилган қиймат' },
+          { icon: 'gear', value: null, label: 'Таннархни камайтириш (8%)' },
+          { icon: 'cuts', value: null, label: 'Товуқни бўлакларга бўлиб сотиш бошланди' }
 
         ]
       },
       {
-        year: '2026-yil', yearNote: '(Kutilma)', tone: 'green',
-        growthHead: '2025-ga nisbatan o‘sish',
+        year: '2026-йил', yearNote: '(Кутилма)', tone: 'green',
+        growthHead: '2025-га нисбатан ўсиш',
         rows: [
           {
-            icon: 'hen', value: 1.5, unit: 'mln dona', abs: 1500000,
-            label: 'Bir aylanmadagi tovuq soni', growth: '+88%'
+            icon: 'hen', value: 1.5, unit: 'млн дона', abs: 1500000,
+            label: 'Бир айланмадаги товуқ сони', growth: '+88%'
           },
           {
-            icon: 'workers', value: 400, suffix: '+', unit: 'ta',
-            label: 'Ishchi soni', growth: "33%"
+            icon: 'workers', value: 400, suffix: '+', unit: 'та',
+            label: 'Ишчи сони', growth: "33%"
           },   /* hujjatda "400 dan oshiq" — shuning uchun "+" */
           {
-            icon: 'chart', value: 315, unit: 'mlrd so‘m', label: 'Yillik aylanma', lead: true,
+            icon: 'chart', value: 315, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true,
             growth: '+30%'
           },
           {
-            icon: 'meat', value: 13100, unit: 'tonna', label: 'Ishlab chiqarish hajmi (yiliga)', lead: true,
+            icon: 'meat', value: 13100, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true,
             growth: '+19%'
           },
           {
-            icon: 'tax', value: 15, unit: 'mlrd so‘m', label: 'Soliq imtiyozi',
+            icon: 'tax', value: 15, unit: 'млрд сўм', label: 'Солиқ имтиёзи',
             growth: '+293%'
           },
-          { icon: 'chart', value: null, label: 'Qo‘shilgan qiymat' },
-          { icon: 'gear', value: 14, unit: 'mlrd so‘m', label: 'Tannarxni kamaytirish (5%)' },
+          { icon: 'chart', value: null, label: 'Қўшилган қиймат' },
+          { icon: 'gear', value: 14, unit: 'млрд сўм', label: 'Таннархни камайтириш (5%)' },
           {
-            icon: 'hen', value: 75, unit: 'ming bosh',
-            label: 'Vengriya Aviagen kompaniyasidan ona tovuq'
+            icon: 'hen', value: 75, unit: 'минг бош',
+            label: 'Венгрия Авиаген компаниясидан она товуқ'
           }
         ]
       }
@@ -321,23 +321,23 @@
       title: '',
       wheel: true,
       items: [
-        { key: 'akorachka', label: 'Son go`shti', value: 13.8 },
-        { key: 'file', label: 'File (Ko`krak go`shti)', value: 35.6 },
-        { key: 'qanot', label: 'Qanot', value: 12 },
-        { key: 'golen', label: 'Tovuq Boldirchasi', value: 7 },
-        { key: 'bedro', label: 'Son', value: 12 },
-        { key: 'drakon', label: 'Tovuq Boldiri', value: 12 },
-        { key: 'teri', label: 'Teri', value: 3 },
-        { key: 'karkas', label: 'Tovuq Karkazi', value: 5 },
+        { key: 'akorachka', label: 'Сон гўшти', value: 13.8 },
+        { key: 'file', label: 'Филе (Кўкрак гўшти)', value: 35.6 },
+        { key: 'qanot', label: 'Қанот', value: 12 },
+        { key: 'golen', label: 'Товуқ Болдирчаси', value: 7 },
+        { key: 'bedro', label: 'Сон', value: 12 },
+        { key: 'drakon', label: 'Товуқ Болдири', value: 12 },
+        { key: 'teri', label: 'Тери', value: 3 },
+        { key: 'karkas', label: 'Товуқ Каркази', value: 5 },
       ]
     },
 
     chain: [
-      { icon: 'hen', label: 'Ona tovuq xo‘jaligi' },
-      { icon: 'gear', label: 'Yem ishlab chiqarish' },
-      { icon: 'barn', label: 'Tovuq boqish' },
-      { icon: 'blade', label: 'So‘yish va qayta ishlash' },
-      { icon: 'cuts', label: 'Bo‘laklarga bo‘lib sotish' }
+      { icon: 'hen', label: 'Она товуқ хўжалиги' },
+      { icon: 'gear', label: 'Ем ишлаб чиқариш' },
+      { icon: 'barn', label: 'Товуқ боқиш' },
+      { icon: 'blade', label: 'Сўйиш ва қайта ишлаш' },
+      { icon: 'cuts', label: 'Бўлакларга бўлиб сотиш' }
     ]
   },
 
@@ -364,41 +364,41 @@
     id: '2026-2027',
     layout: 'project',
     period: '2026–2027',
-    eyebrow: 'Yangi bosqich',
-    brand: 'Sokin Savdo Servis',
-    title: 'Yangi loyiha: "Parranda invesment" MCHJ hamkorligidagi texnologik transformatsiya',
-    subtitle: 'Yangi bosqich — yanada katta imkoniyatlar',
+    eyebrow: 'Янги босқич',
+    brand: 'Сокин Савдо Сервис',
+    title: 'Янги лойиҳа: "Парранда инвестмент" МЧЖ ҳамкорлигидаги технологик трансформация',
+    subtitle: 'Янги босқич — янада катта имкониятлар',
 
     photo: 'assets/photos/2026.jpg',
-    photoAlt: 'Yangi so‘yish va qadoqlash majmuasi — ko‘chadan ko‘rinishi',
+    photoAlt: 'Янги сўйиш ва қадоқлаш мажмуаси — кўчадан кўриниши',
 
     /* Uchinchi tomon nomlari hujjatdagidek matn bilan beriladi;
        logotiplar ishlatilmaydi. */
 
 
     invest: {
-      label: 'Loyihaning umumiy qiymati',
-      value: 20, unit: 'mln $',
+      label: 'Лойиҳанинг умумий қиймати',
+      value: 20, unit: 'млн $',
       cells: [
 
       ]
     },
 
     kpis: [
-      { icon: 'hen', label: 'Yillik parranda soni', value: 12, unit: 'mln bosh' },
-      { icon: 'meat', label: 'Go‘sht ishlab chiqarish', value: 69, unit: 'ming tonna' },
-      { icon: 'chart', label: 'Yillik aylanma (prognoz)', value: 1.2, unit: 'trln so‘m' },
-      { icon: 'chart', label: 'Kutilayotgan soliq imtiyozi', value: 100, unit: 'mlrd so‘m' }
+      { icon: 'hen', label: 'Йиллик парранда сони', value: 12, unit: 'млн бош' },
+      { icon: 'meat', label: 'Гўшт ишлаб чиқариш', value: 69, unit: 'минг тонна' },
+      { icon: 'chart', label: 'Йиллик айланма (прогноз)', value: 1.2, unit: 'трлн сўм' },
+      { icon: 'chart', label: 'Кутилаётган солиқ имтиёзи', value: 100, unit: 'млрд сўм' }
     ],
 
     tracks: {
-      title: 'Majmuaning asosiy yo‘nalishlari',
+      title: 'Мажмуанинг асосий йўналишлари',
       items: [
-        { icon: 'cage', label: 'Ko‘p qavatli kataklarda tovuq boqish tizimi', note: 'Tannarxni kamaytirish\n14 mlrd so`m (1.2%) ' },
-        { icon: 'pack', label: 'Parrada soyish , qayta ishlash , saqlash va qadoqlash', note: 'Qo`shilgan qiymat\n915 mlrd so`m\nTannarxni kamaytirish\n36 mlrd so`m (3%)' },
+        { icon: 'cage', label: 'Кўп қаватли катакларда товуқ боқиш тизими', note: 'Таннархни камайтириш\n14 млрд сўм (1.2%) ' },
+        { icon: 'pack', label: 'Парранда сўйиш, қайта ишлаш, сақлаш ва қадоқлаш', note: 'Қўшилган қиймат\n915 млрд сўм\nТаннархни камайтириш\n36 млрд сўм (3%)' },
         {
-          icon: 'recycle', label: 'Rendering liniyasi',
-          note: 'Qo`shilgan qiymat\n50 mlrd so`m'
+          icon: 'recycle', label: 'Рендеринг линияси',
+          note: 'Қўшилган қиймат\n50 млрд сўм'
         }
       ]
     }
@@ -428,44 +428,44 @@
   {
     id: 'istiqbol',
     layout: 'plans',
-    period: 'Istiqbol',
-    eyebrow: '2027-yilgacha',
-    brand: 'Sokin Savdo Servis',
-    title: 'Kelajak sari qadam : Istiqbolli strategik loyihalar.',
-    subtitle: '2027-yilgacha yanada katta imkoniyatlar.',
-    taglines: ['Sifatli mahsulot', 'Kuchli iqtisodiyot', 'Barqaror kelajak'],
+    period: 'Истиқбол',
+    eyebrow: '2027-йилгача',
+    brand: 'Сокин Савдо Сервис',
+    title: 'Келажак сари қадам : Истиқболли стратегик лойиҳалар.',
+    subtitle: '2027-йилгача янада катта имкониятлар.',
+    taglines: ['Сифатли маҳсулот', 'Кучли иқтисодиёт', 'Барқарор келажак'],
 
     items: [
       {
-        icon: 'gear', title: 'Ozuqa bazasini mustahkamlash : Andijon viloyatida yuqori texnologiyali zamonaviy yem - ozuqa zavodini barpo etish.',
-        when: '2027-yil 4-chorak', value: 10, unit: 'mln $', photo: 'assets/photos/plans-1.jpg'
+        icon: 'gear', title: 'Юқори технологияли замонавий ем - озуқа заводини барпо этиш',
+        when: '2027-йил 4-чорак', value: 10, unit: 'млн $', photo: 'assets/photos/plans-1.jpg'
       },
       {
-        icon: 'meat', title: 'Chuqur qayta ishlash va assortiment : Yuqori sifatli kolbasa va go`sht mahsulotlarini ishlab chiqarishni yo`lga qo`yish.',
-        when: '2027-yil 1-chorak', value: 2.5, unit: 'mln $', photo: 'assets/photos/plans-2.jpg'
+        icon: 'meat', title: 'Юқори сифатли колбаса ва гўшт маҳсулотларини ишлаб чиқаришни йўлга қўйиш',
+        when: '2027-йил 1-чорак', value: 2.5, unit: 'млн $', photo: 'assets/photos/plans-2.jpg'
       },
       {
-        icon: 'hen', title: 'Genetika va seleksiya (Ona tovuq loyihasi) : Naslli parrandachilikni rivojlantirish maqsadida maxsus "Ona tovuq" loyihasini tatbiq etish.',
-        when: '2027-yil 2-chorak', value: 7, unit: 'mln $', photo: 'assets/photos/plans-3.jpg'
+        icon: 'hen', title: 'Наслли паррандачиликни ривожлантириш мақсадида махсус "Она товуқ" лойиҳасини татбиқ этиш',
+        when: '2027-йил 2-чорак', value: 7, unit: 'млн $', photo: 'assets/photos/plans-3.jpg'
       },
       {
-        icon: 'market', title: 'Logistika va savdo tarmog`i : Respublikamizning barcha 12ta viloyatlarida 200 ta zamonaviy brendli klaster savdo do`konlarini qurish va xalqqa arzon mahsulot yetkazish.',
-        when: '2027-yil 4-chorak', value: 7.5, unit: 'mln $', photo: 'assets/photos/plans-4.jpg'
+        icon: 'market', title: 'Республиканинг барча вилоятларида замонавий брендли 200та кластер савдо дўконларини қуриш ва халққа арзон маҳсулот етказиш.',
+        when: '2027-йил 4-чорак', value: 7.5, unit: 'млн $', photo: 'assets/photos/plans-4.jpg'
       },
       {
-        icon: 'barn', title: 'Naslchilik va parrandachilik majmuasi : Xalqaro standartlarga javob beradigan zamonaviy parranda va naslli chorva fermasini tashkil etish.',
-        when: '2027-yil 4-chorak', value: 9, unit: 'mln $', photo: 'assets/photos/plans-5.jpg'
+        icon: 'barn', title: 'Халқаро стандартларга жавоб берадиган замонавий парранда ва наслли чорва фермасини ташкил этиш.',
+        when: '2027-йил 4-чорак', value: 9, unit: 'млн $', photo: 'assets/photos/plans-5.jpg'
       }
     ],
 
     total: {
-      label: 'Jami loyihalar',
+      label: 'Жами лойиҳалар',
       cells: [
-        { icon: 'money', value: 36, unit: 'mln $', label: 'investitsiya' },
-        { icon: 'workers', value: 1780, unit: 'ta', label: 'ish o‘rni ' },
-        { icon: 'workers', value: 578.5, unit: 'mlrd so`m ', label: 'Qo`shilgan qiymat' }
+        { icon: 'money', value: 36, unit: 'млн $', label: 'инвестиция' },
+        { icon: 'workers', value: 2230, unit: 'та', label: 'иш ўрни ' },
+        { icon: 'workers', value: 578, unit: 'млрд сўм ', label: 'Қўшилган қиймат' }
       ],
-      note: 'Barqaror rivojlanish sari'
+      note: 'Барқарор ривожланиш сари'
     }
   }];
 })();

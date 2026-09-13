@@ -171,13 +171,13 @@
      Nomlar anatomik — bu hujjatdagi 9 ta savdo bo'lagi EMAS (pastdagi izohga
      qarang). */
   var DISPLAY={
-    neck: {rot:[0,0,Math.PI/2],        h:0.90, name:'Bo‘yin', full:'Bo‘yin'},
-    wingL:{rot:[0,Math.PI/2,0],        h:1.08, name:'Qanot',  full:'Chap qanot'},
-    legL: {rot:[-Math.PI/2,0,0.12],    h:1.10, name:'Oyoq',   full:'Chap oyoq (son + boldir)'},
-    torso:{rot:[-Math.PI/2,0,0],       h:1.34, name:'Tana',   full:'Tana — karkas'},
-    legR: {rot:[-Math.PI/2,0,-0.12],   h:1.10, name:'Oyoq',   full:'O‘ng oyoq (son + boldir)'},
-    wingR:{rot:[0,-Math.PI/2,0],       h:1.08, name:'Qanot',  full:'O‘ng qanot'},
-    tail: {rot:[0,0,0],                h:0.84, name:'Dum',    full:'Dum'}
+    neck: {rot:[0,0,Math.PI/2],        h:0.90, name:'Бўйин', full:'Бўйин'},
+    wingL:{rot:[0,Math.PI/2,0],        h:1.08, name:'Қанот',  full:'Чап қанот'},
+    legL: {rot:[-Math.PI/2,0,0.12],    h:1.10, name:'Оёқ',   full:'Чап оёқ (сон + болдир)'},
+    torso:{rot:[-Math.PI/2,0,0],       h:1.34, name:'Тана',   full:'Тана — каркас'},
+    legR: {rot:[-Math.PI/2,0,-0.12],   h:1.10, name:'Оёқ',   full:'Ўнг оёқ (сон + болдир)'},
+    wingR:{rot:[0,-Math.PI/2,0],       h:1.08, name:'Қанот',  full:'Ўнг қанот'},
+    tail: {rot:[0,0,0],                h:0.84, name:'Дум',    full:'Дум'}
   };
   /* chapdan o'ngga tartib: juftlar tananing ikki yonida */
   var ORDER=['neck','wingL','legL','torso','legR','wingR','tail'];
