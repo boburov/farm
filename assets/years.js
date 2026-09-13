@@ -355,7 +355,7 @@
       value:35, unit:'mln $',
       cells:[
         {label:'Parranda Investment hisobidan', value:20,  unit:'mln $'},
-        {label:'Soliq imtiyoz (kutilayotgan)',  value:100, unit:'mlrd so‘m'}
+        {label:'Soliq imtiyoz (kutilayotgan)',  value:100, unit:', 80 mlrd so‘m'}
       ]
     },
 
@@ -369,8 +369,8 @@
     tracks:{
       title:'Majmuaning asosiy yo‘nalishlari',
       items:[
-        {icon:'cage',    label:'Ko‘p qavatli kataklarda tovuq boqish tizimi',note:'Tannarxni kamaytirish\n14.4 mlrd (1.2%)'},
-        {icon:'pack',    label:'Parrada soyish , qayta ishlash , saqlash va qadoqlash', note:'Qo`shilgan qiymat - 915 mlrd Tannarxni kamaytrish - 36 mlrd (3%)'},
+        {icon:'cage',    label:'Ko‘p qavatli kataklarda tovuq boqish tizimi',note:'Tannarxni kamaytirish\n14.4 mlrd (1.2%) so`m'},
+        {icon:'pack',    label:'Parrada soyish , qayta ishlash , saqlash va qadoqlash', note:'Qo`shilgan qiymat - 915 mlrd Tannarxni kamaytrish - 36 mlrd (3%) so`m'},
         {icon:'recycle', label:'Rendering liniyasi',
          note:'Qo`shilgan qiymat\n49.7 mlrd so`m'}
       ]
