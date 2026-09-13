@@ -170,12 +170,12 @@
         rows:[
           {icon:'subsidy', value:2500,  unit:'so‘m',      label:'Har bir kg ga subsidiya'},
           {icon:'hen',     value:220,   unit:'ming dona', label:'Bir aylanmadagi tovuq soni'},
-          /* manbasi: buyurtmachi tasdig'i, hujjatda yo'q — yuqoridagi izohga qarang */
           {icon:'workers', value:150,   unit:'ta',        label:'Ishchi soni'},
           {icon:'chart',   value:66,    unit:'mlrd so‘m', label:'Yillik aylanma', lead:true},
           {icon:'meat',    value:3300,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true},
           {icon:'tax',     value:3.7,   unit:'mlrd so‘m', label:'Soliq imtiyozi'},
-          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'}
+          {icon:'gear',    value:null,  label:'Ichki yem hisobiga tannarx arzonladi (10,4%)'},
+       
         ]
       },
       {
@@ -192,10 +192,10 @@
            growth:'+36%'},
           {icon:'meat',    value:4500,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true,
            growth:'+36%'},
-          {icon:'gear',    value:6.9,   unit:'mlrd so‘m',
-           label:'Ichki yem hisobiga tannarx arzonladi (8%)'},
-          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi',
-           growth:'0%'}
+          {icon:'tax',     value:null,  label:'Soliq imtiyozi'},
+          {icon:'gear',    value:10.4,   unit:'mlrd so‘m',
+           label:'Ichki yem hisobiga tannarx arzonladi (10,4%)'},
+          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'}
         ]
       }
     ],
@@ -243,7 +243,7 @@
     eyebrow:'Qo‘shimcha qiymat',
     brand:'Sokin Savdo Servis',
     title:'Klaster tarmoqlari yanada kengaydi va tovuq go`shtini bo`laklarga ajratish tizimini tashil etish bilan ishlab chiqarish quvvati oshirildi.',
-    subtitle:'Sifatli nasl + qo‘shimcha qiymat = yanada katta imkoniyatlar.',
+    subtitle:'2025-yilda : Butun tovuqni qisimlarga ajratish\n2026-yilda : "Ona tovuq" loyihasining boshlanishi',
 
     photo:'assets/photos/2025.jpg',
     photoAlt:'Ona tovuq xo‘jaligi, bo‘laklarga bo‘lib ishlash sexi va qadoqlash',
@@ -261,7 +261,8 @@
           {icon:'chart',   value:240,   unit:'mlrd so‘m', label:'Yillik aylanma', lead:true},
           {icon:'meat',    value:12000, unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true},
           {icon:'tax',     value:8,     unit:'mlrd so‘m', label:'Soliq imtiyozi (2024–2025)'},
-          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'},
+          {icon:'chart',   value:20.9,  unit:'mlrd so‘m', label:'Qo‘shilgan qiymat'},
+          {icon:'gear',    value:null,  label:'Tannarxni kamaytirish (8%)'},
           {icon:'cuts',    value:null,  label:'Tovuqni bo‘laklarga bo‘lib sotish boshlandi'}
         ]
       },
@@ -279,8 +280,8 @@
            growth:'+88%'},
           {icon:'tax',     value:31.4,  unit:'mlrd so‘m', label:'Soliq imtiyozi',
            growth:'+293%'},
-          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi',
-           growth:'0%'},
+          {icon:'chart',   value:null,  label:'Qo‘shilgan qiymat'},
+          {icon:'gear',    value:43.2,  unit:'mlrd so‘m', label:'Tannarxni kamaytirish (8%)'},
           {icon:'hen',     value:75,    unit:'ming bosh',
            label:'Vengriya Aviagen kompaniyasidan ona tovuq'}
         ]
@@ -370,11 +371,10 @@
     tracks:{
       title:'Majmuaning asosiy yo‘nalishlari',
       items:[
-        {icon:'cage',    label:'Ko‘p qavatli kataklarda tovuq boqish tizimi'},
-        {icon:'blade',   label:'So‘yish majmuasi', note:'Marel'},
-        {icon:'pack',    label:'Qadoqlash majmuasi', note:'Marel'},
+        {icon:'cage',    label:'Ko‘p qavatli kataklarda tovuq boqish tizimi',note:'Tannarxni kamaytirish\n14.4 mlrd (1.2%)'},
+        {icon:'pack',    label:'Parrada soyish , qayta ishlash , saqlash va qadoqlash', note:'Qo`shilgan qiymat - 915 mlrd Tannarxni kamaytrish - 36 mlrd (3%)'},
         {icon:'recycle', label:'Rendering liniyasi',
-         note:'Chiqindini qayta ishlab, yemga qo‘shimcha mahsulot'}
+         note:'Qo`shilgan qiymat - 49.7 mlrd so`m'}
       ]
     }
   },
@@ -427,7 +427,8 @@
       label:'Jami loyihalar',
       cells:[
         {icon:'money',   value:36,   unit:'mln $', label:'investitsiya'},
-        {icon:'workers', value:1780, unit:'ta',    label:'ish o‘rni yaratiladi'}
+        {icon:'workers', value:1780, unit:'ta',    label:'ish o‘rni yaratiladi'},
+        {icon:'workers', value:578.5, unit:'mlrd',    label:'Qo`shilgan qiymat yaratilinadi'}
       ],
       note:'Barqaror rivojlanish sari'
     }

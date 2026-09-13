@@ -100,6 +100,7 @@ html,body{
   font-size:clamp(28px,1.05vw,38px);
   font-weight:500;line-height:1.35;color:var(--muted);
   max-width:78ch;
+  white-space:pre-line; /* subtitle ichidagi \n — yangi qator */
 }
 
 /* ---------------------------------------------------------- atmosfera --- */
@@ -500,26 +501,23 @@ html,body{
   font-size:clamp(8px,.66vw,13px);font-weight:700;letter-spacing:.14em;color:var(--gold);
 }
 .track-label{font-size:clamp(9.5px,.84vw,17px);font-weight:600;line-height:1.2;color:var(--ink)}
-.track-note{font-size:clamp(8px,.64vw,13px);font-weight:500;color:var(--muted)}
+.track-note{font-size:clamp(16px,1.75vw,25px);line-height:1.3;font-weight:900;color:black;white-space:pre-line}
 
 /* ------------------------------------------------------------ rejalar --- */
 
 .projects{
   flex:1 1 auto;min-height:0;list-style:none;margin:0;padding:0;
   display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:clamp(10px,1.8vw,40px);counter-reset:prj;
+  grid-template-rows:auto auto auto;
+  column-gap:clamp(10px,1.8vw,40px);row-gap:0;
 }
-.project{counter-increment:prj;display:flex;flex-direction:column;
-  gap:clamp(5px,.9vh,13px);min-height:0}
-.project::before{
-  content:counter(prj,decimal-leading-zero);
-  font-size:clamp(8px,.66vw,13px);font-weight:700;letter-spacing:.14em;color:var(--gold);
-}
-/* Sarlavha bir yoki ikki qatorga sig'adi — ikki qatorlik joy ajratiladi,
-   shunda barcha ustunlarda rasm va meta bir chiziqda boshlanadi. */
-.project-name{margin:0;font-size:clamp(10px,.92vw,19px);
-  font-weight:700;line-height:1.16;color:var(--ink);
-  min-height:calc(1.16em * 2)}
+/* subgrid: har karta 3 qatorni (sarlavha · surat · meta) umumiy panjaradan
+   oladi — sarlavha uzunligi har xil bo'lsa ham barcha suratlar va pastki
+   chiziqlar bir balandlikda boshlanadi. */
+.project{display:grid;grid-row:span 3;grid-template-rows:subgrid;
+  row-gap:clamp(5px,.9vh,13px);min-height:0}
+.project-name{margin:0;font-size:clamp(1px,.92vw,19px);
+  font-weight:700;line-height:1.16;color:var(--ink);align-self:end}
 /* Bir xil nisbatdagi tasvir maydoni — surat kelmasa ham ustunlar tengligicha
    qoladi (brif: "consistent image proportions"). */
 .project-shot{
@@ -629,7 +627,7 @@ html,body{
   .figures{gap:22px}
   .figure-value{font-size:clamp(40px,15vw,84px)}
   .metrics,.tracks{grid-template-columns:1fr 1fr}
-  .projects{grid-template-columns:1fr}
+  .projects{grid-template-columns:1fr;grid-template-rows:none;row-gap:24px}
   .project-shot{min-height:140px}
   .totals{gap:20px}
   .totals-note{margin-left:0;flex:1 0 100%}
