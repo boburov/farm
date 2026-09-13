@@ -28,7 +28,7 @@
     stats: [
       { value: 3, unit: 'та', label: 'Ишчи' },
       {
-        value: 200, unit: 'млн сўм', label: 'Йиллик айланма',
+        value: 122, unit: 'минг $', label: 'Йиллик айланма',
         note: ''
       }
     ],
@@ -97,10 +97,10 @@
       {
         year: '2020', tone: 'dark',
         rows: [
-          { icon: 'cash', value: 4, unit: 'млрд сўм', label: 'Кредит (ўзлаштирилган)' },
+          { icon: 'cash', value: 0.4, unit: 'млн $', label: 'Кредит (ўзлаштирилган)' },
           { icon: 'hen', value: 25, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
           { icon: 'workers', value: 50, unit: 'та', label: 'Ишчилар сони' },
-          { icon: 'chart', value: 8, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
+          { icon: 'chart', value: 0.8, unit: 'млн $', label: 'Йиллик айланма', lead: true },
           { icon: 'meat', value: 375, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true },
         ]
       },
@@ -108,10 +108,10 @@
         year: '2021', tone: 'green',
         growthHead: '2020-га нисбатан ўсиш',
         rows: [
-          { icon: 'cash', value: 20, unit: 'млрд сўм', label: 'Кредит (ўзлаштирилган)', growth: '+500%' },
+          { icon: 'cash', value: 2, unit: 'млн $', label: 'Кредит (ўзлаштирилган)', growth: '+470%' },
           { icon: 'hen', value: 200, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони', growth: '+800%' },
           { icon: 'workers', value: 100, unit: 'та', label: 'Ишчилар сони', growth: '+200%' },
-          { icon: 'chart', value: 60, unit: 'млрд сўм', label: 'Йиллик айланма', growth: '+750%' },
+          { icon: 'chart', value: 6, unit: 'млн $', label: 'Йиллик айланма', growth: '+750%' },
           { icon: 'meat', value: 3000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', growth: '+800%' },
         ]
       }
@@ -165,10 +165,10 @@
       {
         year: '2022', tone: 'dark',
         rows: [
-          { icon: 'subsidy', value: 2500, unit: 'сўм', label: 'Ҳар бир кг га субсидия' },
+          { icon: 'subsidy', value: 0.2, unit: '$', label: 'Ҳар бир кг га субсидия' },
           { icon: 'hen', value: 220, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
           { icon: 'workers', value: 150, unit: 'та', label: 'Ишчилар сони' },
-          { icon: 'chart', value: 66, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
+          { icon: 'chart', value: 6, unit: 'млн $', label: 'Йиллик айланма', lead: true },
           { icon: 'meat', value: 3300, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true },
           { icon: 'gear', value: null, label: 'Ички ем ҳисобига таннарх арзонлади (10,4%)' },
 
@@ -179,7 +179,7 @@
         growthHead: '2022-га нисбатан ўсиш',
         rows: [
           {
-            icon: 'subsidy', value: 1250, unit: 'сўм', label: 'Ҳар бир кг га субсидия',
+            icon: 'subsidy', value: 0.1, unit: '$', label: 'Ҳар бир кг га субсидия',
             growth: '-50%'
           },
           {
@@ -191,15 +191,15 @@
             growth: '+33%'
           },
           {
-            icon: 'chart', value: 90, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true,
-            growth: '+36%'
+            icon: 'chart', value: 9, unit: 'млн $', label: 'Йиллик айланма', lead: true,
+            growth: '+28%'
           },
           {
             icon: 'meat', value: 4500, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true,
             growth: '+36%'
           },
           {
-            icon: 'gear', value: 10, unit: 'млрд сўм',
+            icon: 'gear', value: 1, unit: 'млн $',
             label: 'Таннархни камайтириш хисобига эришилган иқтисод',
             note: '12%', growth: ''
           },
@@ -265,10 +265,10 @@
             label: 'Бир айланмадаги товуқ сони'
           },
           { icon: 'workers', value: 300, unit: 'та', label: 'Ишчилар сони' },
-          { icon: 'chart', value: 242, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
+          { icon: 'chart', value: 19, unit: 'млн $', label: 'Йиллик айланма', lead: true },
           { icon: 'meat', value: 11000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true },
           { icon: 'tax', value: null, unit: 'млрд сўм', label: 'Солиқ имтиёзи (2024–2025)' },
-          { icon: 'chart', value: 19, unit: 'млрд сўм', label: 'Қўшилган қиймат' },
+          { icon: 'chart', value: 2, unit: 'млн $', label: 'Қўшилган қиймат' },
           { icon: 'gear', value: null, label: 'Таннархни камайтириш (8%)' },
           { icon: 'cuts', value: null, label: 'Товуқни бўлакларга бўлиб сотиш бошланди' }
 
@@ -280,24 +280,24 @@
         rows: [
           {
             icon: 'hen', value: 1.5, unit: 'млн дона', abs: 1500000,
-            label: 'Бир айланмадаги товуқ сони', growth: '+188%'
+            label: 'Бир айланмадаги товуқ сони', growth: '+88%'
           },
           {
             icon: 'workers', value: 400, suffix: '+', unit: 'та',
-            label: 'Ишчилар сони', growth: "133%"
+            label: 'Ишчилар сони', growth: "33%"
           },   /* hujjatda "400 dan oshiq" — shuning uchun "+" */
           {
-            icon: 'chart', value: 315, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true,
-            growth: '+130%'
+            icon: 'chart', value: 26, unit: 'млн $', label: 'Йиллик айланма', lead: true,
+            growth: '+36%'
           },
           {
             icon: 'meat', value: 13100, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми ', lead: true,
-            growth: '+119%'
+            growth: '+19%'
           },
-          { icon: 'gear', value: 14, unit: 'млрд сўм', label: 'Таннархни камайтириш хисобига эришилган иқтисод', note: '5%' },
+          { icon: 'gear', value: 1, unit: 'млн $', label: 'Таннархни камайтириш хисобига эришилган иқтисод', note: '5%' },
           { icon: 'chart', value: null, label: 'Лойиҳа хисобига қўшилган қиймат' },
           {
-            icon: 'tax', value: 15, unit: 'млрд сўм', label: 'Солиқ имтиёзи',
+            icon: 'tax', value: 1, unit: 'млн $', label: 'Солиқ имтиёзи',
             growth: ''
           },
           {
@@ -378,8 +378,8 @@
     kpis: [
       { icon: 'hen', label: 'Йиллик парранда сони', value: 12, unit: 'млн бош' },
       { icon: 'meat', label: 'Гўшт ишлаб чиқариш', value: 69, unit: 'минг тонна' },
-      { icon: 'chart', label: 'Йиллик айланма (прогноз)', value: 1.2, unit: 'трлн сўм' },
-      { icon: 'chart', label: 'Кутилаётган солиқ имтиёзи', value: 100, unit: 'млрд сўм' }
+      { icon: 'chart', label: 'Йиллик айланма (прогноз)', value: 101, unit: 'млн $' },
+      { icon: 'chart', label: 'Кутилаётган солиқ имтиёзи', value: 8, unit: 'млн $' }
     ],
 
     chain: [
@@ -391,12 +391,12 @@
       items: [
         /* jadval: `added` — Қўшилган қиймат, `cost` — Таннархни камайтириш */
         { icon: 'cage', label: 'Кўп қаватли катакларда товуқ боқиш тизими',
-          cost: { value: 14, unit: 'млрд сўм', note: '1.2%' } },
+          cost: { value: 1, unit: 'млн $', note: '1.2%' } },
         { icon: 'pack', label: 'Парранда сўйиш, қайта ишлаш, сақлаш ва қадоқлаш',
-          added: { value: 915, unit: 'млрд сўм' },
-          cost: { value: 36, unit: 'млрд сўм', note: '3%' } },
+          added: { value: 77, unit: 'млн $' },
+          cost: { value: 3, unit: 'млн $', note: '3%' } },
         { icon: 'recycle', label: 'Рендеринг линияси',
-          added: { value: 50, unit: 'млрд сўм' } }
+          added: { value: 4, unit: 'млн $' } }
       ]
     }
   },
@@ -466,7 +466,7 @@
       cells: [
         { icon: 'money', value: 36, unit: 'млн $', label: 'инвестиция' },
         { icon: 'workers', value: 2230, unit: 'та', label: 'иш ўрни ' },
-        { icon: 'workers', value: 578, unit: 'млрд сўм ', label: 'Қўшилган қиймат' }
+        { icon: 'workers', value: 49, unit: 'млн $ ', label: 'Қўшилган қиймат' }
       ],
       note: ''
     }
