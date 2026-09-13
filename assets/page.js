@@ -761,7 +761,7 @@
 
     if(y.total){
       var t=el('section','totals reveal');
-      t.appendChild(el('p','totals-label',y.total.label));
+      if(y.total.label&&y.total.label.trim()) t.appendChild(el('p','totals-label',y.total.label));
       y.total.cells.forEach(function(c){
         var cell=el('div','total');
         cell.appendChild(value('total-value',c.value,c.unit));

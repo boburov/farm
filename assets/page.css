@@ -593,9 +593,9 @@ html,body{
   align-self:center;
 }
 /* uchta jami qiymat butun kenglik bo'ylab teng taqsimlanadi */
-.total{display:flex;flex-direction:column;flex:1 1 0;min-width:0}
+.total{display:flex;flex-direction:column;align-items:center;text-align:center;flex:1 1 0;min-width:0}
 .total-value{
-  display:flex;align-items:baseline;gap:.22em;
+  display:flex;align-items:baseline;justify-content:center;gap:.22em;
   font-size:clamp(24px,3.4vw,72px);font-weight:800;line-height:.96;
   letter-spacing:-.04em;color:var(--head);font-variant-numeric:tabular-nums;
 }
