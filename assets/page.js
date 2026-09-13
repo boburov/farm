@@ -827,6 +827,7 @@
     page.innerHTML='';
     page.classList.remove('ready');
     page.dataset.layout=y.layout||'single';
+    page.dataset.id=y.id;
 
     page.appendChild(shellTop(y));
 
