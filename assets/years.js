@@ -37,7 +37,7 @@
     photoAlt: 'Сокин Савдо Сервис — Ишлаб чиқарувчидан олинган товуқ гўшти юк машинасига ' +
       'ортилиб, бозорга етказилмоқда',
     brand: 'Сокин Савдо Сервис',
-    subtitle: 'Фаолиятимизни бозорда фақат товуқ гўшти улгуржи савдоси ва дистрибуция билан бошлаган эдик.',
+    subtitle: 'Фаолиятни бозорда товуқ гўшти улгуржи савдоси ва дистрбюция билан бошлаш',
 
     /* Suratdagi nuqtalar — surat kengligining ulushi sifatida (0..1), piksel
        emas. Fon `cover` bilan qirqilgani uchun ekran nisbati o'zgarsa piksel
@@ -56,7 +56,7 @@
     ],
 
     chain: [
-      { icon: 'factory', label: 'улгуржи савдоси ва дистрибуция' },
+      { icon: 'factory', label: 'улгуржи савдо ва дистрибуция' },
       
     ]
   },
