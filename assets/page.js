@@ -144,8 +144,11 @@
 
     var head=el('div','ledger-head reveal');
     head.appendChild(el('span','lh-metric','Ko‘rsatkich'));
-    head.appendChild(el('span',null,a.year));
-    head.appendChild(el('span',null,b.year));
+    [a,b].forEach(function(c){
+      var s=el('span',null,c.year);
+      if(c.yearNote) s.appendChild(el('small','lh-note',c.yearNote));
+      head.appendChild(s);
+    });
     head.appendChild(el('span','lh-metric',b.growthHead?'O‘sish':''));
     wrap.appendChild(head);
 
@@ -423,8 +426,8 @@
      radius koeffitsienti (r) ayrimlarini ichkariroq oladi.
      Bo'lakning kattaligi ulushiga bog'liq, lekin chiziqli emas: eng kichigi
      ham ko'rinib tursin uchun daraja 0.65. */
-  var ORBIT=[{a:19,r:1.06},{a:56,r:.88},{a:112,r:1.06},{a:148,r:1},{a:182,r:1.02},
-             {a:220,r:1},{a:258,r:1},{a:300,r:1},{a:336,r:1.12}];
+  var ORBIT=[{a:0,r:1.08},{a:50,r:1.02},{a:100,r:1.1},{a:145,r:1.02},{a:180,r:1.02},
+             {a:215,r:1.02},{a:260,r:1.1},{a:310,r:1.02}];
   /* Ellips radiuslari va markazi — .cuts maydonining foizida. Bo'yiga
      kichikroq, markazi esa biroz tepada: pastki bo'lakning yozuvi zanjir
      qatoriga tegib ketmasin. */
@@ -649,7 +652,7 @@
     var strip=[];
     if(y.invest) strip.push({label:y.invest.label,value:y.invest.value,
                              unit:y.invest.unit,lead:true});
-    (y.kpis||[]).slice(0,3).forEach(function(k){ strip.push(k); });
+    (y.kpis||[]).forEach(function(k){ strip.push(k); });
 
     var ms=el('div','metrics');
     strip.forEach(function(c){

@@ -204,6 +204,10 @@ html,body{
   font-weight:800;letter-spacing:-.03em;color:var(--ink);
   font-variant-numeric:tabular-nums;
 }
+.ledger-head .lh-note{
+  display:block;margin-top:.15em;
+  font-size:.5em;font-weight:600;letter-spacing:0;color:var(--muted);
+}
 .ledger-head .lh-metric{
   font-size:clamp(8px,.64vw,13px);
   font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
@@ -397,8 +401,8 @@ html,body{
 /* Bo'lak nomi och fonda va rasm chetida turadi — `--muted` (4.4:1) bu o'lchamda
    o'qilmadi, shuning uchun `--ink` (10.8:1) va kattaroq eng kichik o'lcham. */
 .cut-name{
-  font-style:normal;font-size:clamp(8.5px,.62vw,12px);
-  font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+  font-style:normal;font-size:clamp(10px,.76vw,15px);
+  font-weight:400;letter-spacing:0;color:var(--ink);
 }
 
 /* ----------------------------------------------------- 2010 (hikoya) --- */
@@ -642,7 +646,7 @@ html,body{
   .cut{width:calc(9% + 13% * var(--k))}
   .cuts-core-num{font-size:20px}
   .cut-pct{font-size:12px}
-  .cut-name{font-size:9.5px;letter-spacing:.1em}
+  .cut-name{font-size:11px}
   .timeline{flex-wrap:wrap;gap:10px}
   .tl-btn{font-size:10px;letter-spacing:0}
 }
