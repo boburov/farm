@@ -711,7 +711,7 @@
       /* Jadval: chapda yo'nalish nomi, o'ngda qiymatlar ustunlari */
       var tr=el('div','tracks reveal');
       var th=el('div','tracks-head');
-      ['Лойиҳа номи','Лойиҳа хисобига қўшилган қиймат','Таннархни камайтириш хисобига эришилган иқтисод'].forEach(function(t){ th.appendChild(el('span',null,t)); });
+      ['Лойиҳа номи','Лойиҳа хисобига қўшилган қиймат','Таннархни камайтириш ҳисобига эришилган иқтисод'].forEach(function(t){ th.appendChild(el('span',null,t)); });
       tr.appendChild(th);
       tracks.forEach(function(t){
         var row=el('div','tracks-row');

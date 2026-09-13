@@ -22,7 +22,7 @@
   --sage:#CBD9CB;
 
   --ease:cubic-bezier(.22,1,.36,1);
-  --font:"Plus Jakarta Sans",Arial,Helvetica,sans-serif;
+  --font:"Roboto",Arial,Helvetica,sans-serif;
   --serif:"EB Garamond",Georgia,serif;
 
   /* xavfsiz chekka va pastki navigatsiya balandligi */
@@ -99,9 +99,9 @@ html,body{
   font-weight:300;line-height:1.02;letter-spacing:-.02em;
   color:var(--head);
 }
-.lede-bold{font-weight:900;font-family:"Onest",var(--font)}
+.lede-bold{font-weight:900;font-family:var(--font)}
 .lede-year{
-  font-family:"Onest",var(--font);
+  font-family:var(--font);
   font-size:clamp(24px,3.5vw,68px);
   font-weight:900;line-height:1.02;letter-spacing:-.02em;
   color:var(--head);
@@ -157,7 +157,7 @@ html,body{
 .page[data-layout="project"] .scene{gap:clamp(7px,1.3vh,18px)}
 /* 2010: sarlavha ostidagi matn boshqa sahifalardagi sarlavha o'lchamida */
 .page[data-layout="single"] .lede{max-width:none}
-.page[data-id="2010"] .lede-title{font-weight:900;font-family:"Onest",var(--font)}
+.page[data-id="2010"] .lede-title{font-weight:900;font-family:var(--font)}
 /* 2025–2026: uzun sarlavha — butun kenglikda, kamroq qatorga bo'linadi */
 .page[data-id="2025-2026"] .lede{max-width:none}
 .page[data-layout="single"] .lede-sub{font-size:clamp(24px,3.5vw,68px);font-weight:300;letter-spacing:-.02em;line-height:1.05;color:var(--head);max-width:none}
@@ -727,7 +727,7 @@ html,body{
   color:var(--gold);
 }
 .home-name{
-  margin:0;font-family:"Onest",var(--font);
+  margin:0;font-family:var(--font);
   font-size:clamp(34px,5.6vw,108px);font-weight:900;line-height:.98;letter-spacing:-.035em;
   color:var(--head);
 }
