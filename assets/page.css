@@ -596,7 +596,13 @@ html,body{
   transition:color .25s var(--ease),border-color .25s var(--ease);
 }
 .tl-btn:hover{color:var(--ink)}
-.tl-step.is-current .tl-btn{color:var(--ink);border-top-color:var(--ink);font-weight:800}
+/* joriy sahifa: yashil to'rtburchak ichida oq yil nomi */
+.tl-step.is-current .tl-btn{
+  width:auto;margin-top:clamp(4px,.8vh,10px);
+  padding:clamp(5px,.7vh,10px) clamp(10px,1vw,18px);
+  background:var(--head);color:#fff;border-top-color:transparent;border-radius:4px;
+  font-weight:800;
+}
 .tl-nav{display:flex;align-items:center;gap:clamp(2px,.3vw,8px);padding-left:clamp(6px,1vw,18px)}
 .navbtn{
   -webkit-appearance:none;appearance:none;
