@@ -283,7 +283,7 @@
             label: 'Бир айланмадаги товуқ сони', growth: '+88%'
           },
           {
-            icon: 'workers', value: 400, suffix: ' ', unit: 'нафар',
+            icon: 'workers', value: 400, suffix: ' ', unit: 'та',
             label: 'Ишчилар сони', growth: "+33%"
           },   /* hujjatda "400 dan oshiq" — shuning uchun "+" */
           {
