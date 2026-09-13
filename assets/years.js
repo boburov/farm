@@ -370,7 +370,7 @@
       title:'Majmuaning asosiy yo‘nalishlari',
       items:[
         {icon:'cage',    label:'Ko‘p qavatli kataklarda tovuq boqish tizimi',note:'Tannarxni kamaytirish\n14.4 mlrd so`m (1.2%) '},
-        {icon:'pack',    label:'Parrada soyish , qayta ishlash , saqlash va qadoqlash', note:'Qo`shilgan qiyma\n915 mlrd so`m\nTannarxni kamaytrish\n36 mlrd so`m (3%)'},
+        {icon:'pack',    label:'Parrada soyish , qayta ishlash , saqlash va qadoqlash', note:'Qo`shilgan qiymat\n915 mlrd so`m\nTannarxni kamaytrish\n36 mlrd so`m (3%)'},
         {icon:'recycle', label:'Rendering liniyasi',
          note:'Qo`shilgan qiymat\n49.7 mlrd so`m'}
       ]
