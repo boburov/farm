@@ -101,7 +101,6 @@
           {icon:'workers', value:50,    unit:'ta',        label:'Ishchi soni'},
           {icon:'chart',   value:7.5,   unit:'mlrd so‘m', label:'Yillik aylanma (6 marta aylanma)', lead:true},
           {icon:'meat',    value:375,   unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', lead:true},
-          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'}
         ]
       },
       {
@@ -113,7 +112,6 @@
           {icon:'workers', value:100,   unit:'ta',        label:'Ishchi soni',                     growth:'+100%'},
           {icon:'chart',   value:60,    unit:'mlrd so‘m', label:'Yillik aylanma (6 marta aylanma)',growth:'+700%'},
           {icon:'meat',    value:3000,  unit:'tonna',     label:'Ishlab chiqarish hajmi (yiliga)', growth:'+700%'},
-          {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi',               growth:'0%'}
         ]
       }
     ],
@@ -194,7 +192,7 @@
            growth:'+36%'},
           {icon:'tax',     value:null,  label:'Soliq imtiyozi'},
           {icon:'gear',    value:10.4,   unit:'mlrd so‘m',
-           label:'Ichki yem hisobiga tannarx arzonladi (10,4%)'},
+           label:'Ichki yem hisobiga tannarx arzonladi (11,5%)'},
           {icon:'money',   value:20000, unit:'so‘m',      label:'1 kg go‘sht narxi'}
         ]
       }
