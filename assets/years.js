@@ -101,7 +101,7 @@
           { icon: 'cash', value: 4, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)' },
           { icon: 'hen', value: 25, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони' },
           { icon: 'workers', value: 50, unit: 'та', label: 'Ишчи сони' },
-          { icon: 'chart', value: 7.5, unit: 'млрд сўм', label: 'Йиллик айланма (6 марта айланма)', lead: true },
+          { icon: 'chart', value: 7.5, unit: 'млрд сўм', label: 'Йиллик айланма', lead: true },
           { icon: 'meat', value: 375, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', lead: true },
         ]
       },
@@ -112,7 +112,7 @@
           { icon: 'cash', value: 20, unit: 'млрд сўм', label: 'Кредит (олиниб ёпилган)', growth: '+400%' },
           { icon: 'hen', value: 200, unit: 'минг дона', label: 'Бир айланмадаги товуқ сони', growth: '+700%' },
           { icon: 'workers', value: 100, unit: 'та', label: 'Ишчи сони', growth: '+100%' },
-          { icon: 'chart', value: 60, unit: 'млрд сўм', label: 'Йиллик айланма (6 марта айланма)', growth: '+700%' },
+          { icon: 'chart', value: 60, unit: 'млрд сўм', label: 'Йиллик айланма', growth: '+700%' },
           { icon: 'meat', value: 3000, unit: 'тонна', label: 'Ишлаб чиқариш ҳажми (йилига)', growth: '+700%' },
         ]
       }
