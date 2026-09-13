@@ -28,7 +28,7 @@
     stats:[
       {value:3,   unit:'ta',       label:'Ishchi'},
       {value:200, unit:'mln so‘m', label:'Yillik aylanma',
-       note:'yiliga 6 marta aylanma'}
+       note:''}
     ],
 
     photo:'assets/photos/2010.jpg',
