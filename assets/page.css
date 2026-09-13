@@ -692,6 +692,84 @@ html,body{
   .tl-btn{font-size:10px;letter-spacing:0}
 }
 
+/* ------------------------------------------------------ bosh sahifa --- */
+
+/* Muqova: bir tekis fon, markazda logo, nom, ta'sischi belgisi va tugma.
+   Elementlar navbat bilan pastdan ko'tariladi; chiqishda butun qatlam so'nadi. */
+.home{
+  position:fixed;inset:0;z-index:50;
+  display:grid;place-items:center;padding:var(--pad-y) var(--pad-x);
+  background:var(--bg);
+  opacity:1;transition:opacity .5s var(--ease);
+}
+.home[hidden]{display:none}
+.home.is-out{opacity:0;pointer-events:none}
+.home-inner{display:flex;flex-direction:column;align-items:center;text-align:center}
+.home-inner>*{opacity:0;transform:translateY(14px);
+  transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.home.is-in .home-inner>*{opacity:1;transform:none}
+.home.is-in .home-inner>:nth-child(2){transition-delay:.12s}
+.home.is-in .home-inner>:nth-child(3){transition-delay:.22s}
+.home.is-in .home-inner>:nth-child(4){transition-delay:.34s}
+.home.is-in .home-inner>:nth-child(5){transition-delay:.46s}
+.home.is-in .home-inner>:nth-child(6){transition-delay:.58s}
+
+.home-logo{
+  width:clamp(96px,11vw,190px);height:auto;margin-bottom:clamp(22px,4vh,44px);
+  transform:translateY(14px) scale(.9);
+}
+.home.is-in .home-logo{animation:home-float 6s var(--ease) 1.2s infinite alternate}
+@keyframes home-float{from{transform:none}to{transform:translateY(-6px)}}
+
+.home-form{
+  margin:clamp(10px,1.8vh,20px) 0 0;
+  font-size:clamp(11px,.9vw,16px);font-weight:700;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--gold);
+}
+.home-name{
+  margin:0;font-family:"Onest",var(--font);
+  font-size:clamp(34px,5.6vw,108px);font-weight:900;line-height:.98;letter-spacing:-.035em;
+  color:var(--head);
+}
+/* ingichka chiziq — nomdan keyin chapdan o'ngga chiziladi */
+.home-rule{
+  display:block;width:clamp(48px,6vw,96px);height:2px;margin:clamp(18px,3.2vh,34px) 0;
+  background:var(--ink);transform-origin:center;
+}
+.home-inner>.home-rule{transform:scaleX(0)}
+.home.is-in .home-inner>.home-rule{transform:scaleX(1)}
+
+.home-badge{
+  margin:0 0 clamp(22px,4vh,44px);
+  padding:.62em 1.25em;border:1px solid var(--rule);border-radius:999px;
+  font-size:clamp(12px,.95vw,17px);font-weight:500;color:var(--ink);
+  background:rgba(255,255,255,.6);
+}
+.home-badge b{font-weight:800;color:var(--num)}
+
+.home-start{
+  -webkit-appearance:none;appearance:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.7em;
+  padding:.95em 2.1em;border:0;border-radius:999px;
+  background:var(--head);color:#fff;font:inherit;
+  font-size:clamp(14px,1.05vw,19px);font-weight:700;letter-spacing:.02em;
+  box-shadow:0 10px 28px -12px rgba(4,157,13,.55);
+  transition:opacity .9s var(--ease),transform .9s var(--ease),
+             background .25s var(--ease),box-shadow .25s var(--ease);
+}
+.home-start span{display:inline-block;transition:transform .3s var(--ease)}
+.home-start:hover{background:#038a0b;box-shadow:0 14px 34px -12px rgba(4,157,13,.7)}
+.home-start:hover span{transform:translateX(5px)}
+.home-start:active{transform:scale(.98)}
+.home-start:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.brand-logo{cursor:pointer}
+
+@media (prefers-reduced-motion:reduce){
+  .home,.home-inner>*,.home-start{transition:none}
+  .home-inner>*,.home-inner>.home-rule{opacity:1;transform:none}
+  .home.is-in .home-logo{animation:none}
+}
+
 @media (prefers-reduced-motion:reduce){
   .cuts-model{opacity:1;transition:none}
   .reveal,.page.ready .reveal{opacity:1;transition:none}
