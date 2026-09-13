@@ -415,7 +415,7 @@
        when:'2027-yil 1-chorak', value:2.5, unit:'mln $', photo:'assets/photos/plans-2.jpg'},
       {icon:'hen',    title:'Genetika va seleksiya (Ona tovuq loyihasi) : Naslli parrandachilikni rivojlantirish maqsadida maxsus "Ona tovuq" loyihasini tatbiq etish.',
        when:'2027-yil 2-chorak', value:7,   unit:'mln $', photo:'assets/photos/plans-3.jpg'},
-      {icon:'market', title:'Logistika va savdo tarmog`i : Respublikamizning barcha 12ta viloyatlarida 500 ta zamonaviy brendli klaster savdo do`konlarini qurish va xalqqa arzon mahsulot yetkazish.',
+      {icon:'market', title:'Logistika va savdo tarmog`i : Respublikamizning barcha 12ta viloyatlarida 200 ta zamonaviy brendli klaster savdo do`konlarini qurish va xalqqa arzon mahsulot yetkazish.',
        when:'2027-yil 4-chorak', value:7.5, unit:'mln $', photo:'assets/photos/plans-4.jpg'},
       {icon:'barn',   title:'Naslchilik va parrandachilik majmuasi : Xalqaro standartlarga javob beradigan zamonaviy parranda va naslli chorva fermasini tashkil etish.',
        when:'2027-yil 4-chorak', value:9,   unit:'mln $', photo:'assets/photos/plans-5.jpg'}
@@ -425,8 +425,8 @@
       label:'Jami loyihalar',
       cells:[
         {icon:'money',   value:36,   unit:'mln $', label:'investitsiya'},
-        {icon:'workers', value:1780, unit:'ta',    label:'ish o‘rni yaratiladi'},
-        {icon:'workers', value:578.5, unit:'mlrd',    label:'Qo`shilgan qiymat yaratilinadi'}
+        {icon:'workers', value:1780, unit:'ta',    label:'ish o‘rni '},
+        {icon:'workers', value:578.5, unit:'mlrd so`m ',    label:'Qo`shilgan qiymat'}
       ],
       note:'Barqaror rivojlanish sari'
     }
