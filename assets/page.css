@@ -729,7 +729,11 @@ html,body{
 .home-name{
   margin:0;font-family:var(--font);
   font-size:clamp(34px,5.6vw,108px);font-weight:900;line-height:.98;letter-spacing:-.035em;
-  color:var(--head);
+  color:#c9971c;
+  /* tilla rang — logodagi metall yaltirog'iga mos gradient */
+  background:linear-gradient(175deg,#f6d46a 0%,#e0a82a 38%,#a86f0c 62%,#e8b845 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  padding-bottom:.08em;
 }
 /* ingichka chiziq — nomdan keyin chapdan o'ngga chiziladi */
 .home-rule{
