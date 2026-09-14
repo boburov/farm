@@ -378,7 +378,7 @@
     kpis: [
       { icon: 'hen', label: 'Йиллик парранда сони', value: 12, unit: 'млн бош' },
       { icon: 'meat', label: 'Гўшт ишлаб чиқариш', value: 69, unit: 'минг тонна' },
-      { icon: 'chart', label: 'Йиллик айланма (прогноз)', value: 101, unit: 'млн $' },
+      { icon: 'chart', label: 'Йиллик айланма (режа)', value: 101, unit: 'млн $' },
       { icon: 'chart', label: 'Кутилаётган солиқ имтиёзи', value: 8, unit: 'млн $' }
     ],
 
